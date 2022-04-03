@@ -8,9 +8,8 @@ const routines = [
 		audio:"morning",
 		loopAudio:true,
 		loopDelay:10,
-		autoAdvanceChildren:false,
-		enforceChildrenOrder:false,
-		hideCompletedTasks:false,
+		taskAudioPrefix:'Isaiah',
+		audioEncouragement:'awesome',
 		tasks:[
 			{id:20},
 			{
@@ -45,9 +44,7 @@ const routines = [
 		name:"Afternoon",
 		loopAudio:true,
 		loopDelay:10,
-		autoAdvanceChildren:false,
-		enforceChildrenOrder:false,
-		hideCompletedTasks:false,
+		taskAudioPrefix:'Isaiah',
 		tasks:[
 			{id:11},
 			{id:12}
@@ -60,9 +57,7 @@ const routines = [
 		audio:"evening",
 		loopAudio:true,
 		loopDelay:10,
-		autoAdvanceChildren:false,
-		enforceChildrenOrder:false,
-		hideCompletedTasks:false,
+		taskAudioPrefix:'Isaiah',
 		tasks:[
 			{id:3},
 			{id:2},
@@ -227,7 +222,7 @@ const tasks = [
 	{
 		id:20,
 		text:"Wake up",
-		time:60,
+		time:6,
 		audio:"wake",
 		image:""
 	},

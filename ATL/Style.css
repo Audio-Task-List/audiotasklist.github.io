@@ -118,13 +118,13 @@ button {
 
 .routineArea{
 	position:absolute;
-	left:-300px;
+	left:-310px;
 	top:0;
 	width: 300px;
 	min-width:300px;
 	border-right:solid 3px #000;
 	height:100%;
-	padding:0;
+	padding: 0 0 0 10px;
 	margin:0;
 	z-index:100;
 	background-color:#EEE;

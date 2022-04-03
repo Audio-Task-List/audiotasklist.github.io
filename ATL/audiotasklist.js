@@ -1,6 +1,5 @@
 "use strict";
 
-let isAudioPlaying = false;
 let availableRoutines = [];
 let routineArea = null;
 let settingsArea = null;
@@ -124,23 +123,27 @@ function autoAdvanceChange(){
 	autoAdvanceChildren = document.getElementById("chkAuto").checked;
 	
 	const next = getNextUncompletedTask();
-	updateNotAllowedOnChkChange(root, next, autoAdvanceChildren);
+	updateNotAllowedOnChkChange(alpha, next, autoAdvanceChildren);
 	
 	updateNotAllowed();
-	root.collapseDescendants();
+	alpha.collapseDescendants();
 	next.expandWrapper();
 	if(autoAdvanceChildren){
-		autoAdvance();
+		const next = getNextUncompletedTask();
+		if(next){
+			next.select();
+			next.expandWrapper();
+		}
 	}
 }
 function enforceOrderChange(){
 	enforceChildrenOrder = document.getElementById("chkOrder").checked;
 
 	const next = getNextUncompletedTask();
-	updateNotAllowedOnChkChange(root, next, enforceChildrenOrder);
+	updateNotAllowedOnChkChange(alpha, next, enforceChildrenOrder);
 	
 	updateNotAllowed();
-	root.collapseDescendants();
+	alpha.collapseDescendants();
 	next.expandWrapper();
 }
 function hideCompletedChange(){
@@ -154,13 +157,12 @@ function hideCompletedChange(){
 	
 	
 	if(!hideCompletedTasks){
-		root.collapseDescendants();
+		alpha.collapseDescendants();
 		if(currentTask){
 			currentTask.expandWrapper();
 		}
 	}
 }
-
 
 function showSettings(){
 	settingsArea.classList.add('settingsExpanded');
@@ -199,8 +201,8 @@ function updateNotAllowed(){
 	}
 }
 function resetUncompleted(){
-	for(let index in root.children){
-		const child = root.children[index];
+	for(let index in alpha.children){
+		const child = alpha.children[index];
 		child.resetDescendants();
 	}
 	updateNotAllowed();
@@ -222,13 +224,11 @@ function taskClick(task) {
 	task.select();
 }
 function autoAdvance(){
-	if(!autoAdvanceChildren){return;}
+	if(!autoAdvanceChildren || currentRoutine.audioEncouragement){return;}
 	const next = getNextUncompletedTask();
 	if(next){
 		next.select();
 		next.expandWrapper();
-		//next.select();
-		//startTimer();
 	}
 }
 
@@ -295,6 +295,7 @@ function completeCurrentTask(){
 	}
 }
 function placeFloatButtons(){
+	if(!currentTask){return;}
 	const hasDoneBtn = !autoAdvanceChildren && currentTask && currentTask.btn;
 	
 	const r = currentTask.btn.getBoundingClientRect();
@@ -316,15 +317,32 @@ function remind(){
 	currentTask.reminders++;
 }
 
+function audioPrefixEnded(){
+	if(currentTask){
+		currentTask.playAudio();
+	}
+}
 function audioEnded() {
-	isAudioPlaying = false;
+	if(currentRoutine.playTaskAudioSuffix()){return;}
 	if(loopAudio && currentTask){
 		loopTimeout = setTimeout(() => currentTask.playAudio(), loopDelay); 
 	}
 }
+function audioSuffixEnded(){
+	if(loopAudio && currentTask){
+		loopTimeout = setTimeout(() => currentTask.playAudio(), loopDelay); 
+	}
+}
+function audioEncouragementEnded(){
+	if(!autoAdvanceChildren){return;}
+	const next = getNextUncompletedTask();
+	if(next){
+		next.select();
+		next.expandWrapper();
+	}
+}
 function audioError(id) {
 	console.log("Audio not found:" + id);
-	isAudioPlaying = false;
 }
 
 function createSubTaskDiv(parent, id){
@@ -357,20 +375,34 @@ function loadTasks(parentDiv, taskIDs, parentTask){
 }
 
 function getNextUncompletedTask(){
-	return root.getNextUncompletedDescendant();
+	return alpha.getNextUncompletedDescendant();
 }
 
-function routine(id, name, audio, theme, loopAudio, loopDelay, autoAdvanceChildren, enforceChildrenOrder, hideCompletedTasks, tasks){
+function routine(id, name, audio, taskAudioPrefix, taskAudioSuffix, audioEncouragement, theme, loopAudio, loopDelay, autoAdvanceChildren, enforceChildrenOrder, hideCompletedTasks, tasks){
 	this.id = id;
 	this.name = name;
 	if(audio) {
 		this.audio = new Audio(`.\\audio\\${audio}.mp3`);
-		this.audio.addEventListener('ended', () => audioEnded(this.id));
-		this.audio.addEventListener('error', () => audioError(this.id));
 	}
+	if(taskAudioPrefix){
+		this.taskAudioPrefix = new Audio(`.\\audio\\${taskAudioPrefix}.mp3`);
+		this.taskAudioPrefix.addEventListener('ended', () => audioPrefixEnded());
+		this.taskAudioPrefix.addEventListener('error', () => audioError(this.id));
+	}
+	if(taskAudioSuffix){
+		this.taskAudioSuffix = new Audio(`.\\audio\\${taskAudioSuffix}.mp3`);
+		this.taskAudioSuffix.addEventListener('ended', () => audioSuffixEnded());
+		this.taskAudioSuffix.addEventListener('error', () => audioError(this.id));
+	}
+	if(audioEncouragement){
+		this.audioEncouragement = new Audio(`.\\audio\\${audioEncouragement}.mp3`);
+		this.audioEncouragement.addEventListener('ended', () => audioEncouragementEnded());
+		this.audioEncouragement.addEventListener('error', () => audioError(this.id));
+	}
+	
 	this.theme = theme;
 	this.loopAudio = loopAudio || false;
-	this.loopDelay = loopDelay || 0;
+	this.loopDelay = loopDelay*1000 || 0;
 	this.autoAdvanceChildren = autoAdvanceChildren || false;
 	this.enforceChildrenOrder = enforceChildrenOrder || false;
 	this.hideCompletedTasks = hideCompletedTasks || false;
@@ -384,7 +416,6 @@ function routine(id, name, audio, theme, loopAudio, loopDelay, autoAdvanceChildr
 }
 routine.prototype.playAudio = function(){
 	if(this.audio){
-		isAudioPlaying = true;
 		this.audio.play();
 	}
 }
@@ -398,7 +429,7 @@ routine.prototype.select = function(){
 	}
 	
 	loopAudio = this.loopAudio;
-	loopDelay = this.loopDelay * 1000;
+	loopDelay = this.loopDelay;
 	autoAdvanceChildren = this.autoAdvanceChildren;
 	enforceChildrenOrder = this.enforceChildrenOrder;
 	hideCompletedTasks = this.hideCompletedTasks;
@@ -409,7 +440,7 @@ routine.prototype.select = function(){
 	document.getElementById("chkOrder").checked = enforceChildrenOrder;
 	document.getElementById("chkHideComplete").checked = hideCompletedTasks;	
 
-	root.text = this.name;
+	alpha.text = this.name;
 	this.playAudio();
 	routineStarted = Date.now();
 	currentRoutine = this;
@@ -418,8 +449,8 @@ routine.prototype.select = function(){
 	
 	completedTable.replaceChildren();
 	taskArea.replaceChildren();
-	root.children = [];
-	loadTasks(taskArea, this.tasks, root);
+	alpha.children = [];
+	loadTasks(taskArea, this.tasks, alpha);
 	
 	document.getElementById("rightSide").classList.remove('hide');
 	document.getElementById("settingsBtn").classList.remove('hide');
@@ -430,6 +461,27 @@ routine.prototype.select = function(){
 		autoAdvance();
 		updateNotAllowed();
 	}
+}
+routine.prototype.playTaskAudioPrefix = function(){
+	if(this.taskAudioPrefix){
+		this.taskAudioPrefix.play();
+		return true;
+	}
+	return false;
+}
+routine.prototype.playTaskAudioSuffix = function(){
+	if(this.taskAudioSuffix){
+		this.taskAudioSuffix.play();
+		return true;
+	}
+	return false;
+}
+routine.prototype.playEncouragement = function(){
+	if(this.audioEncouragement){
+		this.audioEncouragement.play();
+		return true;
+	}
+	return false;
 }
 
 function task(id, text, time, audio, parent) {
@@ -454,7 +506,7 @@ function task(id, text, time, audio, parent) {
 	this.time = time*1000 || 0;
 	if(audio) {
 		this.audio = new Audio(`.\\audio\\${audio}.mp3`);
-		this.audio.addEventListener('ended', () => audioEnded(this.id));
+		this.audio.addEventListener('ended', () => audioEnded());
 		this.audio.addEventListener('error', () => audioError(this.id));
 	}
 	
@@ -468,10 +520,7 @@ task.prototype.playAudio = function(){
 		clearTimeout(loopTimeout);
 	}
 	if(this.audio){
-		isAudioPlaying = true;
 		this.audio.play();
-		
-		if(this.started === 0){ this.started = Date.now(); }
 	}
 }
 task.prototype.buildID = function(){
@@ -525,7 +574,7 @@ task.prototype.select = function(){
 	currentTime = this.time;
 	startTimer();
 	updateTimer();
-	this.playAudio();
+	if(!currentRoutine.playTaskAudioPrefix()){this.playAudio();}
 }
 task.prototype.complete = function(){
 	//if children not done is not done.
@@ -547,7 +596,7 @@ task.prototype.complete = function(){
 		div.style.removeProperty('max-height');
 	}
 	
-	const taskNum = this.btn.id.replace("root_","").replaceAll("_",".").replace("root", "Routine");
+	const taskNum = this.btn.id.replace("alpha_","").replaceAll("_",".").replace("alpha", "Routine");
 
 	const newRow = {
 		taskNum: taskNum,
@@ -559,7 +608,7 @@ task.prototype.complete = function(){
 	};
 	addTableRow(newRow);
 
-	//if there is no parent this is the root and we all done here.
+	//if there is no parent this is the alpha and we all done here.
 	if(!this.parent){
 		routineCompleted = Date.now();
 		stopTimer();
@@ -576,6 +625,8 @@ task.prototype.complete = function(){
 	if(!autoAdvanceChildren && !this.parent.completed){
 		this.parent.setCurrent();
 	}
+	
+	currentRoutine.playEncouragement();
 }
 task.prototype.getNextUncompletedDescendant = function(){
 		if(this.completed === 0 && this.children.length === 0){
@@ -664,7 +715,8 @@ task.prototype.descendantReminders = function(){
 	return reminders;
 }
 
-const root = new task('root', null, null, null, null);
+//renamed this to alpha because root was conflicting with some of wife's addons
+const alpha = new task('alpha', null, null, null, null);
 function init(){
 	routineName = document.getElementById("routineName");
 	startStopTimer = document.getElementById("startStop");
@@ -679,7 +731,7 @@ function init(){
 
 	for(let index in routines){
 		const r = routines[index];
-		availableRoutines.push(new routine(r.id, r.name, r.audio, r.theme, r.loopAudio, r.loopDelay, r.autoAdvanceChildren, r.enforceChildrenOrder, r.hideCompletedTasks, r.tasks));
+		availableRoutines.push(new routine(r.id, r.name, r.audio, r.taskAudioPrefix, r.taskAudioSuffix, r.audioEncouragement, r.theme, r.loopAudio, r.loopDelay, r.autoAdvanceChildren, r.enforceChildrenOrder, r.hideCompletedTasks, r.tasks));
 	}
 	
 	for(let index in availableRoutines){
@@ -688,11 +740,12 @@ function init(){
 	}
 }
 
-//make Isaiah's morning routine
-//some type of nested timer?
-//generic audio for when subtasks exist
+//demo with audio prefix
+//demo with audio suffix
+//demo with encouragement
 
-//make a routine that is just a list of all tasks
+//some type of nested timer?
+//make a routine that is just a list of all tasks?
 
 //save data in local storage
 //export
@@ -705,8 +758,6 @@ function init(){
 //routine images
 
 //themes
-
-
 
 //graphs
 //For a single day:
