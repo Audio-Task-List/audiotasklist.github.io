@@ -318,7 +318,7 @@ function remind(){
 
 function audioEnded() {
 	isAudioPlaying = false;
-	if(loopAudio){
+	if(loopAudio && currentTask){
 		loopTimeout = setTimeout(() => currentTask.playAudio(), loopDelay); 
 	}
 }
@@ -398,7 +398,7 @@ routine.prototype.select = function(){
 	}
 	
 	loopAudio = this.loopAudio;
-	loopDelay = this.loopDelay;
+	loopDelay = this.loopDelay * 1000;
 	autoAdvanceChildren = this.autoAdvanceChildren;
 	enforceChildrenOrder = this.enforceChildrenOrder;
 	hideCompletedTasks = this.hideCompletedTasks;
@@ -689,9 +689,12 @@ function init(){
 }
 
 //make Isaiah's morning routine
+//some type of nested timer?
+//generic audio for when subtasks exist
+
+//make a routine that is just a list of all tasks
 
 //save data in local storage
-
 //export
 	//CSV
 	//base64
@@ -702,6 +705,8 @@ function init(){
 //routine images
 
 //themes
+
+
 
 //graphs
 //For a single day:

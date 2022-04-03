@@ -44,7 +44,7 @@ const routines = [
 		theme:"dark",
 		name:"Loop Audio",
 		loopAudio:true,
-		loopDelay:1000,
+		loopDelay:10,
 		autoAdvanceChildren:false,
 		enforceChildrenOrder:false,
 		hideCompletedTasks:false,
