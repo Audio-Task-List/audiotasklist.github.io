@@ -9,6 +9,7 @@ const routines = [
 		loopAudio:true,
 		loopDelay:10,
 		taskAudioPrefix:'Isaiah',
+		autoAdvanceDone:true,
 		audioEncouragement:'awesome',
 		timeExpiredAudio:'timer',
 		tasks:[
@@ -46,6 +47,7 @@ const routines = [
 		loopAudio:true,
 		loopDelay:10,
 		taskAudioPrefix:'Isaiah',
+		autoAdvanceDone:true,
 		audioEncouragement:'awesome',
 		timeExpiredAudio:'timer',
 		tasks:[
@@ -60,6 +62,7 @@ const routines = [
 		audio:"evening",
 		loopAudio:true,
 		loopDelay:10,
+		autoAdvanceDone:true,
 		taskAudioPrefix:'Isaiah',
 		audioEncouragement:'awesome',
 		timeExpiredAudio:'timer',
