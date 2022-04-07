@@ -49,7 +49,9 @@
 		</div>
 		<button id="toggleRoutines" class="toggleRoutines" onclick="showRoutines()">></button>
 		<button id="settingsBtn" class="settingsBtn hide" onclick="showSettings()">≡</button>
-		<div id="routineName" class="routineName">
+		<div id="topRow" class="topRow">
+			<div id="routineName" class="routineName"></div>
+			<div id="routineImage" class="routineIcon"></div>
 		</div>
 		<div id="content" class="contentWrapper">
 			<div id="taskArea" class="taskArea">
@@ -70,15 +72,18 @@
 				</table>
 			</div>
 		</div>
-		<div id="taskImage" class="taskImage">
+		<div id="floatyButtons" class="floatyButtons hide">
+			<button id="btnDone" class="btnDone" onclick="clickDone()">✓</button>
+			<div id="timer" class="timer">
+				<div id="timerDisplay" class="timerDisplay" onclick="startStop()">00:00</div>
+				<button id="startStop" class="timerButton" onclick="startStop()">Start</button>
+				<button id="reset" class="timerButton" onclick="resetTimer()">Reset</button>
+			</div>
+			<div id="remindArea" class="remindArea">
+				<button id="btnRemind" class="btnRemind" onclick="remind()">Remind</button>
+				<div id="remindDisplay" class="remindDisplay">Reminds:<span id="currentReminds">70</span></div>
+			</div>
 		</div>
-		<div id="timer" class="timer hide">
-			<div id="timerDisplay" class="timerDisplay">00:00</div>
-			<button id="startStop" class="timerButton" onclick="startStop()">Start</button>
-			<button id="reset" class="timerButton" onclick="resetTimer()">Reset</button>
-		</div>
-		<button id="btnDone" class="btnDone hide" onclick="clickDone()">✓</button>
-		<button id="btnRemind" class="btnRemind hide" onclick="remind()">Remind</button>
 		<script>init();</script>
 	</body>
 </html>
