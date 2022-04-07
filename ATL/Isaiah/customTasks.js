@@ -10,6 +10,7 @@ const routines = [
 		loopDelay:10,
 		autoAdvanceDone:true,
 		taskAudioPrefix:'Isaiah',
+		autoAdvanceDone:true,
 		audioEncouragement:'awesome',
 		timeExpiredAudio:'timer',
 		tasks:[
@@ -48,6 +49,7 @@ const routines = [
 		loopDelay:10,
 		autoAdvanceDone:true,
 		taskAudioPrefix:'Isaiah',
+		autoAdvanceDone:true,
 		audioEncouragement:'awesome',
 		timeExpiredAudio:'timer',
 		tasks:[

@@ -329,7 +329,7 @@ function completeCurrentTask(){
 	}
 }
 function placeFloatButtons(){
-	if(!currentTask){return;}
+	if(!currentTask || currentTask.children.length !== 0){return;}
 	const r = currentTask.btn.getBoundingClientRect();
 	const offset = window.scrollY;
 	
@@ -519,10 +519,14 @@ routine.prototype.select = function(){
 	loopAudio = this.loopAudio;
 	loopDelay = this.loopDelay;
 	autoAdvanceTimer = this.autoAdvanceTimer;
+	autoAdvanceDone = this.autoAdvanceDone;
 	enforceChildrenOrder = this.enforceChildrenOrder;
 	hideCompletedTasks = this.hideCompletedTasks;
 	
-	document.getElementById("routineImage").style.backgroundImage = this.icon;
+	if(this.icon){
+		document.getElementById("routineImage").style.backgroundImage = this.icon;
+	}
+	routineName.textContent = this.name;
 	document.getElementById("chkLoop").checked = loopAudio;
 	document.getElementById("numDelay").value = loopDelay/1000;
 	document.getElementById("chkAutoTimer").checked = autoAdvanceTimer;	
@@ -535,7 +539,6 @@ routine.prototype.select = function(){
 	routineStarted = Date.now();
 	currentRoutine = this;
 	hideRoutines();
-	routineName.textContent = this.name;
 	
 	completedTable.replaceChildren();
 	taskArea.replaceChildren();
