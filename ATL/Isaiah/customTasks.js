@@ -10,6 +10,7 @@ const routines = [
 		loopDelay:10,
 		taskAudioPrefix:'Isaiah',
 		audioEncouragement:'awesome',
+		timeExpiredAudio:'timer',
 		tasks:[
 			{id:20},
 			{
@@ -45,6 +46,8 @@ const routines = [
 		loopAudio:true,
 		loopDelay:10,
 		taskAudioPrefix:'Isaiah',
+		audioEncouragement:'awesome',
+		timeExpiredAudio:'timer',
 		tasks:[
 			{id:11},
 			{id:12}
@@ -58,6 +61,8 @@ const routines = [
 		loopAudio:true,
 		loopDelay:10,
 		taskAudioPrefix:'Isaiah',
+		audioEncouragement:'awesome',
+		timeExpiredAudio:'timer',
 		tasks:[
 			{id:3},
 			{id:2},
@@ -222,7 +227,7 @@ const tasks = [
 	{
 		id:20,
 		text:"Wake up",
-		time:6,
+		time:60,
 		audio:"wake",
 		image:""
 	},

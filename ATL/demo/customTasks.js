@@ -5,10 +5,11 @@ const routines = [
 		id:0,
 		theme:"dark",
 		name:"Default",
+		icon:"breakfast.png",
 		audio:"default",
 		loopAudio:false,
 		loopDelay:0,
-		autoAdvanceChildren:false,
+		autoAdvanceTimer:false,
 		enforceChildrenOrder:false,
 		hideCompletedTasks:false,
 		tasks:[
@@ -45,7 +46,7 @@ const routines = [
 		name:"Loop Audio",
 		loopAudio:true,
 		loopDelay:10,
-		autoAdvanceChildren:false,
+		autoAdvanceTimer:false,
 		enforceChildrenOrder:false,
 		hideCompletedTasks:false,
 		tasks:[
@@ -82,7 +83,7 @@ const routines = [
 		name:"Auto-Advance",
 		loopAudio:false,
 		loopDelay:0,
-		autoAdvanceChildren:true,
+		autoAdvanceTimer:true,
 		enforceChildrenOrder:false,
 		hideCompletedTasks:false,
 		tasks:[
@@ -119,7 +120,7 @@ const routines = [
 		name:"Enforce Order",
 		loopAudio:false,
 		loopDelay:0,
-		autoAdvanceChildren:false,
+		autoAdvanceTimer:false,
 		enforceChildrenOrder:true,
 		hideCompletedTasks:false,
 		tasks:[
@@ -155,9 +156,10 @@ const routines = [
 		theme:"dark",
 		name:"Hide Completed",
 		audio:"hideCompleted",
+		icon:"breakfast.png",
 		loopAudio:false,
 		loopDelay:0,
-		autoAdvanceChildren:false,
+		autoAdvanceTimer:false,
 		enforceChildrenOrder:false,
 		hideCompletedTasks:true,
 		tasks:[
@@ -196,98 +198,98 @@ const tasks = [
 		text:"Eat Breakfast",
 		time:3,
 		audio:"breakfast",
-		image:""
+		icon:"breakfast.png"
 	},
 	{
 		id:1,
 		text:"Get Dressed",
 		time:15,
 		audio:"dressed",
-		image:""
+		icon:""
 	},
 	{
 		id:2,
 		text:"Eat Oatmeal",
 		time:3,
 		audio:"eat",
-		image:""
+		icon:"breakfast.png"
 	},
 	{
 		id:3,
 		text:"Underwear On",
 		time:3,
 		audio:"underwear",
-		image:""
+		icon:""
 	},
 	{
 		id:4,
 		text:"Pants On",
 		time:3,
 		audio:"trousers",
-		image:""
+		icon:""
 	},
 	{
 		id:5,
 		text:"Shirt On",
 		time:3,
 		audio:"shirt",
-		image:""
+		icon:""
 	},
 	{
 		id:6,
 		text:"Long Sleeved Shirt On",
 		time:3,
 		audio:"longShirt",
-		image:""
+		icon:""
 	},
 	{
 		id:7,
 		text:"Socks On",
 		time:3,
 		audio:"socks",
-		image:""
+		icon:""
 	},
 	{
 		id:8,
 		text:"Drink Milk",
 		time:3,
 		audio:"milk",
-		image:""
+		icon:""
 	},
 	{
 		id:9,
 		text:"Medicine",
 		time:3,
 		audio:"medicine",
-		image:""
+		icon:""
 	},
 	{
 		id:10,
 		text:"Potty Try",
 		time:3,
 		audio:"potty",
-		image:""
+		icon:""
 	},
 	{
 		id:11,
 		text:"Shoes On",
 		time:3,
 		audio:"shoes",
-		image:""
+		icon:""
 	},
 	{
 		id:12,
 		text:"Eat",
 		time:30,
 		audio:"eat",
-		image:""
+		icon:""
 	},
 	{
 		id:13,
 		text:"Put Dish in the sink",
 		time:3,
 		audio:"dishes",
-		image:""
+		icon:""
 	}
 	
 ];				
