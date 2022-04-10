@@ -3,52 +3,69 @@
 	<head>
 		<meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
 		<link rel="icon" type="image/x-icon" href="../favicon.ico"/>
-		<link rel="stylesheet" type="text/css" href="../Style.css"/>
+		<link rel="stylesheet" type="text/css" href="../Base.css"/>
+		<link rel="stylesheet" type="text/css" href="../Trains.css" disabled />
 		<script src="customTasks.js"></script>
 		<script src="../audiotasklist.js"></script>
 	</head>
 	<body>
-		<div id="settingsArea" class="settings">
-			<button id="closeSettings" class="closeSettings" onclick="hideSettings()">X</button>
-			<h2>Settings</h2>
+		<div id="rightMenu" class="rightMenu">
+			<button id="closeRightMenu" class="closeMenu" onclick="hideRightMenu()">X</button>
 			<p>
-				<label for="ddlTheme" on>Theme</label>
-				<select id="ddlTheme" onchange="themeChange()">
-					<option value="light">light</option>
-					<option value="dark">dark</option>
-				</select>
+				//TODO: Graph
 			</p>
 			<p>
-				<label for="chkLoop">Loop Audio</label>
-				<input id="chkLoop" type="checkbox" onchange="loopChange()"></input>
-				<br/>
-				<label for="numDelay">Loop Delay (s)</label>
-				<input id="numDelay" type="number" min="0" max="600" onchange="loopDelayChange()"></input>
+				<label for="btnExport">Export Data</label><br/>
+				<button id="btnExport" onclick="exportClick()">Download Data</button>
 			</p>
 			<p>
-				<label for="chkAutoTimer">Start next task when the timer expires</label>
-				<input id="chkAutoTimer" type="checkbox" onchange="autoTimerAdvanceChange()"></input>
+				<label for="import">Import Data</label>
+				<input id="import" type="file" accept=".txt" onchange="importFile(event);"/>
 			</p>
-			<p>
-				<label for="chkAutoDone">Start next task when task is completed</label>
-				<input id="chkAutoDone" type="checkbox" onchange="autoDoneAdvanceChange()"></input>
-			</p>
-			<p>
-				<label for="chkOrder">Enforce Task Order</label>
-				<input id="chkOrder" type="checkbox" onchange="enforceOrderChange()"></input>
-			</p>
-			<p>
-				<label for="chkHideComplete">Hide Completed Tasks</label>
-				<input id="chkHideComplete" type="checkbox" onchange="hideCompletedChange()"></input>
-			</p>
-			
+
+			<div id="settingsArea" class="settings hide">
+				<hr/>
+				<h2>Routine Settings</h2>
+				<p>
+					<label for="ddlTheme" on>Theme</label>
+					<select id="ddlTheme" onchange="themeChange()">
+						<option value="light">light</option>
+						<option value="dark">dark</option>
+					</select>
+					<input type="color">
+				</p>
+				<p>
+					<label for="chkLoop">Loop Audio</label>
+					<input id="chkLoop" type="checkbox" onchange="loopChange()"></input>
+					<br/>
+					<label for="numDelay">Loop Delay (s)</label>
+					<input id="numDelay" type="number" min="0" max="600" onchange="loopDelayChange()"></input>
+				</p>
+				<p>
+					<label for="chkAutoTimer">Start next task when the timer expires</label>
+					<input id="chkAutoTimer" type="checkbox" onchange="autoTimerAdvanceChange()"></input>
+				</p>
+				<p>
+					<label for="chkAutoDone">Start next task when task is completed</label>
+					<input id="chkAutoDone" type="checkbox" onchange="autoDoneAdvanceChange()"></input>
+				</p>
+				<p>
+					<label for="chkOrder">Enforce Task Order</label>
+					<input id="chkOrder" type="checkbox" onchange="enforceOrderChange()"></input>
+				</p>
+				<p>
+					<label for="chkHideComplete">Hide Completed Tasks</label>
+					<input id="chkHideComplete" type="checkbox" onchange="hideCompletedChange()"></input>
+				</p>
+			</div>
 		</div>
 		<div id="routineArea" class="routineArea routineAreaExpanded">
-			<button id="closeRoutines" class="closeRoutines" onclick="hideRoutines()">X</button>
+			<button id="closeRoutines" class="closeRoutines" onclick="hideRoutines()"><</button>
+			<br/>
 			<h1>Routines</h1>
 		</div>
 		<button id="toggleRoutines" class="toggleRoutines" onclick="showRoutines()">></button>
-		<button id="settingsBtn" class="settingsBtn hide" onclick="showSettings()">≡</button>
+		<button id="rightMenuBtn" class="menuBtn" onclick="showRightMenu()">≡</button>
 		<div id="topRow" class="topRow">
 			<div id="routineName" class="routineName"></div>
 			<div id="routineImage" class="routineIcon"></div>
@@ -61,10 +78,10 @@
 				<table class="completedTable">
 					<thead>
 						<tr>
-							<th class="completedColHeader" onclick="sort('taskNum')">#</th>
-							<th class="completedColHeader" onclick="sort('name')">Task</th>
-							<th class="completedColHeader" onclick="sort('duration')">Duration</th>
-							<th class="completedColHeader" onclick="sort('reminders')">Reminders</th>
+							<th class="completedColHeader" style="width:25px" onclick="sort('taskNum')">#</th>
+							<th class="completedColHeader" style="width:200px" onclick="sort('name')">Task</th>
+							<th class="completedColHeader" style="width:20px" onclick="sort('duration')">Duration</th>
+							<th class="completedColHeader" style="width:20px" onclick="sort('reminders')">Reminders</th>
 						</tr>
 					</thead>
 					<tbody id="completedTable" >
@@ -83,6 +100,8 @@
 				<button id="btnRemind" class="btnRemind" onclick="remind()">Remind</button>
 				<div id="remindDisplay" class="remindDisplay">Reminds:<span id="currentReminds">70</span></div>
 			</div>
+		</div>
+		<div class="themeArea">
 		</div>
 		<script>init();</script>
 	</body>

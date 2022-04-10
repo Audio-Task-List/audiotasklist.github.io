@@ -1,0 +1,20 @@
+.task{
+	border: solid 29px #000;
+    border-image-source: url(./themes/trainBorder.bmp);
+    border-image-slice: 180 200;
+    border-image-repeat: round;
+}
+
+
+.themeArea{
+	position:fixed;
+	right:0;
+	bottom:0;
+	width:25%;
+	height:200px;
+	z-index:-1;
+	
+	background-repeat:no-repeat;
+	background-image:url('./themes/train.svg');
+	background-size:contain;
+}
