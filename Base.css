@@ -307,6 +307,15 @@ body {
 	background-color:#CCC;
 }
 
+.dataCell{
+	text-align:center;
+}
+
+.textCell{
+	text-align:left;
+	min-width:130px;
+}
+
 .graphButton{
 	width:calc(100px + 50%);
 	height:50px;
@@ -325,5 +334,4 @@ body {
 
 .tableBody > tr > td {
 	padding:0 5px;
-	text-align:left;
 }

@@ -1,12 +1,13 @@
 "use strict";
 
+//predefined color list (look at excel or something);
+
 //graphs
 //For a single Instance:
 /*
 	flame graph
 	waterfall
 	pie chart of leafs
-	bar?
 */
 //Over time
 /*
@@ -24,6 +25,13 @@ let selectedInstance = null;
 let w = 0;
 let h = 0;
 const graphData = new GraphData();
+const graphColors = [
+	'#FF0000','#00FF00','#0000FF','#FF00FF',
+	'#880000','#008800','#000088','#880088','#888800','#008888',
+	'#FF8888','#88FF88','#8888FF','#FF88FF',
+	'#FF0088','#00FF88','#0088FF','#FF00FF',
+	'#FF8800','#88FF00','#8800FF'
+];
 
 function dateFormat(input){
 	const M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -262,6 +270,7 @@ function buildFlameTable(head, body, foot){
 	
 	const name = document.createElement('th');
 	name.textContent = "Task Name";
+	name.classList.add('textCell');
 	hr.appendChild(name);			
 	const start = document.createElement('th');
 	start.textContent = "Start";
@@ -283,15 +292,19 @@ function buildFlameTable(head, body, foot){
 		
 		const n = document.createElement('td');
 		n.textContent = datum.task.text;
+		n.classList.add('textCell');
 		tr.appendChild(n);			
 		const s = document.createElement('td');
 		s.textContent = formatTime(datum.x);
+		s.classList.add('dataCell');
 		tr.appendChild(s);
 		const e = document.createElement('td');
 		e.textContent = formatTime(datum.y);
+		e.classList.add('dataCell');
 		tr.appendChild(e);
 		const d = document.createElement('td');
 		d.textContent = formatTime(datum.y-datum.x, true);
+		d.classList.add('dataCell');
 		tr.appendChild(d);
 	}
 }
@@ -301,6 +314,7 @@ function buildWaterfallTable(head, body, foot){
 	
 	const name = document.createElement('th');
 	name.textContent = "Task Name";
+	name.classList.add('textCell');
 	hr.appendChild(name);			
 	const start = document.createElement('th');
 	start.textContent = "Start";
@@ -322,15 +336,19 @@ function buildWaterfallTable(head, body, foot){
 		
 		const n = document.createElement('td');
 		n.textContent = datum.task.text;
+		n.classList.add('textCell');
 		tr.appendChild(n);			
 		const s = document.createElement('td');
 		s.textContent = formatTime(datum.x);
+		s.classList.add('dataCell');
 		tr.appendChild(s);
 		const e = document.createElement('td');
 		e.textContent = formatTime(datum.y);
+		e.classList.add('dataCell');
 		tr.appendChild(e);
 		const d = document.createElement('td');
 		d.textContent = formatTime(datum.y-datum.x, true);
+		d.classList.add('dataCell');
 		tr.appendChild(d);
 	}
 }
@@ -340,6 +358,7 @@ function buildPieTable(head, body, foot){
 	
 	const name = document.createElement('th');
 	name.textContent = "Task Name";
+	name.classList.add('textCell');
 	hr.appendChild(name);			
 	const duration = document.createElement('th');
 	duration.textContent = "Duration";
@@ -356,9 +375,11 @@ function buildPieTable(head, body, foot){
 		
 		const n = document.createElement('td');
 		n.textContent = datum.task.text;
+		n.classList.add('textCell');
 		tr.appendChild(n);			
 		const d = document.createElement('td');
 		d.textContent = formatTime(datum.y-datum.x, true);
+		d.classList.add('dataCell');
 		tr.appendChild(d);
 		
 		totalDuration += datum.y-datum.x
@@ -369,43 +390,53 @@ function buildPieTable(head, body, foot){
 	
 	const total = document.createElement('th');
 	total.textContent = "Total Task Time";
+	total.classList.add('textCell');
 	fr.appendChild(total);			
 	const sum = document.createElement('th');
 	sum.textContent = formatTime(totalDuration, true);
+	sum.classList.add('dataCell');
 	fr.appendChild(sum);
 	
 }
 function buildTimeTable(head, body, foot){
 	const hr = document.createElement('tr');
 	head.appendChild(hr);
+
+	const cols = [...new Set(graphData.DataPoints.map(x => x.instance))];
+	const rows = [...new Set(graphData.DataPoints.map(x => x.taskNum))];
 	
-	const instance = document.createElement('th');
-	instance.textContent = "Instance";
-	hr.appendChild(instance);
 	const name = document.createElement('th');
 	name.textContent = "Task Name";
-	hr.appendChild(name);			
-	const value = document.createElement('th');
-	value.textContent = "Duration";
-	hr.appendChild(value);
+	name.classList.add('textCell');
+	hr.appendChild(name);
+	
+	for(let i=0;i<cols.length;i++){
+		const temp = document.createElement('th');
+		temp.textContent = dateFormat(new Date(parseInt(cols[i])));
+		temp.classList.add('textCell');
+		hr.appendChild(temp);
+	}
 	
 	graphData.DataPoints.sort((a,b) => parseInt(b.instance)-parseInt(a.instance) || a.taskNum.localeCompare(b.taskNum));
 	
-	for(let i=0;i<graphData.DataPoints.length;i++){
-		const datum = graphData.DataPoints[i];
-		
+	for(let i=0;i<rows.length;i++){
 		const tr = document.createElement('tr');
 		body.appendChild(tr);
 
-		const e = document.createElement('td');
-		e.textContent = dateFormat(new Date(parseInt(datum.instance)));
-		tr.appendChild(e);			
 		const n = document.createElement('td');
-		n.textContent = datum.task ? datum.task.text : datum.taskNum;
+		const temp = graphData.DataPoints.find(x => x.taskNum === rows[i]);
+		n.textContent = temp.task?temp.task.text : temp.taskNum;
+		n.classList.add('textCell');
 		tr.appendChild(n);			
-		const d = document.createElement('td');
-		d.textContent = formatTime(datum.y-datum.x, true);
-		tr.appendChild(d);
+
+		for(let j=0;j<cols.length;j++){
+			const datum = graphData.DataPoints.find(x => x.instance === cols[j] && x.taskNum === rows[i]);
+			console.log(datum);
+			const d = document.createElement('td');
+			d.textContent = formatTime(datum.y-datum.x, true);
+			d.classList.add('dataCell');
+			tr.appendChild(d);
+		}
 	}
 }
 function buildRemindersTable(head, body, foot){
@@ -539,5 +570,5 @@ function analyze(){
 	document.getElementById("graphData").classList.remove('hide');
 }
 
-
+//redo build non-instance tables to have instances be the column headers?
 //onresize do a thing.
