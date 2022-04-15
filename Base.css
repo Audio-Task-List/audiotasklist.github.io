@@ -297,6 +297,16 @@ body {
 	width:50%;
 }
 
+.graphData{
+	overflow-y: auto;
+    height: calc(100% - 130px);
+	font-size: 10pt;
+}
+
+.tableBody>tr:nth-child(even){
+	background-color:#CCC;
+}
+
 .graphButton{
 	width:calc(100px + 50%);
 	height:50px;

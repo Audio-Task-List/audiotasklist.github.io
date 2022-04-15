@@ -369,12 +369,13 @@ function autoAdvance(){
 	}
 }
 
-function formatTime(totalMilliseconds) {
+function formatTime(totalMilliseconds, showCentiseconds=false) {
 	const minutes = parseInt(totalMilliseconds / 60000, 10).toString().padStart(2, '0');
 	const seconds = parseInt((totalMilliseconds % 60000) / 1000, 10).toString().padStart(2, '0');
 	const remainder = parseInt((totalMilliseconds % 1000) / 10, 10).toString().padEnd(2, '0');
 	
-	return `${minutes}:${seconds}`;//.${remainder}`;
+	if(showCentiseconds){return `${minutes}:${seconds}.${remainder}`;}
+	return `${minutes}:${seconds}`;
 }
 function startTimer(){
 	if(timerInterval){return;}
