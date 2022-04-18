@@ -12,6 +12,7 @@ let floatyButtons = null;
 let doneBtn = null;
 let remindArea = null;
 let currentReminds = null;
+let graphModal = null;
 
 let routineStarted = 0;
 let routineCompleted = 0;
@@ -88,12 +89,12 @@ function addTableRow(rowData){
 	const remindersCell = newRow.insertCell();
 	
 	durationCell.style.textAlign = "center";
-
+	
 	newRow.title = `Allocated: ${formatTime(rowData.allocated)}`;
 	if((rowData.completed - rowData.started) > (rowData.allocated+500)){//allow a bit of slop tollerance
 		newRow.style.color = "#F22";
 	}
-
+	
 	numCell.textContent = rowData.taskNum;
 	nameCell.textContent = rowData.name;
 	durationCell.textContent = rowData.duration;
@@ -111,6 +112,29 @@ function sort(col){
 	sortCompletedData();
 }
 
+function changeBackgroundColor(sender, className){
+	setClassProperty(className, 'background-color', sender.value);
+}
+function changeColor(sender, className){
+	setClassProperty(className, 'color', sender.value);
+}
+function setClassProperty(className, property, value){
+	if(value === null){return;}
+	const stylesheet = document.styleSheets[1];
+	if(!stylesheet){console.error("E1"); return;}
+	let rule;
+	for(let i = 0; i < stylesheet.cssRules.length; i++) {
+		if(stylesheet.cssRules[i].selectorText === className) {
+			rule = stylesheet.cssRules[i];
+		}
+	}
+	
+	if(!rule){
+		stylesheet.insertRule(`${className}{${property}:${value}}`,0);
+		return;
+	}
+	rule.style.setProperty(property, value);
+}
 function updateNotAllowedOnChkChange(task, next, add){
 	if(task.completed){return;}
 	
@@ -128,6 +152,65 @@ function updateNotAllowedOnChkChange(task, next, add){
 	}
 }
 function setTheme(theme){
+	if(theme.contentWrapper){
+		if(theme.contentWrapper.bg){
+			setClassProperty(".contentWrapper", "background-color", theme.contentWrapper.bg);
+			document.getElementById("bgContentWrapper").value = theme.contentWrapper.bg;
+		}
+		
+		if(theme.contentWrapper.c){
+			setClassProperty(".contentWrapper", "color", theme.contentWrapper.c);
+			document.getElementById("cContentWrapper").value = theme.contentWrapper.c;
+		}
+	}
+	if(theme.unstarted)
+	{
+		if(theme.unstarted.bg){
+			setClassProperty(".unstarted", "background-color", theme.unstarted.bg);
+			document.getElementById("bgUnstarted").value = theme.unstarted.bg;
+		}
+		
+		if(theme.unstarted.c){
+			setClassProperty(".unstarted", "color", theme.unstarted.c);
+			document.getElementById("cUnstarted").value = theme.unstarted.c;
+		}
+	}
+	if(theme.current){
+		if(theme.current.bg){
+			setClassProperty(".current", "background-color", theme.current.bg);
+			document.getElementById("bgCurrent").value = theme.current.bg;
+		}
+		
+		if(theme.current.c){
+			setClassProperty(".current", "color", theme.current.c);
+			document.getElementById("cCurrent").value = theme.current.c;
+		}
+	}
+	if(theme.completed){
+		if(theme.completed.bg){
+			setClassProperty(".completed", "background-color", theme.completed.bg);
+			document.getElementById("bgCompleted").value = theme.completed.bg;
+		}
+		
+		if(theme.completed.c){
+			setClassProperty(".completed", "color", theme.completed.c);
+			document.getElementById("cCompleted").value = theme.completed.c;
+		}
+	}
+	if(theme.notAllowed){
+		if(theme.notAllowed.bg){
+			setClassProperty(".notAllowed", "background-color", theme.notAllowed.bg);
+			document.getElementById("bgNotAllowed").value = theme.notAllowed.bg;
+		}
+		
+		if(theme.notAllowed.c){
+			setClassProperty(".notAllowed", "color", theme.notAllowed.c);
+			document.getElementById("cNotAllowed").value = theme.notAllowed.c;
+		}
+	}
+}
+
+function toggleCSSFile(input) {
 	//get all the links
 	const links = document.getElementsByTagName('link');
 	
@@ -136,8 +219,8 @@ function setTheme(theme){
 		//these don't get toggled.
 		if(link.rel !== 'stylesheet' || link.href.endsWith('Base.css')){continue;}
 		
-		//set the theme!
-		if(link.href.includes(theme)){
+		//set the files!
+		if(link.href.includes(input)){
 			link.removeAttribute('disabled');
 		}
 		else{
@@ -151,6 +234,9 @@ function themeChange(){
 }
 function loopChange(){
 	loopAudio = document.getElementById("chkLoop").checked;
+	if(loopAudio && currentTask){
+		loopTimeout = setTimeout(() => currentTask.playAudio(), loopDelay); 
+	}
 	if(!loopAudio && loopTimeout){
 		clearTimeout(loopTimeout);
 	}
@@ -286,12 +372,13 @@ function autoAdvance(){
 	}
 }
 
-function formatTime(totalMilliseconds) {
+function formatTime(totalMilliseconds, showCentiseconds=false) {
 	const minutes = parseInt(totalMilliseconds / 60000, 10).toString().padStart(2, '0');
 	const seconds = parseInt((totalMilliseconds % 60000) / 1000, 10).toString().padStart(2, '0');
 	const remainder = parseInt((totalMilliseconds % 1000) / 10, 10).toString().padEnd(2, '0');
 	
-	return `${minutes}:${seconds}`;//.${remainder}`;
+	if(showCentiseconds){return `${minutes}:${seconds}.${remainder}`;}
+	return `${minutes}:${seconds}`;
 }
 function startTimer(){
 	if(timerInterval){return;}
@@ -766,6 +853,8 @@ task.prototype.complete = function(){
 		stopTimer();
 		timerDisplay.textContent = formatTime(0);
 		Storage.saveCurrent();
+		
+		currentRoutine = null;
 		return;
 	}
 	completedArea.classList.remove('hide');
@@ -866,7 +955,6 @@ task.prototype.descendantReminders = function(){
 	return reminders;
 }
 
-
 //Some hacked together save/load data to try to minimize storage space required.
 //Eventually this might just be in a DB so I won't need to save/load this rubbish
 const cBase = 93;
@@ -903,7 +991,7 @@ function buildCurrentSave(){
 	
 	for(let i=0;i<completedData.length;i++){
 		const c = completedData[i];
-		newData.push(`${intToString(c.id)} ${intToString(c.started-epoch)} ${intToString(c.completed-epoch)} ${intToString(c.reminders)}`);
+		newData.push(`${intToString(c.id)} ${c.taskNum} ${intToString(c.started-epoch)} ${intToString(c.completed-epoch)} ${intToString(c.reminders)}`);
 	}
 	
 	return newData.join('│');
@@ -917,14 +1005,15 @@ function loadSave(input){
 	
 	for(let i=1;i<input.length;i++){
 		const temp = input[i].split(" ");
-		if(temp.length != 4){continue;}
+		if(temp.length != 5){continue;}
 		
 		const id = stringToInt(temp[0]);
-		const start = stringToInt(temp[1]) + epoch;
-		const done = stringToInt(temp[2]) + epoch;
-		const reminders = stringToInt(temp[3]);
+		const taskNum = temp[1];
+		const start = stringToInt(temp[2]) + epoch;
+		const done = stringToInt(temp[3]) + epoch;
+		const reminders = stringToInt(temp[4]);
 		
-		output.push({id:id, started: start, completed:done, reminders:reminders});
+		output.push({id:id, taskNum:taskNum, started: start, completed:done, reminders:reminders});
 	}
 	
 	return output;
@@ -937,20 +1026,42 @@ function importClick(){
 	Storage.import64();
 }
 
-function importFile(e)
-{
+function importFile(e){
 	//if localstorage exists confirm overwrite
 	if(localStorage.getItem('ATL') 
 		&& !confirm('This will overwrite existing local storage. Click OK to continue.')){
 		document.getElementById('import').value = null;
 		return;
 	}
-
+	
 	const f = e.target.files;
 	if(!f || f.length === 0){return;}
-	Storage.import64(f[0]);
+	for(let i=0;i<f.length;i++){
+		Storage.import64(f[i]);
+	}
 }
-
+function clearStorage(){
+	localStorage.clear();
+}
+let isPrimitive = (input) => {
+	return input === null 
+	|| typeof input === 'undefined'
+	|| typeof input === 'number'
+	|| typeof input === 'string'
+	|| typeof input === 'bitint'
+	|| typeof input === 'boolean'
+	|| typeof input === 'symbol';
+}
+function merge(a, b){
+	for(const [key, value] of Object.entries(b)){
+		if(!a.hasOwnProperty(key)){
+			a[key]=value;
+		}
+		else if(!isPrimitive(value)){
+			merge(a[key], b[key]);
+		}
+	}
+}
 function importData(input){
 	const data = {};
 	for(const [key, value] of Object.entries(input)){
@@ -978,18 +1089,19 @@ storage.prototype.saveCurrent = function(){
 	
 	const saveData = buildCurrentSave();
 	temp[currentRoutine.id].push(saveData);
-
+	
 	localStorage.setItem('ATL', JSON.stringify(temp));
+	this.data = importData(temp);
 }
 storage.prototype.export64 = function(){
 	const str = localStorage.getItem('ATL');
 	const temp = btoa(encodeURIComponent(str));
 	const d = new Date();
 	const name = `ATL_export_${d.getUTCFullYear()}_${d.getMonth()}_${d.getDate()}.txt`;
-
+	
     const dl = document.createElement('a');
     document.body.appendChild(dl);
-
+	
     dl.href = `data:application/pdf;base64,${temp}`;
     dl.target = '_self';
     dl.download = name;
@@ -1001,7 +1113,9 @@ storage.prototype.import64 = function(file){
 	reader.onload = function(event){
 		const text = decodeURIComponent(event.target.result);
 		const temp = JSON.parse(text);
-		this.data = importData(temp);
+		
+		const newData = importData(temp);
+		merge(this.data, newData);
 		
 		alert("Data Imported");
 		document.getElementById('import').value = null;
@@ -1028,6 +1142,7 @@ function init(){
 	completedTable = document.getElementById("completedTable");
 	completedArea = document.getElementById("completedArea");
 	currentReminds = document.getElementById("currentReminds");
+	graphModal = document.getElementById("graphModalWrapper");
 	
 	for(let index in routines){
 		const r = routines[index];
@@ -1045,50 +1160,22 @@ function init(){
 	}
 	
 	//document.getElementById('import').addEventListener('change', getFile)
-
+	
 }
 
+window.onbeforeunload = function(){
+	if(currentRoutine){
+		return 'You are in a routine. Do you want to exit?';
+	}
+};
+//this is your x reminder audio
+//get more stern as numbers increase
 
-//graphs
-//For a single day:
-//flame graph
-//waterfall
-//bar
-//pie chart of leafs
-//Over time
-//x-day/y-task time
-//x-day/y-task reminders
+//build custom task/routine and export?
+//Import routine from file?
 
 
 //routine reminder limit? - set row red if over limit
-
-//Themes
-//		<link id="cssLight" rel="stylesheet" type="text/css" href="../Light.css" disabled />
-//ligher colors; default theme
-//dark border
-//no background picture
-//		<link id="cssDark" rel="stylesheet" type="text/css" href="../Dark.css" disabled />
-//darker colors
-//light border
-//no background picture
-//		<link id="cssDinosaurs" rel="stylesheet" type="text/css" href="../Dinosarus.css" disabled />
-//Dinosaur egg shaped buttons
-//Dinosaur in lower right
-//		<link id="cssFlowers" rel="stylesheet" type="text/css" href="../Flowers.css" disabled />
-//Flowers/stems border
-//butterfly lower right
-//		<link id="cssRainbows" rel="stylesheet" type="text/css" href="../Rainbows.css" disabled />
-//Rainbow border
-//unicorn lower right
-//		<link id="cssSpace" rel="stylesheet" type="text/css" href="../Space.css" disabled />
-// stars border
-//moon picture background
-//		<link id="cssSports" rel="stylesheet" type="text/css" href="../Sports.css" disabled />
-//sports balls/bats border
-//sports balls in corner
-//		<link id="cssTransportation" rel="stylesheet" type="text/css" href="../Transportation.css" disabled />
-//train tracks/roads for borders
-//train picture in lower right
 
 
 //Update demo routines

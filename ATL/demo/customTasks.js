@@ -36,8 +36,15 @@ var routines = [
 	},
 	{
 		id:1,
-		theme:'Trains',
-		name:'Loop Audio, Train Theme',
+		theme:
+		{
+			contentWrapper:{bg:"#CCCCFF",c:"#000000"}, 
+			unstarted:{bg:"#999999",c:"#CCCCFF"}, 
+			current:{bg:"#CCFFCC",c:"#000000"}, 
+			completed:{bg:"#884444",c:"#662222"}, 
+			notAllowed:{bg:"#FFCCCC",c:"#992222"}
+		},
+		name:'Loop Audio',
 		loopAudio:true,
 		loopDelay:10,
 		tasks:[
@@ -138,6 +145,7 @@ var routines = [
 		name:'Enforce Order',
 		enforceChildrenOrder:true,
 		tasks:[
+			{id:25},
 			{id:25},
 			{id:26},
 			{id:27}
