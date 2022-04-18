@@ -234,6 +234,9 @@ function themeChange(){
 }
 function loopChange(){
 	loopAudio = document.getElementById("chkLoop").checked;
+	if(loopAudio && currentTask){
+		loopTimeout = setTimeout(() => currentTask.playAudio(), loopDelay); 
+	}
 	if(!loopAudio && loopTimeout){
 		clearTimeout(loopTimeout);
 	}
@@ -850,6 +853,8 @@ task.prototype.complete = function(){
 		stopTimer();
 		timerDisplay.textContent = formatTime(0);
 		Storage.saveCurrent();
+		
+		currentRoutine = null;
 		return;
 	}
 	completedArea.classList.remove('hide');
@@ -950,13 +955,6 @@ task.prototype.descendantReminders = function(){
 	return reminders;
 }
 
-function showGraphModal(){
-	hideRightMenu();
-	graphModal.classList.remove('hide');
-}
-function hideGraphModal(s){
-	graphModal.classList.add('hide');
-}
 //Some hacked together save/load data to try to minimize storage space required.
 //Eventually this might just be in a DB so I won't need to save/load this rubbish
 const cBase = 93;
@@ -1165,7 +1163,11 @@ function init(){
 	
 }
 
-
+window.onbeforeunload = function(){
+	if(currentRoutine){
+		return 'You are in a routine. Do you want to exit?';
+	}
+};
 //this is your x reminder audio
 //get more stern as numbers increase
 

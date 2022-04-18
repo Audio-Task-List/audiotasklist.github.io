@@ -322,9 +322,25 @@ body {
 	font-size:14pt;
 }
 
-.graphWrapper{
+.modalContent{
+	height:calc(100% - 50px);
+}
+
+.fullHeight{
+	height:99%;
+}
+.partialHeight{
+	height:60%;
+	width:100%;
+	margin:0 auto;
+}
+
+.modalContentWrapper{
 	display:flex;
-	height:calc(100% - 50px);;
+}
+
+.graphWrapper{
+	margin: 0 auto;
 }
 
 .graph{
@@ -334,4 +350,10 @@ body {
 
 .tableBody > tr > td {
 	padding:0 5px;
+}
+
+.bottomGraphData{
+	border-top:solid 1px #000;
+	overflow:auto;
+	height:39%;
 }
