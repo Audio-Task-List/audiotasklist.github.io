@@ -1,9 +1,8 @@
 "use strict";
 
-const taskHeight = 95;//used for sizing subtask div heights
 let availableRoutines = [];
 let routineArea = null;
-let settingsArea = null;
+let rightMenu = null;
 let completedArea = null;
 let completedTable = null;
 let timerArea = null;
@@ -13,6 +12,7 @@ let floatyButtons = null;
 let doneBtn = null;
 let remindArea = null;
 let currentReminds = null;
+let graphModal = null;
 
 let routineStarted = 0;
 let routineCompleted = 0;
@@ -57,10 +57,16 @@ function sortCompletedData(){
 	for(let i=0;i<completedData.length;i++){
 		const rowData = completedData[i];
 		const newRow = completedTable.insertRow();
+		
 		const numCell = newRow.insertCell();
 		const nameCell = newRow.insertCell();
 		const durationCell = newRow.insertCell();
 		const remindersCell = newRow.insertCell();
+		
+		newRow.title = `Allocated: ${formatTime(rowData.allocated)}`;
+		if((rowData.completed - rowData.started) > rowData.allocated){
+			newRow.style.color = "#F22";
+		}
 		
 		numCell.textContent = rowData.taskNum;
 		nameCell.textContent = rowData.name;
@@ -82,6 +88,13 @@ function addTableRow(rowData){
 	const durationCell = newRow.insertCell();
 	const remindersCell = newRow.insertCell();
 	
+	durationCell.style.textAlign = "center";
+	
+	newRow.title = `Allocated: ${formatTime(rowData.allocated)}`;
+	if((rowData.completed - rowData.started) > (rowData.allocated+500)){//allow a bit of slop tollerance
+		newRow.style.color = "#F22";
+	}
+	
 	numCell.textContent = rowData.taskNum;
 	nameCell.textContent = rowData.name;
 	durationCell.textContent = rowData.duration;
@@ -99,6 +112,29 @@ function sort(col){
 	sortCompletedData();
 }
 
+function changeBackgroundColor(sender, className){
+	setClassProperty(className, 'background-color', sender.value);
+}
+function changeColor(sender, className){
+	setClassProperty(className, 'color', sender.value);
+}
+function setClassProperty(className, property, value){
+	if(value === null){return;}
+	const stylesheet = document.styleSheets[1];
+	if(!stylesheet){console.error("E1"); return;}
+	let rule;
+	for(let i = 0; i < stylesheet.cssRules.length; i++) {
+		if(stylesheet.cssRules[i].selectorText === className) {
+			rule = stylesheet.cssRules[i];
+		}
+	}
+	
+	if(!rule){
+		stylesheet.insertRule(`${className}{${property}:${value}}`,0);
+		return;
+	}
+	rule.style.setProperty(property, value);
+}
 function updateNotAllowedOnChkChange(task, next, add){
 	if(task.completed){return;}
 	
@@ -115,12 +151,92 @@ function updateNotAllowedOnChkChange(task, next, add){
 		updateNotAllowedOnChkChange(task.children[index], next, add);
 	}
 }
+function setTheme(theme){
+	if(theme.contentWrapper){
+		if(theme.contentWrapper.bg){
+			setClassProperty(".contentWrapper", "background-color", theme.contentWrapper.bg);
+			document.getElementById("bgContentWrapper").value = theme.contentWrapper.bg;
+		}
+		
+		if(theme.contentWrapper.c){
+			setClassProperty(".contentWrapper", "color", theme.contentWrapper.c);
+			document.getElementById("cContentWrapper").value = theme.contentWrapper.c;
+		}
+	}
+	if(theme.unstarted)
+	{
+		if(theme.unstarted.bg){
+			setClassProperty(".unstarted", "background-color", theme.unstarted.bg);
+			document.getElementById("bgUnstarted").value = theme.unstarted.bg;
+		}
+		
+		if(theme.unstarted.c){
+			setClassProperty(".unstarted", "color", theme.unstarted.c);
+			document.getElementById("cUnstarted").value = theme.unstarted.c;
+		}
+	}
+	if(theme.current){
+		if(theme.current.bg){
+			setClassProperty(".current", "background-color", theme.current.bg);
+			document.getElementById("bgCurrent").value = theme.current.bg;
+		}
+		
+		if(theme.current.c){
+			setClassProperty(".current", "color", theme.current.c);
+			document.getElementById("cCurrent").value = theme.current.c;
+		}
+	}
+	if(theme.completed){
+		if(theme.completed.bg){
+			setClassProperty(".completed", "background-color", theme.completed.bg);
+			document.getElementById("bgCompleted").value = theme.completed.bg;
+		}
+		
+		if(theme.completed.c){
+			setClassProperty(".completed", "color", theme.completed.c);
+			document.getElementById("cCompleted").value = theme.completed.c;
+		}
+	}
+	if(theme.notAllowed){
+		if(theme.notAllowed.bg){
+			setClassProperty(".notAllowed", "background-color", theme.notAllowed.bg);
+			document.getElementById("bgNotAllowed").value = theme.notAllowed.bg;
+		}
+		
+		if(theme.notAllowed.c){
+			setClassProperty(".notAllowed", "color", theme.notAllowed.c);
+			document.getElementById("cNotAllowed").value = theme.notAllowed.c;
+		}
+	}
+}
+
+function toggleCSSFile(input) {
+	//get all the links
+	const links = document.getElementsByTagName('link');
+	
+	for(let i=0;i<links.length;i++){
+		const link = links.item(i);
+		//these don't get toggled.
+		if(link.rel !== 'stylesheet' || link.href.endsWith('Base.css')){continue;}
+		
+		//set the files!
+		if(link.href.includes(input)){
+			link.removeAttribute('disabled');
+		}
+		else{
+			link.setAttribute('disabled', null);
+		}
+	}
+}
 
 function themeChange(){
-	
+	//TODO: setTheme(whatever was selected)
 }
 function loopChange(){
 	loopAudio = document.getElementById("chkLoop").checked;
+	if(loopAudio && currentTask){
+		loopTimeout = setTimeout(() => currentTask.playAudio(), loopDelay); 
+	}
 	if(!loopAudio && loopTimeout){
 		clearTimeout(loopTimeout);
 	}
@@ -186,11 +302,11 @@ function hideCompletedChange(){
 	}
 }
 
-function showSettings(){
-	settingsArea.classList.add('settingsExpanded');
+function showRightMenu(){
+	rightMenu.classList.add('rightMenuExpanded');
 }
-function hideSettings(){
-	settingsArea.classList.remove('settingsExpanded');
+function hideRightMenu(){
+	rightMenu.classList.remove('rightMenuExpanded');
 }
 
 function showRoutines(){
@@ -207,6 +323,7 @@ function includesClass(element, className){
 function updateHeight(div, task){
 	if(!div || div.tagName !== "DIV" || div.id === "taskArea"){return;}
 	
+	const taskHeight = alpha.children[0].btn.getBoundingClientRect().height + 10;
 	const height = task.countDescendants() * taskHeight;
 	div.style.maxHeight = height+"px";
 }
@@ -255,12 +372,13 @@ function autoAdvance(){
 	}
 }
 
-function formatTime(totalMilliseconds) {
+function formatTime(totalMilliseconds, showCentiseconds=false) {
 	const minutes = parseInt(totalMilliseconds / 60000, 10).toString().padStart(2, '0');
 	const seconds = parseInt((totalMilliseconds % 60000) / 1000, 10).toString().padStart(2, '0');
 	const remainder = parseInt((totalMilliseconds % 1000) / 10, 10).toString().padEnd(2, '0');
 	
-	return `${minutes}:${seconds}`;//.${remainder}`;
+	if(showCentiseconds){return `${minutes}:${seconds}.${remainder}`;}
+	return `${minutes}:${seconds}`;
 }
 function startTimer(){
 	if(timerInterval){return;}
@@ -336,12 +454,14 @@ function placeFloatButtons(){
 	const H = window.innerHeight;
 	const W = window.innerWidth;
 	
-	const top = r.top + offset;
+	//center floaty on button if some theme has phat borders
+	const heightOffset = (alpha.children[0].btn.getBoundingClientRect().height - 90)/2;
+	const top = r.top + offset + heightOffset;
 	const left = r.right + 10;
 	
 	if(left + 390 < W){
-		floatyButtons.style.top = (r.top + offset)+"px";
-		floatyButtons.style.left = (r.right + 10)+ "px";
+		floatyButtons.style.top = top+"px";
+		floatyButtons.style.left = left+"px";
 		
 		floatyButtons.style.removeProperty('position');
 		floatyButtons.style.removeProperty('padding');
@@ -355,7 +475,7 @@ function placeFloatButtons(){
 		floatyButtons.style.right = "10px";
 		floatyButtons.style.border = "solid 2px #000";
 		floatyButtons.style.padding = "10px";
-
+		
 		floatyButtons.style.removeProperty('left');
 		floatyButtons.style.removeProperty('top');
 	}
@@ -412,7 +532,7 @@ function createTask(parentDiv, taskID, index, parentTask){
 	const temp = tasks.filter(x => x.id === taskID);
 	if(temp.length === 0){return null;}
 	const t = temp[0];
-	const newTask = new task(Number(index)+1, t.text, t.time, t.audio, t.icon, parentTask);
+	const newTask = new task(taskID, Number(index)+1, t.text, t.time, t.audio, t.icon, parentTask);
 	parentDiv.appendChild(newTask.btn);
 	
 	return newTask;
@@ -449,11 +569,8 @@ function getNextUncompletedTask(task){
 function routine(id, name, icon, audio, taskAudioPrefix, taskAudioSuffix, audioEncouragement, timeExpiredAudio, theme, loopAudio, loopDelay, autoAdvanceTimer, autoAdvanceDone, enforceChildrenOrder, hideCompletedTasks, tasks){
 	this.id = id;
 	this.name = name;
-	this.icon = `url('./icons/${icon}')`;
-	
-	if(audio) {
-		this.audio = new Audio(`.\\audio\\${audio}.mp3`);
-	}
+	if(icon){this.icon = `url('./icons/${icon}')`;}
+	if(audio){this.audio = new Audio(`.\\audio\\${audio}.mp3`);}
 	if(taskAudioPrefix){
 		this.taskAudioPrefix = new Audio(`.\\audio\\${taskAudioPrefix}.mp3`);
 		this.taskAudioPrefix.addEventListener('ended', () => audioPrefixEnded());
@@ -492,7 +609,7 @@ function routine(id, name, icon, audio, taskAudioPrefix, taskAudioSuffix, audioE
 		img.style.backgroundImage=`url(./icons/${icon})`;
 		this.btn.appendChild(img);
 	}
-
+	
 	if(name){
 		const txt = document.createElement('div');
 		txt.classList.add('routineText');
@@ -545,12 +662,17 @@ routine.prototype.select = function(){
 	alpha.children = [];
 	loadTasks(taskArea, this.tasks, alpha);
 	
-	document.getElementById("settingsBtn").classList.remove('hide');
+	document.getElementById("settingsArea").classList.remove('hide');
 	floatyButtons.classList.add('hide');
 	stopTimer();
 	currentTime = 0;
 	
 	completedData = [];
+	
+	if(this.theme){
+		setTheme(this.theme);
+	}
+	else{setTheme('Light');}
 	
 	if(autoAdvanceTimer){
 		autoAdvance();
@@ -585,7 +707,8 @@ routine.prototype.playTimeExpiredAudio = function(){
 	return false;	
 }
 
-function task(id, text, time, audio, icon, parent) {
+function task(taskID, id, text, time, audio, icon, parent) {
+	this.taskID = taskID;//used to look up task
 	this.id = id;//used to make the btn.id
 	this.parent = parent;
 	if(parent){
@@ -595,14 +718,14 @@ function task(id, text, time, audio, icon, parent) {
 	this.text = text;
 	this.btn = document.createElement('div');
 	this.btn.id = this.buildID();
-
+	
 	if(icon){
 		const img = document.createElement("div");
 		img.classList.add('btnIcon');
 		img.style.backgroundImage=`url(./icons/${icon})`;
 		this.btn.appendChild(img);
 	}
-
+	
 	if(text){
 		const txt = document.createElement('div');
 		txt.classList.add('taskText');
@@ -713,11 +836,13 @@ task.prototype.complete = function(){
 	const taskNum = this.btn.id.replace("alpha_","").replaceAll("_",".").replace("alpha", "Routine");
 	
 	const newRow = {
+		id: this.taskID,
 		taskNum: taskNum,
 		name: this.text,
 		started: this.started,
 		completed: this.completed,
 		duration: formatTime(this.completed - this.started),
+		allocated: this.time,
 		reminders:this.descendantReminders()
 	};
 	addTableRow(newRow);
@@ -727,6 +852,9 @@ task.prototype.complete = function(){
 		routineCompleted = Date.now();
 		stopTimer();
 		timerDisplay.textContent = formatTime(0);
+		Storage.saveCurrent();
+		
+		currentRoutine = null;
 		return;
 	}
 	completedArea.classList.remove('hide');
@@ -737,9 +865,6 @@ task.prototype.complete = function(){
 	
 	//check parent
 	this.parent.complete();
-	// if(!autoAdvanceTimer && !this.parent.completed){
-	// this.parent.setCurrent();
-	// }
 	
 	currentRoutine.playEncouragement();
 }
@@ -830,8 +955,177 @@ task.prototype.descendantReminders = function(){
 	return reminders;
 }
 
-//renamed this to alpha because root was conflicting with some of wife's addons
-const alpha = new task('alpha', null, null, null, null, null);
+//Some hacked together save/load data to try to minimize storage space required.
+//Eventually this might just be in a DB so I won't need to save/load this rubbish
+const cBase = 93;
+const cOffset = 33;
+function stringToInt(input){
+	if(input === "¿"){return -1;}
+	let output = 0;
+	
+	const chars = input.split('');
+	for(let i=0;i<chars.length;i++){
+		output *= cBase;
+		output += chars[i].charCodeAt() - cOffset;
+	}
+	
+	return output;
+}
+function intToString(input){
+	if(input === -1){return "¿";}
+	
+	let output = String.fromCharCode((input % cBase) + cOffset);
+	input = Math.floor(input/cBase);
+	
+	while(input > 0){
+		output = String.fromCharCode((input % cBase) + cOffset) + output;
+		input = Math.floor(input/cBase);
+	}
+	
+	return output;
+}
+function buildCurrentSave(){
+	const epoch = new Date().setHours(0,0,0,0);
+	const newData = [];
+	newData.push(intToString(epoch));
+	
+	for(let i=0;i<completedData.length;i++){
+		const c = completedData[i];
+		newData.push(`${intToString(c.id)} ${c.taskNum} ${intToString(c.started-epoch)} ${intToString(c.completed-epoch)} ${intToString(c.reminders)}`);
+	}
+	
+	return newData.join('│');
+}
+function loadSave(input){
+	if(input.length === 0){return null;}
+	input = input.split('│');
+	
+	const epoch = stringToInt(input[0]);
+	const output = [];
+	
+	for(let i=1;i<input.length;i++){
+		const temp = input[i].split(" ");
+		if(temp.length != 5){continue;}
+		
+		const id = stringToInt(temp[0]);
+		const taskNum = temp[1];
+		const start = stringToInt(temp[2]) + epoch;
+		const done = stringToInt(temp[3]) + epoch;
+		const reminders = stringToInt(temp[4]);
+		
+		output.push({id:id, taskNum:taskNum, started: start, completed:done, reminders:reminders});
+	}
+	
+	return output;
+}
+
+function exportClick(){
+	Storage.export64();
+}
+function importClick(){
+	Storage.import64();
+}
+
+function importFile(e){
+	//if localstorage exists confirm overwrite
+	if(localStorage.getItem('ATL') 
+		&& !confirm('This will overwrite existing local storage. Click OK to continue.')){
+		document.getElementById('import').value = null;
+		return;
+	}
+	
+	const f = e.target.files;
+	if(!f || f.length === 0){return;}
+	for(let i=0;i<f.length;i++){
+		Storage.import64(f[i]);
+	}
+}
+function clearStorage(){
+	localStorage.clear();
+}
+let isPrimitive = (input) => {
+	return input === null 
+	|| typeof input === 'undefined'
+	|| typeof input === 'number'
+	|| typeof input === 'string'
+	|| typeof input === 'bitint'
+	|| typeof input === 'boolean'
+	|| typeof input === 'symbol';
+}
+function merge(a, b){
+	for(const [key, value] of Object.entries(b)){
+		if(!a.hasOwnProperty(key)){
+			a[key]=value;
+		}
+		else if(!isPrimitive(value)){
+			merge(a[key], b[key]);
+		}
+	}
+}
+function importData(input){
+	const data = {};
+	for(const [key, value] of Object.entries(input)){
+		data[key] = {};
+		for(let i=0;i<value.length;i++){
+			const record = loadSave(value[i]);
+			const root = record.find(x => x.id===-1);
+			data[key][root.started] = record;
+		}
+	}
+	
+	return data;
+}
+function storage(){
+	const temp = JSON.parse(localStorage.getItem('ATL'));
+	if(!temp){return;}
+	
+	this.data = importData(temp);
+}
+storage.prototype.saveCurrent = function(){
+	const temp = JSON.parse(localStorage.getItem('ATL')) || {};
+	if(!temp[currentRoutine.id]){
+		temp[currentRoutine.id] = [];
+	}
+	
+	const saveData = buildCurrentSave();
+	temp[currentRoutine.id].push(saveData);
+	
+	localStorage.setItem('ATL', JSON.stringify(temp));
+	this.data = importData(temp);
+}
+storage.prototype.export64 = function(){
+	const str = localStorage.getItem('ATL');
+	const temp = btoa(encodeURIComponent(str));
+	const d = new Date();
+	const name = `ATL_export_${d.getUTCFullYear()}_${d.getMonth()}_${d.getDate()}.txt`;
+	
+    const dl = document.createElement('a');
+    document.body.appendChild(dl);
+	
+    dl.href = `data:application/pdf;base64,${temp}`;
+    dl.target = '_self';
+    dl.download = name;
+    dl.click(); 
+}
+storage.prototype.import64 = function(file){
+	
+	const reader = new FileReader();
+	reader.onload = function(event){
+		const text = decodeURIComponent(event.target.result);
+		const temp = JSON.parse(text);
+		
+		const newData = importData(temp);
+		merge(this.data, newData);
+		
+		alert("Data Imported");
+		document.getElementById('import').value = null;
+	}
+	
+	reader.readAsText(file);
+}
+
+const Storage = new storage();
+const alpha = new task(-1, "alpha", null, null, null, null);
 function init(){
 	window.addEventListener('resize', placeFloatButtons);
 	
@@ -840,7 +1134,7 @@ function init(){
 	timerDisplay = document.getElementById("timerDisplay");
 	timerArea = document.getElementById("timer");
 	routineArea = document.getElementById("routineArea");
-	settingsArea = document.getElementById("settingsArea");
+	rightMenu = document.getElementById("rightMenu");
 	taskArea = document.getElementById("taskArea");
 	floatyButtons = document.getElementById("floatyButtons");
 	doneBtn = document.getElementById("btnDone");
@@ -848,6 +1142,7 @@ function init(){
 	completedTable = document.getElementById("completedTable");
 	completedArea = document.getElementById("completedArea");
 	currentReminds = document.getElementById("currentReminds");
+	graphModal = document.getElementById("graphModalWrapper");
 	
 	for(let index in routines){
 		const r = routines[index];
@@ -863,30 +1158,37 @@ function init(){
 		const r = availableRoutines[index];
 		routineArea.appendChild(r.btn);
 	}
+	
+	//document.getElementById('import').addEventListener('change', getFile)
+	
 }
 
+window.onbeforeunload = function(){
+	if(currentRoutine){
+		return 'You are in a routine. Do you want to exit?';
+	}
+};
+//this is your x reminder audio
+//get more stern as numbers increase
+
+//build custom task/routine and export?
+//Import routine from file?
+
+
+//routine reminder limit? - set row red if over limit
+
+
+//Update demo routines
+//default
+//Loop Audio
+//next task when complete: just new audio files
+//hide completed
+//audio previxes
+//audio suffixes
+//task completion audio
+//time expired audio
+
 //demo icons
-//demo with audio prefix
-//demo with audio suffix
-//demo with encouragement
-//demo with time expired audio
-
-//save data in local storage
-//export
-	//CSV
-	//base64
-
-//import base64
 
 //themes
 
-//graphs
-//For a single day:
-	//flame graph
-	//waterfall
-	//bar
-	//pie chart of leafs
-//Over time
-	//x-day/y-task time
-	//x-day/y-task reminders
-	

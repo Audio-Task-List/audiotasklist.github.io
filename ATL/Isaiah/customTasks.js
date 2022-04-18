@@ -3,7 +3,7 @@
 const routines = [
 	{
 		id:0,
-		theme:"dark",
+		theme:{body:"#FFF", unstarted:"#777", current:"#093", completed:"#890"},
 		name:"Morning",
 		audio:"morning",
 		loopAudio:true,
@@ -20,7 +20,8 @@ const routines = [
 				tasks:[
 					{id:1},
 					{id:2},
-					{id:3}
+					{id:3},
+					{id:22}
 				]
 			},
 			{
@@ -93,154 +94,138 @@ const tasks = [
 		id:0,
 		text:"Breakfast Time",
 		time:2000,
-		audio:"downstairs",
-		image:""
+		audio:"downstairs"
 	},
 	{
 		id:1,
 		text:"Eat Up!",
 		time:900,
-		audio:"breakfast",
-		image:""
+		audio:"breakfast"
 	},
 	{
 		id:2,
 		text:"Drink Up!",
 		time:420,
-		audio:"milk",
-		image:""
+		audio:"milk"
 	},
 	{
 		id:3,
 		text:"Medicine Time!",
 		time:30,
-		audio:"medicine",
-		image:""
+		audio:"medicine"
 	},
 	{
 		id:4,
 		text:"Get ready for the Day!",
 		time:600,
-		audio:"ready",
-		image:""
+		audio:"ready"
 	},
 	{
 		id:5,
 		text:"Brush Your Teeth!",
 		time:300,
-		audio:"teeth",
-		image:""
+		audio:"teeth"
 	},
 	{
 		id:6,
 		text:"Pajamas Off!",
 		time:120,
-		audio:"unpajamas",
-		image:""
+		audio:"unpajamas"
 	},
 	{
 		id:7,
 		text:"Clothes in hamper!",
 		time:60,
-		audio:"hamper",
-		image:""
+		audio:"hamper"
 	},
 	{
 		id:8,
 		text:"Get ready to GO!",
 		time:500,
-		audio:"readyToGo",
-		image:""
+		audio:"readyToGo"
 	},
 	{
 		id:9,
 		text:"Potty Time",
 		time:300,
-		audio:"potty",
-		image:""
+		audio:"potty"
 	},
 	{
 		id:10,
 		text:"Shoes On!",
 		time:180,
-		audio:"shoes",
-		image:""
+		audio:"shoes"
 	},
 	{
 		id:11,
 		text:"Eat a snack",
 		time:600,
-		audio:"snack",
-		image:""
+		audio:"snack"
 	},
 	{
 		id:12,
 		text:"Drink your water",
 		time:300,
-		audio:"water",
-		image:""
+		audio:"water"
 	},
 	{
 		id:13,
 		text:"Clean Yourself",
 		time:900,
-		audio:"cleanliness",
-		image:""
+		audio:"cleanliness"
 	},
 	{
 		id:14,
 		text:"Clothes Off!",
 		time:120,
-		audio:"undress",
-		image:""
+		audio:"undress"
 	},
 	{
 		id:15,
 		text:"Bath Time!",
 		time:480,
-		audio:"bathe",
-		image:""
+		audio:"bathe"
 	},
 	{
 		id:16,
 		text:"Dry Yourself!",
 		time:180,
-		audio:"dry",
-		image:""
+		audio:"dry"
 	},
 	{
 		id:17,
 		text:"Pajamas On!",
 		time:180,
-		audio:"pjs",
-		image:""
+		audio:"pjs"
 	},
 	{
 		id:18,
 		text:"Pick out clothes!",
 		time:180,
-		audio:"pick",
-		image:""
+		audio:"pick"
 	},
 	{
 		id:19,
 		text:"Bed Time",
 		time:60,
-		audio:"sleep",
-		image:""
+		audio:"sleep"
 	},
 	{
 		id:20,
 		text:"Wake up",
 		time:60,
-		audio:"wake",
-		image:""
+		audio:"wake"
 	},
 	{
 		id:21,
 		text:"Clothes On",
 		time:300,
-		audio:"dress",
-		image:""
+		audio:"dress"
+	},
+	{
+		id:22,
+		text:"Make your bed",
+		time:120,
+		audio:"bed"
 	}
 ];				
