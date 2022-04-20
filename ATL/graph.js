@@ -1,20 +1,11 @@
 "use strict";
+//onclick??
+	//on xy graph which one if they are the same?
+		//all?
+		//first?
+		//cycle through with each click?
+		//modal to select?
 
-//export table to csv button
-//save image button
-
-//graphs
-//For a single Instance:
-/*
-	flame graph
-	waterfall
-	pie chart of leafs
-*/
-//Over time
-/*
-	x-day/y-task time
-	x-day/y-task reminders
-*/
 const instanceGraphs = ['flame', 'waterfall', 'pie'];
 const graphLeafs = ['pie', 'time', 'reminders'];
 
@@ -47,7 +38,7 @@ function showGraphModal(){
 function hideGraphModal(s){
 	graphModal.classList.add('hide');
 	document.getElementById('graphType').value = "Select Graph Type";
-	
+	document.getElementById('chkRoutineTotal').checked = false;
 	graphType = null;
 	selectedRoutine = null;
 	selectedInstance = null;
@@ -55,6 +46,7 @@ function hideGraphModal(s){
 	graphData.DataPoints = [];
 	graphRoutineArea.classList.add('hide');
 	graphInstanceArea.classList.add('hide');
+	document.getElementById('graphTotal').classList.add('hide');
 	document.getElementById('generateGraph').classList.add('hide');
 	document.getElementById("sideGraphData").classList.add('hide');
 	document.getElementById("modalSideArea").classList.remove('hide');
@@ -62,6 +54,7 @@ function hideGraphModal(s){
 	document.getElementById("bottomGraphData").classList.add('hide');
 	document.getElementById('modalContentWrapper').classList.add('fullHeight');
 	document.getElementById('modalContentWrapper').classList.remove('partialHeight');
+	document.getElementById('modalSideArea').style.removeProperty('min-width');
 	
 	if(ctx){
 		ctx.fillStyle = "#FFFFFF";
@@ -71,10 +64,56 @@ function hideGraphModal(s){
 	}
 }
 
+function getSelectText(id){
+	const e = document.getElementById(id);
+	return e.options[e.selectedIndex].text;
+}
+function saveGraphImage(){
+    const graphImage = graph.toDataURL('image/png');
+	const routineName = getSelectText('selectGraphRoutine');
+	const instanceName = selectedInstance?getSelectText('selectGraphInstance'):dateFormat();
+	const name = `ATL_graph_${graphType}_${routineName}_${instanceName}.png`;
 
-function dateFormat(input){
-	const M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-	return `${input.getDate().toString().padStart(2, '0')} ${M[input.getMonth()]} ${input.getFullYear()} - ${input.getHours().toString().padStart(2, '0')}:${input.getMinutes().toString().padStart(2, '0')}`;
+    const dlImage = graphImage.replace("image/png", "image/octet-stream");
+	
+	const dl = document.createElement('a');
+    document.body.appendChild(dl);
+	
+	dl.setAttribute("href", dlImage);
+    dl.target = '_self';
+    dl.download = name;
+
+    document.body.appendChild(dl);
+	dl.click(); 
+    document.body.removeChild(dl);
+}
+function saveGraphTable(){
+    // Adapted from https://stackoverflow.com/a/56370447/425493
+    const rows = document.querySelectorAll('table#graphDataTable tr');
+    const csv = [];
+    for (let i = 0; i < rows.length; i++) {
+        const row = [], cols = rows[i].querySelectorAll('td, th');
+        for (let j = 0; j < cols.length; j++) {
+            const data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ').replace(/"/g, '""');
+            row.push('"' + data + '"');
+        }
+        csv.push(row.join(','));
+    }
+    const csv_string = csv.join('\n');
+
+	const routineName = getSelectText('selectGraphRoutine');
+	const instanceName = selectedInstance?getSelectText('selectGraphInstance'):dateFormat();
+	const name = `ATL_table_${graphType}_${routineName}_${instanceName}.csv`;
+
+	const dl = document.createElement('a');
+
+	dl.target = '_self';
+    dl.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv_string));
+    dl.setAttribute('download', name);
+
+	document.body.appendChild(dl);
+    dl.click();
+    document.body.removeChild(dl);
 }
 
 function selectGraphType(value){
@@ -121,6 +160,7 @@ function selectGraphRoutine(value){
 	const instanceGraph = instanceGraphs.includes(graphType);
 	document.getElementById('generateGraph').classList.toggle('hide', instanceGraph);
 	graphInstanceArea.classList.toggle('hide', !instanceGraph);
+	document.getElementById('graphTotal').classList.toggle('hide', instanceGraph);
 	
 	if(!instanceGraph){ return; }
 	
@@ -247,40 +287,44 @@ function buildTimeData(){
 	const data = Storage.data[selectedRoutine];
 	const filtered = filterRoutineLeafs(data);
 	const keys = Object.keys(filtered);
+	const includeTotal = document.getElementById('chkRoutineTotal').checked;
 	graphData.maxX = keys.length;
-	graphData.maxY = Math.max(...Object.keys(filtered).map(x => Math.max(...filtered[x].map(y => y.completed-y.started))))
 	
+	let maxY = 0;
 	for(let i=0;i<keys.length;i++){
 		const key = keys[i];
 		const temp = filtered[key];
 		const base = temp.find(x => x.id===-1);
 		
 		for(let j=0;j<temp.length;j++){
+			if(!includeTotal && temp[j].id===-1){continue;}
+			maxY = Math.max(maxY, temp[j].completed - temp[j].started);
 			graphData.DataPoints.push(new DataPoint(key, temp[j].id, temp[j].taskNum, temp[j].started-base.started, temp[j].completed-base.started));
 		}
 	}
+	graphData.maxY = maxY;
 }
 function buildRemindersData(){
 	const data = Storage.data[selectedRoutine];
 	const filtered = filterRoutineLeafs(data);
 	const keys = Object.keys(filtered);
+	const includeTotal = document.getElementById('chkRoutineTotal').checked;
 	graphData.maxX = keys.length;
-	graphData.maxY = Math.max(...Object.keys(filtered).map(x => Math.max(...filtered[x].map(y => y.reminders))))
 	
+	let maxY = 0;
 	for(let i=0;i<keys.length;i++){
 		const key = keys[i];
 		const temp = filtered[key];
-		
 		for(let j=0;j<temp.length;j++){
+			if(!includeTotal && temp[j].id===-1){continue;}
+			maxY = Math.max(maxY, temp[j].reminders);
 			graphData.DataPoints.push(new DataPoint(key, temp[j].id, temp[j].taskNum, temp[j].reminders, 0));
 		}
 	}
+	graphData.maxY = maxY;
+
 }
 function buildData(){
-	graphData.minX = 0;
-	graphData.minY = 0;
-	graphData.DataPoints = [];
-	
 	switch(graphType){
 		case "flame":{
 			buildFlameData();
@@ -578,7 +622,7 @@ graphObject.prototype.checkHit = function(x,y){
 
 		return  this.x < x && deltaX < this.w && this.y < y && deltaY < this.h;
 	}
-	if(this.x && this.y && this.r && this.s && this.e){
+	if(this.x && this.y && this.r && this.s!==null && this.e!==null){//s & e could be 0
 		x -= this.x;
 		y -= this.y;
 		
@@ -597,17 +641,26 @@ function graphClick(e){
 	if(obj){
 		//what to do here?
 		console.log(obj);
-		console.log(obj.data.task.text);
+		const a = obj.data.instance?dateFormat(new Date(parseInt(obj.data.instance))):'N/A';
+		const b = obj.data.task?obj.data.task.text:'Routine';
+		const c = 
+		console.log(a,b);
 	}
 }
 
+function getFont(height){
+	let fontSize = Math.min(16,Math.floor(height));
+	
+	return fontSize+"px sans-serif";
+	
+}
 function buildXY(){
 	let stepScale = 5;
 	if(graphType === 'time'){
-		const timeScaleGroups = [200,1000,10*1000,30*1000,60*1000,5*60*1000];
+		const timeScaleGroups = [0,200,5000,60*1000,5*60*1000,60*60*1000];
 		let i=0;
-		while(timeScaleGroups[i]<graphData.maxY && i<timeScaleGroups.length-1){i++;}
-		stepScale = timeScaleGroups[i];
+		while(timeScaleGroups[i]<graphData.maxY && i<timeScaleGroups.length){i++;}
+		stepScale = timeScaleGroups[i-1];
 	}
 	const yStep = Math.max(1,Math.ceil((graphData.maxY-graphData.minY)/stepScale));
 	graphData.maxY = graphData.minY + (yStep * stepScale);
@@ -619,9 +672,17 @@ function buildXY(){
 
 	graphData.DataPoints.sort((a,b) => parseInt(b.instance)-parseInt(a.instance) || a.taskNum.localeCompare(b.taskNum));
 	
-	graphData.yAxis = 75;
+	graphData.yAxis = 50;
 	let xLabel = 0;
-	ctx.font = "16px sans-serif";
+	const rot = Math.PI/8;
+	const cos = Math.cos(rot);
+	const sin = Math.sin(rot);
+
+	const a = h/20 *cos;
+	const b = (w-graphData.yAxis)/(taskNames.length+1) * sin;
+	const fontHeight = Math.min(a,b);
+	console.log(fontHeight);
+	ctx.font = getFont(fontHeight);
 	ctx.fillStyle = "#000000";
 	for(let i=0;i<taskNames.length;i++){
 		const text = taskNames[i];
@@ -629,14 +690,8 @@ function buildXY(){
 		xLabel = Math.max(size, xLabel);
 	}
 	
-	graphData.xScale = (w - graphData.yAxis)/(graphData.maxX - graphData.minX) * .98;
-	graphData.yScale = (h - xLabel)/(graphData.maxY - graphData.minY) * .98;
-
 	//xAxis
 	const xStep = (w - graphData.yAxis - xMargin - xMargin) / (taskNames.length);
-	const rot = Math.PI/8;
-	const cos = Math.cos(rot);
-	const sin = Math.sin(rot);
 	xLabel *= sin;
 	graphData.xAxis = h - xLabel - yMargin - yMargin - (20 * sin);
 
@@ -677,14 +732,18 @@ function buildXY(){
 		const size = ctx.measureText(text).width;
 		const x = graphData.yAxis - size - 5;
 		const y = graphData.xAxis - ySpace*i;
-		ctx.fillText(text, x, y+8);
+		ctx.fillText(text, x, y+Math.min(fontHeight/3,5));
 		
+		ctx.strokeStyle = "#CCCCCC";
 		ctx.beginPath();
 		ctx.moveTo(graphData.yAxis,y);
-		ctx.lineTo(graphData.yAxis+5,y);
+		ctx.lineTo(w,y);
 		ctx.stroke();
 		ctx.closePath();
 	}
+	
+	graphData.xScale = (w - graphData.yAxis)/(graphData.maxX - graphData.minX) * .98;
+	graphData.yScale = (graphData.xAxis)/(graphData.maxY - graphData.minY) * .98;
 
 	return labelPos;
 }
@@ -715,12 +774,12 @@ function buildFlameGraph(){
 		ctx.closePath();
 		ctx.stroke();
 		
-		ctx.font = "16px sans-serif";
+		ctx.font = getFont(x2);
 		ctx.fillStyle = "#000000";
 		const text = datum.task?datum.task.text:datum.taskNum;
 		const size = ctx.measureText(text);
 
-		const tx = x1 + 20;
+		const tx = x1 + Math.min(20,x2-1);
 		const ty = y1 + size.width + 5;
 
 		ctx.save();
@@ -743,7 +802,7 @@ function buildWaterfallGraph(){
 	for(let i=0;i<graphData.DataPoints.length;i++){
 		const datum = graphData.DataPoints[i];
 
-		ctx.font = (graphData.yScale/2) +"px sans-serif";
+		ctx.font = getFont(graphData.yScale);
 		ctx.fillStyle = "#000000";
 		const text = datum.task?datum.task.text:datum.taskNum;
 		const size = ctx.measureText(text);
@@ -770,8 +829,8 @@ function buildWaterfallGraph(){
 		
 		const x1 = (datum.x * graphData.xScale) + xPad;
 		const x2 = (datum.y - datum.x) * graphData.xScale;
-		const y1 = (yScale * i) + yMargin;
-		const y2 = yScale;
+		const y1 = (graphData.yScale * i) + yMargin;
+		const y2 = graphData.yScale;
 		
 		ctx.fillStyle = graphColors[i % graphColors.length];
 		ctx.strokeStyle = "#000000";
@@ -788,7 +847,7 @@ function buildWaterfallGraph(){
 }
 function buildPieGraph(){
 	const center = {x:w/2,y:h/2};
-	const r = Math.min(w,h)/2.2;
+	const r = Math.min(w,h)/2.1;
 	const totalTime = graphData.DataPoints.reduce((n, {x,y}) => n + (y-x), 0);
 	
 	ctx.save();
@@ -812,10 +871,12 @@ function buildPieGraph(){
 		ctx.stroke();
 		ctx.fill();
 		
-		ctx.font = "16px sans-serif";
+		const fontHeight = duration / twoPi * r;
+		ctx.font = getFont(fontHeight);
 		const text = datum.task?datum.task.text:datum.taskNum;
 		const size = ctx.measureText(text);
-		const tx = r-size.width-10;
+		const maxWidth = Math.floor(r*.8);
+		const tx = r-Math.min(size.width, maxWidth)-10;
 		const ty = 0;
 
 		ctx.rotate(duration/2);
@@ -827,7 +888,7 @@ function buildPieGraph(){
 		}
 		ctx.beginPath();
 		ctx.fillStyle = "#000000";
-		ctx.fillText(text, 0, 0);
+		ctx.fillText(text, 0, 0, maxWidth);
 		ctx.closePath();
 		if(textAngle >= halfPi && textAngle <= 3*halfPi){
 			ctx.translate(size.width,0);
@@ -960,7 +1021,49 @@ function buildGraph(){
 	}
 }
 
+let resizerDelay;
+function resize(){
+	clearTimeout(resizerDelay);
+	resizerDelay = setTimeout(calcSize, 20);
+}
+function calcSize(){
+	if(!graph){graph = document.getElementById("Graph");}
+	const r = document.getElementById("graphWrapper").getBoundingClientRect();
+	//graph.getBoundingClientRect();
+	w = r.width;
+	h = r.height;
+
+	graphObjects = [];
+	graph.width = w;
+	graph.height = h;
+
+	ctx = graph.getContext('2d');
+	
+	ctx.fillStyle = "#FFFFFF";
+	ctx.beginPath();
+	ctx.fillRect(0,0,w,h);
+	
+	ctx.strokeStyle = "#000000";
+	ctx.lineWidth = 1;
+	ctx.rect(1,1,w-2,h-2);
+	ctx.stroke();
+	
+	graphData.minX = 0;
+	graphData.minY = 0;
+	graphData.xScale = 0;
+	graphData.yScale = 0;
+	graphData.DataPoints = [];
+	
+	buildData();
+	buildTable();
+	buildGraph();
+}
+
 function analyze(){
+	if(graphType === 'pie'){
+		document.getElementById('modalSideArea').style.minWidth = "225px";
+	}
+
 	const isInstance = instanceGraphs.includes(graphType);
 	document.getElementById('sideGraphData').classList.toggle('hide', !isInstance);
 	document.getElementById('bottomGraphData').classList.toggle('hide', isInstance);
@@ -976,20 +1079,7 @@ function analyze(){
 	document.getElementById('graphOptionWrapper').classList.add('hide');
 	
 	graph = document.getElementById("Graph");
-	const r = graph.getBoundingClientRect();
-	w = r.width;
-	h = r.height;
-
-	graphObjects = [];
-	graph.width = w;
-	graph.height = h;
-	graph.onmousedown = graphClick;
-
-	ctx = graph.getContext('2d');
-	
-	buildData();
-	buildTable();
-	buildGraph();
+	calcSize();
 }
 
 //redo build non-instance tables to have instances be the column headers?

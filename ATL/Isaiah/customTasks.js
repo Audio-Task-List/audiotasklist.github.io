@@ -12,6 +12,7 @@ const routines = [
 		autoAdvanceDone:true,
 		audioEncouragement:'awesome',
 		timeExpiredAudio:'timer',
+		reminderLimit:2,
 		tasks:[
 			{id:20},
 			{
@@ -51,6 +52,7 @@ const routines = [
 		autoAdvanceDone:true,
 		audioEncouragement:'awesome',
 		timeExpiredAudio:'timer',
+		reminderLimit:2,
 		tasks:[
 			{id:11},
 			{id:12}
@@ -67,6 +69,7 @@ const routines = [
 		taskAudioPrefix:'Isaiah',
 		audioEncouragement:'awesome',
 		timeExpiredAudio:'timer',
+		reminderLimit:2,
 		tasks:[
 			{id:3},
 			{id:2},

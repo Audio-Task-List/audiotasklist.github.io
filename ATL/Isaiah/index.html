@@ -14,7 +14,16 @@
 			.notAllowed{}
 		</style>
 	</head>
-	<body class="contentWrapper">
+	<body class="contentWrapper" onresize="resize()">
+		<div id="routineArea" class="routineArea routineAreaExpanded">
+			<button id="closeRoutines" class="closeRoutines" onclick="hideRoutines()">«</button>
+			<br/>
+			<h1>Routines</h1>
+			<div id="inProgress" class="hide">
+				<button class="inProgress" onclick="restoreInProgress()">Restore Routine In Progress</button>
+				<hr/>
+			</div>
+		</div>
 		<div id="rightMenu" class="rightMenu">
 			<button id="closeRightMenu" class="closeMenu" onclick="hideRightMenu()">X</button>
 			<p>
@@ -90,11 +99,6 @@
 			</p>
 
 		</div>
-		<div id="routineArea" class="routineArea routineAreaExpanded">
-			<button id="closeRoutines" class="closeRoutines" onclick="hideRoutines()">«</button>
-			<br/>
-			<h1>Routines</h1>
-		</div>
 		<button id="toggleRoutines" class="toggleRoutines" onclick="showRoutines()">»</button>
 		<button id="rightMenuBtn" class="menuBtn" onclick="showRightMenu()">≡</button>
 		<div id="graphModalWrapper" class="graphModalWrapper hide">
@@ -122,12 +126,20 @@
 									<label for="selectGraphInstance">Instance</label>
 									<select id="selectGraphInstance" class="graphOption" onchange="selectGraphRoutineInstance(this.value)"></select>
 								</div>
+								<div id="graphTotal" class="graphOptionWrapper hide">
+									<label for="chkRoutineTotal" title="If checked the routine total will also be graphed">Graph Totals</label>
+								<input type="checkbox" id="chkRoutineTotal" class="graphOption" title="If checked the routine total will also be graphed"></select>
+								</div>
 								<div id="generateGraph" class="hide">
 									<button class="graphButton" onclick="analyze()">Generate Graph</button>
 								</div>
 							</div>
 							<div id="sideGraphData" class="graphData hide">
 								<div id="dataWrapper">
+									<div>
+										<button id="dlGraph" onclick="saveGraphImage()">Save Graph</button>
+										<button id="dlTable" onclick="saveGraphTable()">Save Table</button>
+									</div>
 									<table id="graphDataTable" class="graphDataTable">
 										<thead id="tableHead" class="tableHead"></thead>
 										<tbody id="tableBody" class="tableBody"></tbody>
@@ -137,10 +149,14 @@
 							</div>
 						</div>
 						<div id="graphWrapper" class="graphWrapper">
-							<canvas id="Graph" class="graph"><h1>Graph</h1></canvas>
+							<canvas id="Graph" class="graph" onclick="graphClick(event)"><h1>Graph</h1></canvas>
 						</div>
 					</div>
 					<div id="bottomGraphData" class="bottomGraphData hide">
+						<div style="float:right;">
+							<button id="dlGraphBottom" onclick="saveGraphImage()">Save Graph</button>
+							<button id="dlTableBottom" onclick="saveGraphTable()">Save Table</button>
+						</div>
 					</div>
 				</div>
 			</div>
