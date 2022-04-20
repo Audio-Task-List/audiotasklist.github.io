@@ -144,6 +144,7 @@ var routines = [
 		theme:'dark',
 		name:'Enforce Order',
 		enforceChildrenOrder:true,
+		reminderLimit:2,
 		tasks:[
 			{id:25},
 			{id:25},

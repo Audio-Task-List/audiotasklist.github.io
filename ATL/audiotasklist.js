@@ -64,7 +64,7 @@ function sortCompletedData(){
 		const remindersCell = newRow.insertCell();
 		
 		newRow.title = `Allocated: ${formatTime(rowData.allocated)}`;
-		if((rowData.completed - rowData.started) > rowData.allocated){
+		if((rowData.completed - rowData.started) > (rowData.allocated+500) || rowData.reminders > currentRoutine.reminderLimit){
 			newRow.style.color = "#F22";
 		}
 		
@@ -91,7 +91,7 @@ function addTableRow(rowData){
 	durationCell.style.textAlign = "center";
 	
 	newRow.title = `Allocated: ${formatTime(rowData.allocated)}`;
-	if((rowData.completed - rowData.started) > (rowData.allocated+500)){//allow a bit of slop tollerance
+	if((rowData.completed - rowData.started) > (rowData.allocated+500) || rowData.reminders > currentRoutine.reminderLimit){
 		newRow.style.color = "#F22";
 	}
 	
@@ -229,9 +229,6 @@ function toggleCSSFile(input) {
 	}
 }
 
-function themeChange(){
-	//TODO: setTheme(whatever was selected)
-}
 function loopChange(){
 	loopAudio = document.getElementById("chkLoop").checked;
 	if(loopAudio && currentTask){
@@ -372,6 +369,11 @@ function autoAdvance(){
 	}
 }
 
+function dateFormat(input){
+	if(!input){input = new Date();}
+	const M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	return `${input.getDate().toString().padStart(2, '0')} ${M[input.getMonth()]} ${input.getFullYear()} - ${input.getHours().toString().padStart(2, '0')}:${input.getMinutes().toString().padStart(2, '0')}`;
+}
 function formatTime(totalMilliseconds, showCentiseconds=false) {
 	const minutes = parseInt(totalMilliseconds / 60000, 10).toString().padStart(2, '0');
 	const seconds = parseInt((totalMilliseconds % 60000) / 1000, 10).toString().padStart(2, '0');
@@ -489,7 +491,11 @@ function remind(){
 	if(!currentTask){return;}
 	currentTask.reminders++;
 	currentReminds.textContent = currentTask.reminders;
-	currentTask.playAudio();
+	
+	//play current reminders audio
+	const reminder = new Audio(`..\\audio\\${Math.min(currentTask.reminders,4)}reminder.mp3`);
+	reminder.addEventListener('ended', () => currentTask.playAudio());
+	reminder.play();
 }
 
 function audioPrefixEnded(){
@@ -566,7 +572,7 @@ function getNextUncompletedTask(task){
 	if(task.parent){return getNextUncompletedTask(task.parent);}
 }
 
-function routine(id, name, icon, audio, taskAudioPrefix, taskAudioSuffix, audioEncouragement, timeExpiredAudio, theme, loopAudio, loopDelay, autoAdvanceTimer, autoAdvanceDone, enforceChildrenOrder, hideCompletedTasks, tasks){
+function routine(id, name, icon, audio, taskAudioPrefix, taskAudioSuffix, audioEncouragement, timeExpiredAudio, reminderLimit, theme, loopAudio, loopDelay, autoAdvanceTimer, autoAdvanceDone, enforceChildrenOrder, hideCompletedTasks, tasks){
 	this.id = id;
 	this.name = name;
 	if(icon){this.icon = `url('./icons/${icon}')`;}
@@ -590,6 +596,8 @@ function routine(id, name, icon, audio, taskAudioPrefix, taskAudioSuffix, audioE
 		this.timeExpiredAudio = new Audio(`.\\audio\\${timeExpiredAudio}.mp3`);
 		this.timeExpiredAudio.addEventListener('error', () => audioError(this.id));
 	}
+	
+	this.reminderLimit = reminderLimit;
 	
 	this.theme = theme;
 	this.loopAudio = loopAudio || false;
@@ -622,7 +630,12 @@ function routine(id, name, icon, audio, taskAudioPrefix, taskAudioSuffix, audioE
 }
 routine.prototype.playAudio = function(){
 	if(this.audio){
+		try{
 		this.audio.play();
+		}
+		catch(error){
+			//expected on page load/restore in progress.
+			}
 	}
 }
 routine.prototype.select = function(){
@@ -855,7 +868,12 @@ task.prototype.complete = function(){
 		Storage.saveCurrent();
 		
 		currentRoutine = null;
+		localStorage.removeItem('InProgress');
 		return;
+	}
+	else{
+		const saveData = {routine:currentRoutine.id ,tasks:buildCurrentSave()};
+		localStorage.setItem('InProgress', JSON.stringify(saveData));
 	}
 	completedArea.classList.remove('hide');
 	previousTask = currentTask || previousTask;
@@ -1019,6 +1037,51 @@ function loadSave(input){
 	return output;
 }
 
+function findTaskByNum(parent, taskNum){
+	if(parent.btn.id===taskNum){return parent;}
+	for(let i=0;i<parent.children.length;i++){
+		const temp = findTaskByNum(parent.children[i], taskNum);
+		if(temp !== null){return temp;}
+	}
+	return null;
+}
+function restoreInProgress(){
+	const temp = JSON.parse(localStorage.getItem('InProgress'));
+	if(temp === null){return;}
+	availableRoutines.find(x => x.id === temp.routine).select();
+	
+	const data = loadSave(temp.tasks);
+	console.log(data);
+	for(let i=0;i<data.length;i++){
+		const datum = data[i];
+		const task = tasks.find(x => x.id===datum.id);
+		
+		const taskNum = `alpha_${datum.taskNum.replaceAll('.','_')}`;
+		const routineTask = findTaskByNum(alpha, taskNum);
+		
+		routineTask.started = datum.started;
+		routineTask.completed = datum.completed;
+		routineTask.reminders = datum.reminders;
+		routineTask.btn.classList.add('completed');
+		routineTask.btn.classList.remove('unstarted');
+		
+		//add to completed table
+		const newRow = {
+			id: datum.id,
+			taskNum: datum.taskNum,
+			name: task.text,
+			started: datum.started,
+			completed: datum.completed,
+			duration: formatTime(datum.completed - datum.started),
+			allocated: task.time*1000,
+			reminders:datum.reminders
+		};
+		addTableRow(newRow);
+	}
+	completedArea.classList.remove('hide');
+	document.getElementById('inProgress').classList.add('hide');
+}
+
 function exportClick(){
 	Storage.export64();
 }
@@ -1096,16 +1159,17 @@ storage.prototype.saveCurrent = function(){
 storage.prototype.export64 = function(){
 	const str = localStorage.getItem('ATL');
 	const temp = btoa(encodeURIComponent(str));
-	const d = new Date();
-	const name = `ATL_export_${d.getUTCFullYear()}_${d.getMonth()}_${d.getDate()}.txt`;
+	const name = `ATL_export_${dateFormat()}.txt`;
 	
     const dl = document.createElement('a');
     document.body.appendChild(dl);
 	
-    dl.href = `data:application/pdf;base64,${temp}`;
+    dl.href = `data:text/plain;charset=utf-8,${temp}`;
     dl.target = '_self';
     dl.download = name;
     dl.click(); 
+	
+	dl.remove();
 }
 storage.prototype.import64 = function(file){
 	
@@ -1147,7 +1211,7 @@ function init(){
 	for(let index in routines){
 		const r = routines[index];
 		availableRoutines.push(new routine(r.id, r.name, r.icon,
-			r.audio, r.taskAudioPrefix, r.taskAudioSuffix, r.audioEncouragement, r.timeExpiredAudio,
+			r.audio, r.taskAudioPrefix, r.taskAudioSuffix, r.audioEncouragement, r.timeExpiredAudio, r.reminderLimit,
 		r.theme, r.loopAudio, r.loopDelay, r.autoAdvanceTimer, r.autoAdvanceDone, r.enforceChildrenOrder, r.hideCompletedTasks, r.tasks));
 	}
 	
@@ -1159,8 +1223,9 @@ function init(){
 		routineArea.appendChild(r.btn);
 	}
 	
-	//document.getElementById('import').addEventListener('change', getFile)
-	
+	if(localStorage.getItem('InProgress') !== null){
+		document.getElementById('inProgress').classList.remove('hide');
+	}
 }
 
 window.onbeforeunload = function(){
@@ -1168,15 +1233,6 @@ window.onbeforeunload = function(){
 		return 'You are in a routine. Do you want to exit?';
 	}
 };
-//this is your x reminder audio
-//get more stern as numbers increase
-
-//build custom task/routine and export?
-//Import routine from file?
-
-
-//routine reminder limit? - set row red if over limit
-
 
 //Update demo routines
 //default
