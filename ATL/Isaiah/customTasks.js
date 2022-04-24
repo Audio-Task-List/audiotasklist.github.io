@@ -14,32 +14,21 @@ const routines = [
 		timeExpiredAudio:'timer',
 		reminderLimit:2,
 		tasks:[
-			{id:20},
-			{
-				id:0,
-				tasks:[
-					{id:1},
-					{id:2},
-					{id:3},
-					{id:22}
-				]
-			},
-			{
-				id:4,
-				tasks:[
-					{id:5},
-					{id:6},
-					{id:21},
-					{id:7}
-				]
-			},
-			{
-				id:8,
-				tasks:[
-					{id:9},
-					{id:10}
-				]
-			}
+			{id:0},
+			{id:1},
+			{id:2},
+			{id:3},			
+			{id:23},
+			{id:22},
+			{id:5},
+			{id:6},
+			{id:21},
+			{id:24},
+			{id:7},
+			{id:9},
+			{id:25},
+			{id:10},
+			{id:26}
 		]
 	},
 	{
@@ -73,19 +62,16 @@ const routines = [
 		tasks:[
 			{id:3},
 			{id:2},
-			{
-				id:13,
-				tasks:[
-					{id:14},
-					{id:15},
-					{id:16},
-					{id:17},
-					{id:5},
-					{id:7}
-				]
-			},
+			{id:23},
+			{id:14},
+			{id:15},
+			{id:16},
+			{id:17},
+			{id:5},
+			{id:7},
 			{id:18},
-			{id:19}
+			{id:19},
+			{id:26}
 		]
 	}
 ];
@@ -93,67 +79,67 @@ const routines = [
 const tasks = [
 	{
 		id:0,
-		text:"Breakfast Time",
-		time:2000,
-		audio:"downstairs"
+		text:"Travel time",
+		time:120,
+		audio:"eatingTime"
 	},
 	{
 		id:1,
-		text:"Eat Up!",
+		text:"Eat up",
 		time:900,
 		audio:"breakfast"
 	},
 	{
 		id:2,
-		text:"Drink Up!",
+		text:"Drink up",
 		time:420,
 		audio:"milk"
 	},
 	{
 		id:3,
-		text:"Medicine Time!",
+		text:"Medicine time",
 		time:30,
 		audio:"medicine"
 	},
 	{
 		id:4,
-		text:"Get ready for the Day!",
+		text:"Get ready for the day",
 		time:600,
 		audio:"ready"
 	},
 	{
 		id:5,
-		text:"Brush Your Teeth!",
-		time:300,
+		text:"Brush your teeth",
+		time:180,
 		audio:"teeth"
 	},
 	{
 		id:6,
-		text:"Pajamas Off!",
-		time:120,
+		text:"Pajamas off",
+		time:180,
 		audio:"unpajamas"
 	},
 	{
 		id:7,
-		text:"Clothes in hamper!",
+		text:"Clothes in hamper",
 		time:60,
 		audio:"hamper"
 	},
 	{
 		id:8,
-		text:"Get ready to GO!",
+		text:"Get ready to GO",
 		time:500,
 		audio:"readyToGo"
 	},
 	{
 		id:9,
-		text:"Potty Time",
+		text:"Potty time",
 		time:300,
 		audio:"potty"
 	},
 	{
 		id:10,
-		text:"Shoes On!",
+		text:"Shoes on",
 		time:180,
 		audio:"shoes"
 	},
@@ -171,43 +157,43 @@ const tasks = [
 	},
 	{
 		id:13,
-		text:"Clean Yourself",
+		text:"Clean yourself",
 		time:900,
 		audio:"cleanliness"
 	},
 	{
 		id:14,
-		text:"Clothes Off!",
-		time:120,
+		text:"Clothes off",
+		time:240,
 		audio:"undress"
 	},
 	{
 		id:15,
-		text:"Bath Time!",
+		text:"Wash time",
 		time:480,
 		audio:"bathe"
 	},
 	{
 		id:16,
-		text:"Dry Yourself!",
+		text:"Dry yourself",
 		time:180,
 		audio:"dry"
 	},
 	{
 		id:17,
-		text:"Pajamas On!",
-		time:180,
+		text:"Pajamas on",
+		time:240,
 		audio:"pjs"
 	},
 	{
 		id:18,
-		text:"Pick out clothes!",
+		text:"Pick out clothes",
 		time:180,
 		audio:"pick"
 	},
 	{
 		id:19,
-		text:"Bed Time",
+		text:"Bed time",
 		time:60,
 		audio:"sleep"
 	},
@@ -219,7 +205,7 @@ const tasks = [
 	},
 	{
 		id:21,
-		text:"Clothes On",
+		text:"Clothes on",
 		time:300,
 		audio:"dress"
 	},
@@ -228,5 +214,29 @@ const tasks = [
 		text:"Make your bed",
 		time:120,
 		audio:"bed"
+	},
+	{
+		id:23,
+		text:"Travel time",
+		time:60,
+		audio:"upstairs"
+	},
+	{
+		id:24,
+		text:"Throw away insert",
+		time:120,
+		audio:"throwAwayInsert"
+	},
+	{
+		id:25,
+		text:"Travel time",
+		time:60,
+		audio:"downstairs"
+	},
+	{
+		id:26,
+		text:"Collect reward",
+		time:30,
+		audio:"collect"
 	}
 ];				
