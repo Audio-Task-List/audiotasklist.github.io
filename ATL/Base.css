@@ -5,6 +5,10 @@ body {
 	overflow-y:auto;
 }
 
+select {
+	width:150px;
+}
+
 .contentWrapper{
 	display:flex;
 	flex-wrap:wrap;
@@ -19,6 +23,7 @@ body {
 .completedArea{
 	display:block;
 	padding-left:50px;
+	padding-top:50px;
 }
 
 .rightMenu {
@@ -187,6 +192,16 @@ body {
 	height:64px;
 }
 
+.undoArea{
+	position:absolute;
+	top:64px;
+	right:25px;
+	width: 175px;
+}
+.undoButton{
+	font-size:24pt;
+}
+
 .floatyButtons{
 	position: absolute;
 	display:flex;
@@ -287,6 +302,15 @@ body {
 	background-color: #FFF;
 }
 
+.resetButton{
+	cursor:pointer;
+	float:right;
+	font-size: 18pt;
+	border:none;
+	background-color: #FFF;
+	margin-right:30px;
+}
+
 .graphOptions{
 	min-width:300px;
 	height:100%;
@@ -296,6 +320,11 @@ body {
 
 .graphOptionWrapper{
 	margin: 10px 0px;
+}
+
+.graphLabel{
+	width:100px;
+	text-align:right;
 }
 
 .graphOptionWrapper > label{

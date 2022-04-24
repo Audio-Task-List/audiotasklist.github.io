@@ -104,12 +104,13 @@
 		<div id="graphModalWrapper" class="graphModalWrapper hide">
 			<div id="graphModal" class="graphModal">
 				<button id="closeGraphModal" class="closeMenuButton" onclick="hideGraphModal()">X</button>
+				<button id="resetGraph" class="resetButton hide" onclick="resetGraphOptions()">Reset</button>
 				<h3>Graphing & Analysis Tools</h3>
 				<div  class="modalContent">
 					<div id="modalContentWrapper" class="modalContentWrapper fullHeight">
 						<div id="modalSideArea" class="graphOptions">
 							<div id="graphOptionWrapper" class="graphOptionWrapper">
-								<label for="graphType">Graph Type</label>
+								<label for="graphType" class="graphLabel">Graph Type</label>
 								<select id="graphType" class="graphOption" onchange="selectGraphType(this.value)">
 									<option selected disabled hidden>Select Graph Type</option>
 									<option value="flame">Flame Graph</option>
@@ -119,16 +120,26 @@
 									<option value="reminders">Reminder Count</option>
 								</select>
 								<div id="graphRoutine" class="graphOptionWrapper hide">
-									<label for="selectGraphRoutine">Routine</label>
-									<select id="selectGraphRoutine" class="graphOption" onchange="selectGraphRoutine(this.value)"></select>
+									<label for="selectGraphRoutine" class="graphLabel">Routine</label>
+									<select id="selectGraphRoutine" class="graphOption" onchange="onSelectGraphRoutine(this.value)"></select>
 								</div>
 								<div id="graphInstance" class="graphOptionWrapper hide">
-									<label for="selectGraphInstance">Instance</label>
-									<select id="selectGraphInstance" class="graphOption" onchange="selectGraphRoutineInstance(this.value)"></select>
+									<label for="ddlYearMonth" class="graphLabel">Year-Month</label>
+									<select id="ddlYearMonth" onchange="getMonthInstances(this, event)"></select>
+									<div id="selectGraphInstance" class="graphOptionWrapper hide">
+										<label for="ddlGraphInstance" class="graphLabel">Instance</label>
+										<select id="ddlGraphInstance" class="graphOption" onchange="selectGraphRoutineInstance(this.value)"></select>
+									</div>
 								</div>
 								<div id="graphTotal" class="graphOptionWrapper hide">
-									<label for="chkRoutineTotal" title="If checked the routine total will also be graphed">Graph Totals</label>
-								<input type="checkbox" id="chkRoutineTotal" class="graphOption" title="If checked the routine total will also be graphed"></select>
+									<p>
+										<label for="chkRoutineTotal" class="graphLabel" title="If checked the routine total will also be graphed">Graph Totals</label>
+										<input type="checkbox" id="chkRoutineTotal" title="If checked the routine total will also be graphed"></select>
+									</p>
+									<p>
+										<input id="dateFrom" type="date"></input>-
+										<input id="dateTo" type="date"></input>
+									</p>
 								</div>
 								<div id="generateGraph" class="hide">
 									<button class="graphButton" onclick="analyze()">Generate Graph</button>
@@ -183,6 +194,9 @@
 					</tbody>
 				</table>
 			</div>
+		</div>
+		<div id="undoArea" class="undoArea hide">
+			<button id="undoButton" class="undoButton" onclick="undoLastComplete()">Undo Last Complete</button>
 		</div>
 		<div id="floatyButtons" class="floatyButtons hide">
 			<button id="btnDone" class="btnDone" onclick="clickDone()">✓</button>

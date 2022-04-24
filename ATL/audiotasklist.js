@@ -1,4 +1,17 @@
 "use strict";
+//on import success; indicate done; remove filename from input
+
+//Update demo routines
+//default
+//Loop Audio
+//next task when complete: just new audio files
+//hide completed
+//audio previxes
+//audio suffixes
+//task completion audio
+//time expired audio
+
+//demo icons
 
 let availableRoutines = [];
 let routineArea = null;
@@ -6,6 +19,7 @@ let rightMenu = null;
 let completedArea = null;
 let completedTable = null;
 let timerArea = null;
+let undoArea = null;
 let routineName = null;
 let taskArea = null;
 let floatyButtons = null;
@@ -19,7 +33,7 @@ let routineCompleted = 0;
 
 let currentRoutine = null;
 let currentTask = null;
-let previousTask = null;
+let lastCompletedTask = null;
 
 let loopTimeout = null;
 let timerInterval = null;
@@ -34,6 +48,7 @@ let autoAdvanceTimer = false;
 let autoAdvanceDone = false;
 let enforceChildrenOrder = false;
 let hideCompletedTasks = false;
+let isEncouraging = false;
 
 let completedData = [];
 let sortCol = 'taskNum';
@@ -52,26 +67,11 @@ function sortData(a, b){
 }
 function sortCompletedData(){
 	completedTable.replaceChildren();
-	completedData = completedData.sort((a,b) => sortData(a, b));
+	const tempData = [...completedData];
+	completedData = [];
 	
-	for(let i=0;i<completedData.length;i++){
-		const rowData = completedData[i];
-		const newRow = completedTable.insertRow();
-		
-		const numCell = newRow.insertCell();
-		const nameCell = newRow.insertCell();
-		const durationCell = newRow.insertCell();
-		const remindersCell = newRow.insertCell();
-		
-		newRow.title = `Allocated: ${formatTime(rowData.allocated)}`;
-		if((rowData.completed - rowData.started) > (rowData.allocated+500) || rowData.reminders > currentRoutine.reminderLimit){
-			newRow.style.color = "#F22";
-		}
-		
-		numCell.textContent = rowData.taskNum;
-		nameCell.textContent = rowData.name;
-		durationCell.textContent = rowData.duration;
-		remindersCell.textContent = rowData.reminders;
+	for(let i=0;i<tempData.length;i++){
+		addTableRow(tempData[i])
 	}
 }
 function addTableRow(rowData){
@@ -90,8 +90,12 @@ function addTableRow(rowData){
 	
 	durationCell.style.textAlign = "center";
 	
-	newRow.title = `Allocated: ${formatTime(rowData.allocated)}`;
-	if((rowData.completed - rowData.started) > (rowData.allocated+500) || rowData.reminders > currentRoutine.reminderLimit){
+	const a = rowData.allocated?`Allocated: ${formatTime(rowData.allocated)}`:'';
+	const c = currentRoutine.reminderLimit?`Reminder Limit: ${currentRoutine.reminderLimit}`:'';
+	const b = a&&c?'\n':'';
+	newRow.title = `${a}${b}${c}`;
+	if((rowData.allocated && (rowData.completed - rowData.started) > (rowData.allocated+500)) || 
+		(currentRoutine.reminderLimit && rowData.reminders > currentRoutine.reminderLimit)){
 		newRow.style.color = "#F22";
 	}
 	
@@ -248,7 +252,7 @@ function autoTimerAdvanceChange(){
 	if(currentTime){return;}//don't advance until time runs out
 	
 	alpha.collapseDescendants();
-	const next = getNextUncompletedTask(previousTask);
+	const next = getNextUncompletedTask(lastCompletedTask);
 	if(next){
 		next.expandWrapper();
 		next.select();
@@ -262,7 +266,7 @@ function autoDoneAdvanceChange(){
 	if(currentTask){return;}//don't advance until done is clicked
 	
 	alpha.collapseDescendants();
-	const next = getNextUncompletedTask(previousTask);
+	const next = getNextUncompletedTask(lastCompletedTask);
 	if(next){
 		next.expandWrapper();
 		next.select();
@@ -272,7 +276,7 @@ function autoDoneAdvanceChange(){
 function enforceOrderChange(){
 	enforceChildrenOrder = document.getElementById("chkOrder").checked;
 	
-	const next = getNextUncompletedTask(previousTask);
+	const next = getNextUncompletedTask(lastCompletedTask);
 	if(next){
 		updateNotAllowedOnChkChange(alpha, next, enforceChildrenOrder);
 		
@@ -362,7 +366,7 @@ function taskClick(task) {
 function autoAdvance(){
 	if((!autoAdvanceTimer && ! autoAdvanceDone) 
 	|| currentRoutine.audioEncouragement){return;}
-	const next = getNextUncompletedTask(previousTask);
+	const next = getNextUncompletedTask(lastCompletedTask);
 	if(next){
 		next.select();
 		next.expandWrapper();
@@ -431,6 +435,42 @@ function resetTimer(){
 	stopTimer();
 }
 
+function undoLastComplete(){
+	if(!lastCompletedTask || !lastCompletedTask.completed){return;}
+	
+	if(currentTask){
+		currentTask.started = 0; 
+		currentTask.btn.classList.remove('current');
+		currentTask.btn.classList.add('unstarted');
+		currentTask.collapseDescendants();
+	}
+
+	const temp = lastCompletedTask.taskNum();
+	completedData = completedData.filter(x => x.taskNum !== temp);
+	sortCompletedData();
+
+	lastCompletedTask.completed=0; 
+	lastCompletedTask.btn.classList.remove('completed');
+	lastCompletedTask.btn.classList.remove('hide');
+	
+	let p = lastCompletedTask.parent;
+	while(p && p.completed > 0){
+		p.completed=0; 
+		p.btn.classList.remove('completed');
+		p.btn.classList.add('current');
+		p.expandWrapper();
+		
+		p = p.parent;
+	}
+	
+	resetUncompleted();
+	lastCompletedTask.expandWrapper();
+	lastCompletedTask.select();
+	
+	currentTime = currentTask.time - (Date.now() - currentTask.started);
+	lastCompletedTask = null;
+	undoArea.classList.add('hide');
+}
 function clickDone(){
 	const task = currentTask;
 	completeCurrentTask();
@@ -458,7 +498,8 @@ function placeFloatButtons(){
 	
 	//center floaty on button if some theme has phat borders
 	const heightOffset = (alpha.children[0].btn.getBoundingClientRect().height - 90)/2;
-	const top = r.top + offset + heightOffset;
+	const min = (lastCompletedTask && (r.right + 600) > W) ? 150 : 0;
+	const top = Math.max(r.top + offset + heightOffset, min);
 	const left = r.right + 10;
 	
 	if(left + 390 < W){
@@ -506,7 +547,7 @@ function audioPrefixEnded(){
 function audioEnded() {
 	if(currentRoutine.playTaskAudioSuffix()){return;}
 	if(loopAudio && currentTask){
-		loopTimeout = setTimeout(() => currentTask.playAudio(), loopDelay); 
+		loopTimeout = setTimeout(() => {if(currentTask){currentTask.playAudio()}}, loopDelay); 
 	}
 }
 function audioSuffixEnded(){
@@ -516,7 +557,8 @@ function audioSuffixEnded(){
 }
 function audioEncouragementEnded(){
 	if(!autoAdvanceTimer && ! autoAdvanceDone){return;}
-	const next = getNextUncompletedTask(previousTask);
+	isEncouraging = false;
+	const next = getNextUncompletedTask(lastCompletedTask);
 	if(next){
 		next.select();
 		next.expandWrapper();
@@ -707,6 +749,7 @@ routine.prototype.playTaskAudioSuffix = function(){
 }
 routine.prototype.playEncouragement = function(){
 	if(this.audioEncouragement){
+		isEncouraging = true;
 		this.audioEncouragement.play();
 		return true;
 	}
@@ -774,10 +817,10 @@ task.prototype.playAudio = function(){
 	}
 }
 task.prototype.buildID = function(){
-	let output = this.id;
+	let output = this.id.toString().padStart(2,'0');
 	let p = this.parent;
 	while(p != null && p.id !== "taskArea"){
-		output = `${p.id}_${output}`;
+		output = `${p.id.toString().padStart(2,'0')}_${output}`;
 		p = p.parent;
 	}
 	return output;
@@ -789,11 +832,11 @@ task.prototype.siblings = function(){
 }
 task.prototype.select = function(){
 	//if completed do nothing
-	if(includesClass(this.btn, 'completed')){return;}
+	if(includesClass(this.btn, 'completed') || isEncouraging){return;}
 	
 	floatyButtons.classList.add('hide');
-	previousTask = currentTask || previousTask;
 	currentTask = null;
+	undoArea.classList.toggle('hide', !lastCompletedTask)
 	
 	//if sibling has child tasks and none are completed collapse 
 	const siblings = this.siblings();
@@ -811,7 +854,6 @@ task.prototype.select = function(){
 		const div = document.getElementById(`${this.btn.id}D`);
 		if(div){
 			updateHeight(div, this);
-			//TODO: play subtask audio
 		}
 		this.expandWrapper();
 	}
@@ -826,6 +868,9 @@ task.prototype.select = function(){
 	updateTimer();
 	if(!currentRoutine.playTaskAudioPrefix()){this.playAudio();}
 }
+task.prototype.taskNum = function(){
+	return this.btn.id.replace("alpha_","").replaceAll("_",".").replace("alpha", "Routine");
+}
 task.prototype.complete = function(){
 	//if children not done is not done.
 	if(this.children.some(x => x.completed===0)){ return; }
@@ -834,6 +879,7 @@ task.prototype.complete = function(){
 	this.completed = Date.now();
 	this.btn.classList.remove('current');
 	this.btn.classList.add('completed');
+	lastCompletedTask = this;
 	
 	if(hideCompletedTasks)
 	{
@@ -846,7 +892,7 @@ task.prototype.complete = function(){
 		div.style.removeProperty('max-height');
 	}
 	
-	const taskNum = this.btn.id.replace("alpha_","").replaceAll("_",".").replace("alpha", "Routine");
+	const taskNum = this.taskNum();
 	
 	const newRow = {
 		id: this.taskID,
@@ -876,15 +922,17 @@ task.prototype.complete = function(){
 		localStorage.setItem('InProgress', JSON.stringify(saveData));
 	}
 	completedArea.classList.remove('hide');
-	previousTask = currentTask || previousTask;
 	currentTask = null;
+	undoArea.classList.toggle('hide', !lastCompletedTask )
 	stopTimer();
 	resetTimer();
 	
 	//check parent
 	this.parent.complete();
 	
-	currentRoutine.playEncouragement();
+	if(currentRoutine){
+		currentRoutine.playEncouragement();
+	}
 }
 task.prototype.getNextUncompletedDescendant = function(){
 	if(this.completed === 0 && this.children.length === 0){
@@ -903,7 +951,6 @@ task.prototype.setCurrent = function(){
 	
 	if(!currentTask){
 		currentTask = this;
-		//TODO: set image
 	}
 	
 	this.started = this.started || Date.now();
@@ -1048,7 +1095,8 @@ function findTaskByNum(parent, taskNum){
 function restoreInProgress(){
 	const temp = JSON.parse(localStorage.getItem('InProgress'));
 	if(temp === null){return;}
-	availableRoutines.find(x => x.id === temp.routine).select();
+	const inProgress = availableRoutines.find(x => x.id === temp.routine);
+	if(inProgress){inProgress.select();}
 	
 	const data = loadSave(temp.tasks);
 	console.log(data);
@@ -1058,6 +1106,7 @@ function restoreInProgress(){
 		
 		const taskNum = `alpha_${datum.taskNum.replaceAll('.','_')}`;
 		const routineTask = findTaskByNum(alpha, taskNum);
+		if(!routineTask){continue;}
 		
 		routineTask.started = datum.started;
 		routineTask.completed = datum.completed;
@@ -1197,6 +1246,7 @@ function init(){
 	startStopTimer = document.getElementById("startStop");
 	timerDisplay = document.getElementById("timerDisplay");
 	timerArea = document.getElementById("timer");
+	undoArea = document.getElementById("undoArea");
 	routineArea = document.getElementById("routineArea");
 	rightMenu = document.getElementById("rightMenu");
 	taskArea = document.getElementById("taskArea");
@@ -1233,18 +1283,4 @@ window.onbeforeunload = function(){
 		return 'You are in a routine. Do you want to exit?';
 	}
 };
-
-//Update demo routines
-//default
-//Loop Audio
-//next task when complete: just new audio files
-//hide completed
-//audio previxes
-//audio suffixes
-//task completion audio
-//time expired audio
-
-//demo icons
-
-//themes
 

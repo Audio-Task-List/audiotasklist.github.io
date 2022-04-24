@@ -1,27 +1,31 @@
 "use strict";
-//onclick??
-	//on xy graph which one if they are the same?
-		//all?
-		//first?
-		//cycle through with each click?
-		//modal to select?
+//for non-instance select subgroup of all data
+	//date pickers
+
+//graph.onclick??
+	//show values for selected 
+	//highlight data table
+	//modal/info details
+	//nothing?
+	
+//have a pivot table on non-instance graphs?
+
 
 const instanceGraphs = ['flame', 'waterfall', 'pie'];
-const graphLeafs = ['pie', 'time', 'reminders'];
+const twoPi = Math.PI*2;
+const halfPi = Math.PI/2;
+const rootThreeOverTwo = (3**.5)/2;
 
+let instanceGroups = {};
 let graphObjects = [];
 let graph = null;
 let ctx = null;
-let graphRoutineArea = null;
-let graphInstanceArea = null;
 let graphType = null;
 let selectedRoutine = null;
 let selectedInstance = null;
 let w = 0;
 let h = 0;
-const twoPi = Math.PI*2;
-const halfPi = Math.PI/2;
-const rootThreeOverTwo = (3**.5)/2;
+
 const graphData = new GraphData();
 const graphColors = [
 	'#FF0000','#00FF00','#0000FF','#FF00FF',
@@ -31,12 +35,7 @@ const graphColors = [
 	'#AA0000','#00AA00','#0000AA','#AA00AA','#AAAA00','#00AAAA'
 ];
 
-function showGraphModal(){
-	hideRightMenu();
-	graphModal.classList.remove('hide');
-}
-function hideGraphModal(s){
-	graphModal.classList.add('hide');
+function resetGraphOptions(){
 	document.getElementById('graphType').value = "Select Graph Type";
 	document.getElementById('chkRoutineTotal').checked = false;
 	graphType = null;
@@ -44,14 +43,17 @@ function hideGraphModal(s){
 	selectedInstance = null;
 	
 	graphData.DataPoints = [];
-	graphRoutineArea.classList.add('hide');
-	graphInstanceArea.classList.add('hide');
+	document.getElementById('graphRoutine').classList.add('hide');
+	document.getElementById('graphInstance').classList.add('hide');
 	document.getElementById('graphTotal').classList.add('hide');
 	document.getElementById('generateGraph').classList.add('hide');
 	document.getElementById("sideGraphData").classList.add('hide');
+	document.getElementById("bottomGraphData").classList.add('hide');
+	document.getElementById('resetGraph').classList.add('hide');
+
 	document.getElementById("modalSideArea").classList.remove('hide');
 	document.getElementById("graphOptionWrapper").classList.remove('hide');
-	document.getElementById("bottomGraphData").classList.add('hide');
+
 	document.getElementById('modalContentWrapper').classList.add('fullHeight');
 	document.getElementById('modalContentWrapper').classList.remove('partialHeight');
 	document.getElementById('modalSideArea').style.removeProperty('min-width');
@@ -62,6 +64,15 @@ function hideGraphModal(s){
 		ctx.fillRect(0,0,w,h);
 		ctx.stroke();
 	}
+}
+
+function showGraphModal(){
+	hideRightMenu();
+	graphModal.classList.remove('hide');
+}
+function hideGraphModal(s){
+	resetGraphOptions();
+	graphModal.classList.add('hide');
 }
 
 function getSelectText(id){
@@ -122,12 +133,12 @@ function selectGraphType(value){
 	selectedInstance = null;
 	document.getElementById('generateGraph').classList.add('hide');
 	document.getElementById("sideGraphData").classList.add('hide');
-	document.getElementById('modalContentWrapper').classList.toggle('fullHeight', true);
-	document.getElementById('modalContentWrapper').classList.toggle('partialHeight', false);
-	
-	graphRoutineArea = graphRoutineArea || document.getElementById("graphRoutine");
-	graphInstanceArea = graphInstanceArea || document.getElementById("graphInstance");
-	
+	document.getElementById("graphInstance").classList.add('hide');
+	document.getElementById('graphTotal').classList.add('hide');
+	document.getElementById('modalContentWrapper').classList.add('fullHeight');
+	document.getElementById('modalContentWrapper').classList.remove('partialHeight');
+	document.getElementById("graphRoutine").classList.remove('hide');
+
 	//populate routines
 	const ddl = document.getElementById('selectGraphRoutine');
 	ddl.replaceChildren();
@@ -139,10 +150,11 @@ function selectGraphType(value){
 	o.textContent = "Select Routine";
 	ddl.appendChild(o);
 	
-	
+	const keys = Object.keys(Storage.data).map(x => parseInt(x));
+	console.log(keys);
 	for(let i=0;i<availableRoutines.length;i++){
 		const r = availableRoutines[i];
-		if(r.id === -1){continue;}
+		if(r.id === -1 || !keys.includes(r.id)){continue;}
 		
 		const o = document.createElement('option');
 		o.setAttribute('value', r.id);
@@ -150,22 +162,60 @@ function selectGraphType(value){
 		ddl.appendChild(o);
 	}
 	
-	graphRoutineArea.classList.remove('hide');
-	graphInstanceArea.classList.add('hide');
 }
-function selectGraphRoutine(value){
+function onSelectGraphRoutine(value){
 	selectedRoutine = parseInt(value);
 	selectedInstance = null;
 	
 	const instanceGraph = instanceGraphs.includes(graphType);
 	document.getElementById('generateGraph').classList.toggle('hide', instanceGraph);
-	graphInstanceArea.classList.toggle('hide', !instanceGraph);
+	document.getElementById("graphInstance").classList.toggle('hide', !instanceGraph);
 	document.getElementById('graphTotal').classList.toggle('hide', instanceGraph);
 	
-	if(!instanceGraph){ return; }
+	if(!instanceGraph){ 
+		//set dateFrom to new Date - 7 days
+		document.getElementById('dateTo').valueAsDate = new Date();
+		return; 
+	}
 	
+	const ddl = document.getElementById('ddlYearMonth');
+	ddl.replaceChildren();
+	
+	const o = document.createElement('option');
+	o.setAttribute('selected', null);
+	o.setAttribute('disabled', null);
+	o.setAttribute('hidden', null);
+	o.textContent = "Select Year-Month";
+	ddl.appendChild(o);
+	
+	instanceGroups = {};
+	const routeKeys = Object.keys(Storage.data)
+	for(let i=0;i<routeKeys.length;i++){
+		const r = routeKeys[i];
+		const instanceKeys = Object.keys(Storage.data[r])
+		for(let j=0;j<instanceKeys.length;j++){
+			const iKey = instanceKeys[j];
+			const date = new Date(parseInt(iKey));
+			const yearMonth = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}`;
+			
+			if(!instanceGroups[yearMonth]){
+				instanceGroups[yearMonth] = [];
+				
+				const o = document.createElement('option');
+				o.setAttribute('value', yearMonth);
+				o.textContent = yearMonth;
+				ddl.appendChild(o);
+			}
+			instanceGroups[yearMonth].push(iKey);
+		}
+	}
+	
+	document.getElementById('graphInstance').classList.remove('hide');
+	document.getElementById('selectGraphInstance').classList.add('hide');
+}
+function getMonthInstances(sender){
 	//populate instances of routine
-	const ddl = document.getElementById('selectGraphInstance');
+	const ddl = document.getElementById('ddlGraphInstance');
 	ddl.replaceChildren();
 	
 	const o = document.createElement('option');
@@ -175,13 +225,7 @@ function selectGraphRoutine(value){
 	o.textContent = "Select Instance";
 	ddl.appendChild(o);
 	
-	const i = Storage.data[value];
-	if(!i){
-		alert("No instances recorded for selected routine.");
-		return;
-	}
-	
-	const keys = Object.keys(i);
+	const keys = instanceGroups[sender.value];
 	for(let i=0;i<keys.length;i++){
 		const key = keys[i];
 		const d = new Date(parseInt(key, 10));
@@ -191,6 +235,8 @@ function selectGraphRoutine(value){
 		o.textContent = dateFormat(d);
 		ddl.appendChild(o);
 	}
+	
+	document.getElementById('selectGraphInstance').classList.remove('hide');
 }
 function selectGraphRoutineInstance(value){
 	selectedInstance = value;
@@ -239,6 +285,12 @@ function filterRoutineLeafs(input){
 	return output;
 }
 
+function filterData(input){
+	const filter = document.getElementById("ddlFilter").value;
+	console.log(filter, input);
+	
+	return input;
+}
 function buildFlameData(){
 	const data = Storage.data[selectedRoutine][selectedInstance];
 	
@@ -284,7 +336,7 @@ function buildPieData(){
 	}
 }
 function buildTimeData(){
-	const data = Storage.data[selectedRoutine];
+	const data = filterData(Storage.data[selectedRoutine]);
 	const filtered = filterRoutineLeafs(data);
 	const keys = Object.keys(filtered);
 	const includeTotal = document.getElementById('chkRoutineTotal').checked;
@@ -305,7 +357,7 @@ function buildTimeData(){
 	graphData.maxY = maxY;
 }
 function buildRemindersData(){
-	const data = Storage.data[selectedRoutine];
+	const data = filterData(Storage.data[selectedRoutine]);
 	const filtered = filterRoutineLeafs(data);
 	const keys = Object.keys(filtered);
 	const includeTotal = document.getElementById('chkRoutineTotal').checked;
@@ -1053,7 +1105,7 @@ function calcSize(){
 	graphData.xScale = 0;
 	graphData.yScale = 0;
 	graphData.DataPoints = [];
-	
+
 	buildData();
 	buildTable();
 	buildGraph();
@@ -1079,8 +1131,7 @@ function analyze(){
 	document.getElementById('graphOptionWrapper').classList.add('hide');
 	
 	graph = document.getElementById("Graph");
+
+	document.getElementById('resetGraph').classList.remove('hide');
 	calcSize();
 }
-
-//redo build non-instance tables to have instances be the column headers?
-//onresize do a thing.
