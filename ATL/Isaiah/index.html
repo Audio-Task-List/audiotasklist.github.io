@@ -14,7 +14,7 @@
 			.notAllowed{}
 		</style>
 	</head>
-	<body class="contentWrapper" onresize="resize()">
+	<body class="contentWrapper" onresize="resize()" onerror="windowError(message, source, lineno, colno, error)">
 		<div id="routineArea" class="routineArea routineAreaExpanded">
 			<button id="closeRoutines" class="closeRoutines" onclick="hideRoutines()">«</button>
 			<br/>
@@ -96,6 +96,10 @@
 			<p>
 				<label for="clearStorage">Clear Local Storage</label><br/>
 				<button id="clearStorage" onclick="clearStorage();">Clear Stored Data</button>
+			</p>
+			<p>
+				<label for="toggleDiagnostics">Toggle Diagnostics</label><br/>
+				<button id="toggleDiagnostics" onclick="displayDiagnostics();">Toggle Diagnostics</button>
 			</p>
 
 		</div>
@@ -193,6 +197,9 @@
 					<tbody id="completedTable" >
 					</tbody>
 				</table>
+			</div>
+			<div id="diagnosticsArea" class="diagnosticsArea hide">
+				<textarea id="txtDiagnostics" rows="20" cols="100"></textarea>
 			</div>
 		</div>
 		<div id="undoArea" class="undoArea hide">
