@@ -151,7 +151,6 @@ function selectGraphType(value){
 	ddl.appendChild(o);
 	
 	const keys = Object.keys(Storage.data).map(x => parseInt(x));
-	console.log(keys);
 	for(let i=0;i<availableRoutines.length;i++){
 		const r = availableRoutines[i];
 		if(r.id === -1 || !keys.includes(r.id)){continue;}
@@ -172,8 +171,12 @@ function onSelectGraphRoutine(value){
 	document.getElementById("graphInstance").classList.toggle('hide', !instanceGraph);
 	document.getElementById('graphTotal').classList.toggle('hide', instanceGraph);
 	
+	const instanceKeys = Object.keys(Storage.data[selectedRoutine]).map(x => parseInt(x));
+	
 	if(!instanceGraph){ 
 		//set dateFrom to new Date - 7 days
+		const min = Math.min(...instanceKeys);
+		document.getElementById('dateFrom').valueAsDate = new Date(min);
 		document.getElementById('dateTo').valueAsDate = new Date();
 		return; 
 	}
@@ -189,25 +192,21 @@ function onSelectGraphRoutine(value){
 	ddl.appendChild(o);
 	
 	instanceGroups = {};
-	const routeKeys = Object.keys(Storage.data)
-	for(let i=0;i<routeKeys.length;i++){
-		const r = routeKeys[i];
-		const instanceKeys = Object.keys(Storage.data[r])
-		for(let j=0;j<instanceKeys.length;j++){
-			const iKey = instanceKeys[j];
-			const date = new Date(parseInt(iKey));
-			const yearMonth = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}`;
+	
+	for(let i=0;i<instanceKeys.length;i++){
+		const iKey = instanceKeys[i];
+		const date = new Date(iKey);
+		const yearMonth = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}`;
+		
+		if(!instanceGroups[yearMonth]){
+			instanceGroups[yearMonth] = [];
 			
-			if(!instanceGroups[yearMonth]){
-				instanceGroups[yearMonth] = [];
-				
-				const o = document.createElement('option');
-				o.setAttribute('value', yearMonth);
-				o.textContent = yearMonth;
-				ddl.appendChild(o);
-			}
-			instanceGroups[yearMonth].push(iKey);
+			const o = document.createElement('option');
+			o.setAttribute('value', yearMonth);
+			o.textContent = yearMonth;
+			ddl.appendChild(o);
 		}
+		instanceGroups[yearMonth].push(iKey);
 	}
 	
 	document.getElementById('graphInstance').classList.remove('hide');
@@ -286,14 +285,14 @@ function filterRoutineLeafs(input){
 }
 
 function filterData(input){
-	const filter = document.getElementById("ddlFilter").value;
-	console.log(filter, input);
+	const from = document.getElementById('dateFrom').valueAsDate;
+	const to = document.getElementById('dateTo').valueAsDate;
+	console.log(from, to, input);
 	
 	return input;
 }
 function buildFlameData(){
 	const data = Storage.data[selectedRoutine][selectedInstance];
-	
 	const base = data.find(x => x.id===-1);
 	if(!base){return;}
 	const r = routines.find(x => x.id === selectedRoutine);
