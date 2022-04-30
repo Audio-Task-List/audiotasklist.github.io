@@ -85,6 +85,13 @@ function elementError(e){
 	displayDiagnostics();
 }
 
+function clearChildNodes(id){
+	const e = document.getElementById(id);
+	while(e.firstChild){
+		e.removeChild(e.lastChild);
+	}
+}
+
 function sortData(a, b){
 	switch(typeof a[sortCol]){
 		case "number": {
@@ -97,7 +104,7 @@ function sortData(a, b){
 	}
 }
 function sortCompletedData(){
-	completedTable.replaceChildren();
+	clearChildNodes("completedTable");
 	const tempData = [...completedData];
 	completedData = [];
 	
@@ -634,7 +641,6 @@ function loadTasks(parentDiv, taskIDs, parentTask){
 function getFirstUncompletedLeaf(){
 	return alpha.getNextUncompletedDescendant();
 }
-
 function getNextUncompletedTask(task){
 	if(!task || !task.parent){return getFirstUncompletedLeaf();}
 	const index = task.parent.children.indexOf(task)+1;
@@ -752,8 +758,8 @@ routine.prototype.select = function(){
 		hideRoutines();
 		
 		dPush('Prepare Tasks');
-		completedTable.replaceChildren();
-		taskArea.replaceChildren();
+		clearChildNodes("completedTable");
+		clearChildNodes("taskArea");
 		alpha.children = [];
 		loadTasks(taskArea, this.tasks, alpha);
 		
