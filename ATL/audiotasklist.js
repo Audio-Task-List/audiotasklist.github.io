@@ -28,9 +28,6 @@ let remindArea = null;
 let currentReminds = null;
 let graphModal = null;
 
-let routineStarted = 0;
-let routineCompleted = 0;
-
 let currentRoutine = null;
 let currentTask = null;
 let lastCompletedTask = null;
@@ -53,6 +50,40 @@ let isEncouraging = false;
 let completedData = [];
 let sortCol = 'taskNum';
 let sortAsc = true;
+
+const diagnostics = [];
+function dPush(input){
+	diagnostics.push(input);
+}
+function dClear(){
+	diagnostics.length = 0;
+}
+function displayDiagnostics(){
+	document.getElementById('txtDiagnostics').value = diagnostics.join('\r\n');
+	document.getElementById('diagnosticsArea').classList.toggle('hide');
+	
+	hideRightMenu();
+	hideRoutines();
+}
+function windowError(message, source, lineno, colno, error){
+	dPush('##############################################');
+	dPush("WINDOW ERROR");
+	dPush(message);
+	dPush(`${source} ${lineno}:${colno}`);
+	dPush(error);
+	dPush('##############################################');
+	
+	displayDiagnostics();
+}
+function elementError(e){
+	dPush('##############################################');
+	dPush("ELEMENT ERROR");
+	dPush(e.message);
+	dPush(e.stack);
+	dPush('##############################################');
+	
+	displayDiagnostics();
+}
 
 function sortData(a, b){
 	switch(typeof a[sortCol]){
@@ -444,11 +475,11 @@ function undoLastComplete(){
 		currentTask.btn.classList.add('unstarted');
 		currentTask.collapseDescendants();
 	}
-
+	
 	const temp = lastCompletedTask.taskNum();
 	completedData = completedData.filter(x => x.taskNum !== temp);
 	sortCompletedData();
-
+	
 	lastCompletedTask.completed=0; 
 	lastCompletedTask.btn.classList.remove('completed');
 	lastCompletedTask.btn.classList.remove('hide');
@@ -577,19 +608,22 @@ function createSubTaskDiv(parent, id){
 	return div;
 }
 function createTask(parentDiv, taskID, index, parentTask){
+	dPush(`Create Task: ${taskID}`);
 	const temp = tasks.filter(x => x.id === taskID);
 	if(temp.length === 0){return null;}
 	const t = temp[0];
+	dPush(`\t${t.text}`);
+	
 	const newTask = new task(taskID, Number(index)+1, t.text, t.time, t.audio, t.icon, parentTask);
 	parentDiv.appendChild(newTask.btn);
 	
 	return newTask;
 }
 function loadTasks(parentDiv, taskIDs, parentTask){
+	dPush('Load Tasks:');
 	for(let index in taskIDs){
 		const t = taskIDs[index];
 		const newTask = createTask(parentDiv, t.id, index, parentTask);
-		
 		if(t.tasks && t.tasks.length > 0){
 			const d = createSubTaskDiv(parentDiv, newTask.btn.id);
 			loadTasks(d, t.tasks, newTask);
@@ -673,64 +707,78 @@ function routine(id, name, icon, audio, taskAudioPrefix, taskAudioSuffix, audioE
 routine.prototype.playAudio = function(){
 	if(this.audio){
 		try{
-		this.audio.play();
+			this.audio.play();
 		}
 		catch(error){
 			//expected on page load/restore in progress.
-			}
+		}
 	}
 }
 routine.prototype.select = function(){
-	if(currentRoutine && !routineCompleted){
-		if(currentRoutine === this ||
-			!confirm("You currently have an active routine. Do you want to switch?")){
-			hideRoutines();
-			return;
+	try{
+		dClear();
+		dPush('Select Routine: '+this.name);
+		if(currentRoutine && !alpha.completed){
+			if(currentRoutine === this ||
+				!confirm("You currently have an active routine. Do you want to switch?")){
+				hideRoutines();
+				return;
+			}
 		}
+		loopAudio = this.loopAudio;
+		loopDelay = this.loopDelay;
+		autoAdvanceTimer = this.autoAdvanceTimer;
+		autoAdvanceDone = this.autoAdvanceDone;
+		enforceChildrenOrder = this.enforceChildrenOrder;
+		hideCompletedTasks = this.hideCompletedTasks;
+		dPush('Routine Options Loaded');
+		
+		if(this.icon){
+			document.getElementById("routineImage").style.backgroundImage = this.icon;
+		}
+		routineName.textContent = this.name;
+		document.getElementById("chkLoop").checked = loopAudio;
+		document.getElementById("numDelay").value = loopDelay/1000;
+		document.getElementById("chkAutoTimer").checked = autoAdvanceTimer;	
+		document.getElementById("chkAutoDone").checked = autoAdvanceTimer;	
+		document.getElementById("chkOrder").checked = enforceChildrenOrder;
+		document.getElementById("chkHideComplete").checked = hideCompletedTasks;	
+		
+		dPush('Timer Init');
+		alpha.text = this.name;
+		this.playAudio();
+		alpha.started = Date.now();
+		currentRoutine = this;
+		hideRoutines();
+		
+		dPush('Prepare Tasks');
+		completedTable.replaceChildren();
+		taskArea.replaceChildren();
+		alpha.children = [];
+		loadTasks(taskArea, this.tasks, alpha);
+		
+		document.getElementById("settingsArea").classList.remove('hide');
+		floatyButtons.classList.add('hide');
+		stopTimer();
+		currentTime = 0;
+		
+		completedData = [];
+		
+		if(this.theme){
+			dPush('Set Theme' + this.theme);
+			setTheme(this.theme);
+		}
+		else{setTheme('Light');}
+		
+		if(autoAdvanceTimer){
+			autoAdvance();
+		}
+		
+		dPush('Routine Started');
 	}
-	loopAudio = this.loopAudio;
-	loopDelay = this.loopDelay;
-	autoAdvanceTimer = this.autoAdvanceTimer;
-	autoAdvanceDone = this.autoAdvanceDone;
-	enforceChildrenOrder = this.enforceChildrenOrder;
-	hideCompletedTasks = this.hideCompletedTasks;
-	
-	if(this.icon){
-		document.getElementById("routineImage").style.backgroundImage = this.icon;
-	}
-	routineName.textContent = this.name;
-	document.getElementById("chkLoop").checked = loopAudio;
-	document.getElementById("numDelay").value = loopDelay/1000;
-	document.getElementById("chkAutoTimer").checked = autoAdvanceTimer;	
-	document.getElementById("chkAutoDone").checked = autoAdvanceTimer;	
-	document.getElementById("chkOrder").checked = enforceChildrenOrder;
-	document.getElementById("chkHideComplete").checked = hideCompletedTasks;	
-	
-	alpha.text = this.name;
-	this.playAudio();
-	routineStarted = Date.now();
-	currentRoutine = this;
-	hideRoutines();
-	
-	completedTable.replaceChildren();
-	taskArea.replaceChildren();
-	alpha.children = [];
-	loadTasks(taskArea, this.tasks, alpha);
-	
-	document.getElementById("settingsArea").classList.remove('hide');
-	floatyButtons.classList.add('hide');
-	stopTimer();
-	currentTime = 0;
-	
-	completedData = [];
-	
-	if(this.theme){
-		setTheme(this.theme);
-	}
-	else{setTheme('Light');}
-	
-	if(autoAdvanceTimer){
-		autoAdvance();
+	catch(e){
+		console.error(e);
+		elementError(e);
 	}
 }
 routine.prototype.playTaskAudioPrefix = function(){
@@ -831,45 +879,56 @@ task.prototype.siblings = function(){
 	return this.parent.children;
 }
 task.prototype.select = function(){
-	//if completed do nothing
-	if(includesClass(this.btn, 'completed') || isEncouraging){return;}
-	
-	floatyButtons.classList.add('hide');
-	currentTask = null;
-	undoArea.classList.toggle('hide', !lastCompletedTask)
-	
-	//if sibling has child tasks and none are completed collapse 
-	const siblings = this.siblings();
-	for(let index in siblings){
-		const sib = siblings[index];
-		if(includesClass(sib.btn, 'completed')){continue;}
+	try{
+		dPush('Task Selected: ' + this.btn.id);
+		//if completed do nothing
+		if(includesClass(this.btn, 'completed') || isEncouraging){return;}
 		
-		if(hideCompletedTasks || !sib.hasCompletedDescendant()){
-			sib.collapseDescendants();
+		floatyButtons.classList.add('hide');
+		currentTask = null;
+		undoArea.classList.toggle('hide', !lastCompletedTask)
+		
+		dPush('Manage sub-divs');
+		//if sibling has child tasks and none are completed collapse 
+		const siblings = this.siblings();
+		for(let index in siblings){
+			const sib = siblings[index];
+			if(includesClass(sib.btn, 'completed')){continue;}
+			
+			if(hideCompletedTasks || !sib.hasCompletedDescendant()){
+				sib.collapseDescendants();
+			}
 		}
+
+		//expand this one
+		if(this.children && this.children.length > 0){
+			const div = document.getElementById(`${this.btn.id}D`);
+			if(div){
+				updateHeight(div, this);
+			}
+			this.expandWrapper();
+		}
+		else{
+			setTimeout(placeFloatButtons, 500);
+		}
+		currentReminds.textContent = this.reminders;
+		
+		dPush('Set Current');
+		this.setCurrent();
+		currentTime = this.time;
+		startTimer();
+		updateTimer();
+		if(!currentRoutine.playTaskAudioPrefix()){this.playAudio();}
+		dPush('Task Started: ' + this.text);
+	}
+	catch(e){
+		console.error(e);
+		elementError(e);
 	}
 	
-	//expand this one
-	if(this.children && this.children.length > 0){
-		const div = document.getElementById(`${this.btn.id}D`);
-		if(div){
-			updateHeight(div, this);
-		}
-		this.expandWrapper();
-	}
-	else{
-		setTimeout(placeFloatButtons, 500);
-	}
-	currentReminds.textContent = this.reminders;
-	
-	this.setCurrent();
-	currentTime = this.time;
-	startTimer();
-	updateTimer();
-	if(!currentRoutine.playTaskAudioPrefix()){this.playAudio();}
 }
 task.prototype.taskNum = function(){
-	return this.btn.id.replace("alpha_","").replaceAll("_",".").replace("alpha", "Routine");
+	return this.btn.id.replace("Routine_","").replaceAll("_",".");
 }
 task.prototype.complete = function(){
 	//if children not done is not done.
@@ -908,7 +967,7 @@ task.prototype.complete = function(){
 	
 	//if there is no parent this is the alpha and we all done here.
 	if(!this.parent){
-		routineCompleted = Date.now();
+		//alpha.completed = Date.now();
 		stopTimer();
 		timerDisplay.textContent = formatTime(0);
 		Storage.saveCurrent();
@@ -1050,7 +1109,7 @@ function intToString(input){
 	return output;
 }
 function buildCurrentSave(){
-	const epoch = new Date().setHours(0,0,0,0);
+	const epoch = Math.min(...completedData.map(x=>x.started));
 	const newData = [];
 	newData.push(intToString(epoch));
 	
@@ -1066,7 +1125,7 @@ function loadSave(input){
 	input = input.split('│');
 	
 	const epoch = stringToInt(input[0]);
-	const output = [];
+	const output = {epoch: epoch, data:[]};
 	
 	for(let i=1;i<input.length;i++){
 		const temp = input[i].split(" ");
@@ -1074,11 +1133,11 @@ function loadSave(input){
 		
 		const id = stringToInt(temp[0]);
 		const taskNum = temp[1];
-		const start = stringToInt(temp[2]) + epoch;
-		const done = stringToInt(temp[3]) + epoch;
+		const start = stringToInt(temp[2]);
+		const done = stringToInt(temp[3]);
 		const reminders = stringToInt(temp[4]);
 		
-		output.push({id:id, taskNum:taskNum, started: start, completed:done, reminders:reminders});
+		output.data.push({id:id, taskNum:taskNum, started: start, completed:done, reminders:reminders});
 	}
 	
 	return output;
@@ -1180,8 +1239,7 @@ function importData(input){
 		data[key] = {};
 		for(let i=0;i<value.length;i++){
 			const record = loadSave(value[i]);
-			const root = record.find(x => x.id===-1);
-			data[key][root.started] = record;
+			data[key][record.epoch] = record.data;
 		}
 	}
 	
@@ -1238,8 +1296,9 @@ storage.prototype.import64 = function(file){
 }
 
 const Storage = new storage();
-const alpha = new task(-1, "alpha", null, null, null, null);
+const alpha = new task(-1, "Routine", null, null, null, null);
 function init(){
+	dPush('Init Starting');
 	window.addEventListener('resize', placeFloatButtons);
 	
 	routineName = document.getElementById("routineName");
@@ -1258,24 +1317,31 @@ function init(){
 	currentReminds = document.getElementById("currentReminds");
 	graphModal = document.getElementById("graphModalWrapper");
 	
+	dPush('Adding Routines:');
 	for(let index in routines){
 		const r = routines[index];
+		dPush(r.name);
 		availableRoutines.push(new routine(r.id, r.name, r.icon,
 			r.audio, r.taskAudioPrefix, r.taskAudioSuffix, r.audioEncouragement, r.timeExpiredAudio, r.reminderLimit,
 		r.theme, r.loopAudio, r.loopDelay, r.autoAdvanceTimer, r.autoAdvanceDone, r.enforceChildrenOrder, r.hideCompletedTasks, r.tasks));
 	}
 	
+	dPush('Adding All Tasks Routine');
 	const taskIDs = tasks.map(x => {return {id:x.id}});
 	availableRoutines.push(new routine(-1, "All Tasks", null, null, null, null, null, null, null, null, null, null, null, null, null, taskIDs));
 	
+	dPush('Adding Routine buttons:');
 	for(let index in availableRoutines){
 		const r = availableRoutines[index];
+		dPush(r.btn.textContent);
 		routineArea.appendChild(r.btn);
 	}
 	
 	if(localStorage.getItem('InProgress') !== null){
 		document.getElementById('inProgress').classList.remove('hide');
 	}
+	
+	dPush('Init Complete');
 }
 
 window.onbeforeunload = function(){
