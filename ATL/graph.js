@@ -141,7 +141,7 @@ function selectGraphType(value){
 
 	//populate routines
 	const ddl = document.getElementById('selectGraphRoutine');
-	ddl.replaceChildren();
+	clearChildNodes('selectGraphRoutine');
 	
 	const o = document.createElement('option');
 	o.setAttribute('selected', null);
@@ -182,7 +182,7 @@ function onSelectGraphRoutine(value){
 	}
 	
 	const ddl = document.getElementById('ddlYearMonth');
-	ddl.replaceChildren();
+	clearChildNodes('ddlYearMonth');
 	
 	const o = document.createElement('option');
 	o.setAttribute('selected', null);
@@ -215,7 +215,7 @@ function onSelectGraphRoutine(value){
 function getMonthInstances(sender){
 	//populate instances of routine
 	const ddl = document.getElementById('ddlGraphInstance');
-	ddl.replaceChildren();
+	clearChildNodes('ddlGraphInstance');
 	
 	const o = document.createElement('option');
 	o.setAttribute('selected', null);
@@ -623,9 +623,9 @@ function buildTable(){
 	const body = document.getElementById("tableBody");
 	const foot = document.getElementById("tableFoot");
 	
-	head.replaceChildren();
-	body.replaceChildren();
-	foot.replaceChildren();
+	clearChildNodes('tableHead');
+	clearChildNodes('tableBody');
+	clearChildNodes('tableFoot');
 	switch(graphType){
 		case "flame":{
 			buildFlameTable(head, body, foot);
