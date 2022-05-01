@@ -116,7 +116,7 @@ select {
 }
 
 .toggleRoutines {
-	font-size: 18pt;
+	font-size: 36pt;
 	position:fixed;
 	top:5px;
 	left:10px;
@@ -126,7 +126,7 @@ select {
 }
 
 .menuBtn{
-	font-size: 18pt;
+	font-size: 36pt;
 	position:fixed;
 	top:5px;
 	right:10px;
@@ -137,14 +137,14 @@ select {
 
 .closeMenu{
 	float:right;
-	font-size: 18pt;
+	font-size: 36pt;
 	border:none;
 	background-color: #FFF;
 }
 
 .closeRoutines{
 	float:left;
-	font-size: 18pt;
+	font-size: 36pt;
 	border:none;
 	background-color: #FFF;
 }
