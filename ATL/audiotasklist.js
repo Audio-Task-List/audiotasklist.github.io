@@ -525,20 +525,32 @@ function undoLastComplete(){
 	undoArea.classList.add('hide');
 }
 function clickDone(){
-	const task = currentTask;
-	completeCurrentTask();
-	if(autoAdvanceDone){
-		autoAdvance();
+	try{
+		dPush('clickDone: ' + autoAdvanceDone)
+		const task = currentTask;
+		completeCurrentTask();
+		if(autoAdvanceDone){
+			autoAdvance();
+		}
+	}
+	catch(e){
+		elementError(e);
 	}
 }
 function completeCurrentTask(){
-	if(!currentTask){return;}
-	floatyButtons.classList.add('hide');
-	currentTask.complete();
-	updateNotAllowed();
-	
-	if(loopTimeout){
-		clearTimeout(loopTimeout);
+	try{
+		if(!currentTask){return;}
+		dPush('completeCurrentTask: ' + currentTask.text);
+		floatyButtons.classList.add('hide');
+		currentTask.complete();
+		updateNotAllowed();
+		
+		if(loopTimeout){
+			clearTimeout(loopTimeout);
+		}
+	}
+	catch(e){
+		elementError(e);
 	}
 }
 function placeFloatButtons(){
@@ -783,16 +795,16 @@ routine.prototype.select = function(){
 				hideRoutines();
 				return;
 			}
-			}
-			loopAudio = this.loopAudio;
-			loopDelay = this.loopDelay;
-			autoAdvanceTimer = this.autoAdvanceTimer;
-			autoAdvanceDone = this.autoAdvanceDone;
-			enforceChildrenOrder = this.enforceChildrenOrder;
-			hideCompletedTasks = this.hideCompletedTasks;
-			dPush('\tRoutine Options Loaded');
-			
-			if(this.icon){
+		}
+		loopAudio = this.loopAudio;
+		loopDelay = this.loopDelay;
+		autoAdvanceTimer = this.autoAdvanceTimer;
+		autoAdvanceDone = this.autoAdvanceDone;
+		enforceChildrenOrder = this.enforceChildrenOrder;
+		hideCompletedTasks = this.hideCompletedTasks;
+		dPush('\tRoutine Options Loaded');
+		
+		if(this.icon){
 			document.getElementById("routineImage").style.backgroundImage = this.icon;
 		}
 		routineName.textContent = this.name;
@@ -953,18 +965,23 @@ task.prototype.playAudio = function(){
 	
 }
 task.prototype.buildID = function(){
-	let output = this.id.toString().padStart(2,'0');
-	let p = this.parent;
-	while(p != null && p.id !== "taskArea"){
-		output = `${p.id.toString().padStart(2,'0')}_${output}`;
-		p = p.parent;
-	}
-	return output;
+	try{
+		let output = this.id.toString().padStart(2,'0');
+		let p = this.parent;
+		while(p != null && p.id !== "taskArea"){
+			output = `${p.id.toString().padStart(2,'0')}_${output}`;
+			p = p.parent;
+		}
+		return output;
+	}catch(e){elementError(e);}
 }
 task.prototype.siblings = function(){
-	if(!this.parent){return [];}
+	try{
+		if(!this.parent){return [];}
+		
+		return this.parent.children;
+	}catch(e){elementError(e);}
 	
-	return this.parent.children;
 }
 task.prototype.select = function(){
 	try{
@@ -1015,155 +1032,187 @@ task.prototype.select = function(){
 	
 }
 task.prototype.taskNum = function(){
-	return this.btn.id.replace("Routine_","").replaceAll("_",".");
+	try{
+		return this.btn.id.replace("Routine_","").replaceAll("_",".");
+	}catch(e){elementError(e);}
+	
 }
 task.prototype.complete = function(){
-	//if children not done is not done.
-	if(this.children.some(x => x.completed===0)){ return; }
-	
-	//mark task complete
-	this.completed = Date.now();
-	this.btn.classList.remove('current');
-	this.btn.classList.add('completed');
-	lastCompletedTask = this;
-	
-	if(hideCompletedTasks)
-	{
-		this.btn.classList.add('hide');
-	}
-	
-	//if has child task div collapse it.
-	const div = document.getElementById(`${this.btn.id}D`);
-	if(div){
-		div.style.removeProperty('max-height');
-	}
-	
-	const taskNum = this.taskNum();
-	
-	const newRow = {
-		id: this.taskID,
-		taskNum: taskNum,
-		name: this.text,
-		started: this.started,
-		completed: this.completed,
-		duration: formatTime(this.completed - this.started),
-		allocated: this.time,
-		reminders:this.descendantReminders()
-	};
-	addTableRow(newRow);
-	
-	//if there is no parent this is the alpha and we all done here.
-	if(!this.parent){
-		//alpha.completed = Date.now();
-		stopTimer();
-		timerDisplay.textContent = formatTime(0);
-		Storage.saveCurrent();
+	try{
+		dPush('Task.Complete: ' + this.text);
+		//if children not done is not done.
+		if(this.children.some(x => x.completed===0)){ return; }
 		
-		currentRoutine = null;
-		localStorage.removeItem('InProgress');
-		return;
+		//mark task complete
+		this.completed = Date.now();
+		this.btn.classList.remove('current');
+		this.btn.classList.add('completed');
+		lastCompletedTask = this;
+		dPush('\tCompletedTime:' + this.completed);
+		
+		if(hideCompletedTasks)
+		{
+			this.btn.classList.add('hide');
+		}
+		
+		//if has child task div collapse it.
+		const div = document.getElementById(`${this.btn.id}D`);
+		if(div){
+			dPush('\tCollapse Sub-div');
+			div.style.removeProperty('max-height');
+		}
+		
+		const newRow = {
+			id: this.taskID,
+			taskNum: this.taskNum,
+			name: this.text,
+			started: this.started,
+			completed: this.completed,
+			duration: formatTime(this.completed - this.started),
+			allocated: this.time,
+			reminders:this.descendantReminders()
+		};
+		dPush('\tAdd Completed Row: ' JSON.stringify(newRow));
+		addTableRow(newRow);
+		
+		//if there is no parent this is the alpha and we all done here.
+		if(!this.parent){
+			//alpha.completed = Date.now();
+			dPush('\tRoutine Completed');
+			stopTimer();
+			timerDisplay.textContent = formatTime(0);
+			Storage.saveCurrent();
+			
+			currentRoutine = null;
+			localStorage.removeItem('InProgress');
+			return;
+		}
+		else{
+			dPush('Save In Progress');
+			const saveData = {routine:currentRoutine.id ,tasks:buildCurrentSave()};
+			localStorage.setItem('InProgress', JSON.stringify(saveData));
+		}
+		document.getElementById("completedArea").classList.remove('hide');
+		currentTask = null;
+		undoArea.classList.toggle('hide', !lastCompletedTask )
+		stopTimer();
+		resetTimer();
+		
+		//check parent
+		this.parent.complete();
+		
+		if(currentRoutine){
+			currentRoutine.playEncouragement();
+		}
 	}
-	else{
-		const saveData = {routine:currentRoutine.id ,tasks:buildCurrentSave()};
-		localStorage.setItem('InProgress', JSON.stringify(saveData));
+	catch(e){
+		elementError(e);
 	}
-	document.getElementById("completedArea").classList.remove('hide');
-	currentTask = null;
-	undoArea.classList.toggle('hide', !lastCompletedTask )
-	stopTimer();
-	resetTimer();
 	
-	//check parent
-	this.parent.complete();
-	
-	if(currentRoutine){
-		currentRoutine.playEncouragement();
-	}
 }
 task.prototype.getNextUncompletedDescendant = function(){
-	if(this.completed === 0 && this.children.length === 0){
-		return this;
-	}
+	try{
+		if(this.completed === 0 && this.children.length === 0){
+			return this;
+		}
+		
+		for(let i=0;i<this.children.length;i++){
+			const next = this.children[i].getNextUncompletedDescendant();
+			if(next){return next;}
+		}
+		
+		return null;
+	}catch(e){elementError(e);}
 	
-	for(let i=0;i<this.children.length;i++){
-		const next = this.children[i].getNextUncompletedDescendant();
-		if(next){return next;}
-	}
-	
-	return null;
 }
 task.prototype.setCurrent = function(){
-	if(includesClass(this.btn, 'current')){return;}
-	
-	if(!currentTask){
-		currentTask = this;
-	}
-	
-	this.started = this.started || Date.now();
-	this.btn.classList.remove('unstarted');
-	this.btn.classList.add('current');
-	currentTime = this.time;
-	
-	if(!this.parent){return;}
-	this.parent.setCurrent();
+	try{
+		if(includesClass(this.btn, 'current')){return;}
+		
+		if(!currentTask){
+			currentTask = this;
+		}
+		
+		this.started = this.started || Date.now();
+		this.btn.classList.remove('unstarted');
+		this.btn.classList.add('current');
+		currentTime = this.time;
+		
+		if(!this.parent){return;}
+		this.parent.setCurrent();
+	}catch(e){elementError(e);}
 }
 task.prototype.resetDescendants = function(){
-	if(this.completed > 0){return;}
-	
-	this.btn.classList.add('unstarted');
-	this.btn.classList.remove('current');
-	
-	if(enforceChildrenOrder){
-		this.btn.classList.add('notAllowed');
-	}
-	
-	for(let index in this.children){
-		this.children[index].resetDescendants();
-	}
+	try{
+		if(this.completed > 0){return;}
+		
+		this.btn.classList.add('unstarted');
+		this.btn.classList.remove('current');
+		
+		if(enforceChildrenOrder){
+			this.btn.classList.add('notAllowed');
+		}
+		
+		for(let index in this.children){
+			this.children[index].resetDescendants();
+		}
+	}catch(e){elementError(e);}
 }
 task.prototype.hasCompletedDescendant = function(){
-	return this.children.some(x => x.completed !==0)
-	|| this.children.some(x => x.hasCompletedDescendant());
+	try{
+		return this.children.some(x => x.completed !==0)
+		|| this.children.some(x => x.hasCompletedDescendant());
+	}catch(e){elementError(e);}
 }
 task.prototype.expandWrapper = function(){
-	const parentNode = this.btn.parentNode
-	if(parentNode){
-		updateHeight(parentNode, this.parent);
-	}
-	
-	if(this.parent){
-		this.parent.expandWrapper();
-	}
+	try{
+		const parentNode = this.btn.parentNode
+		if(parentNode){
+			updateHeight(parentNode, this.parent);
+		}
+		
+		if(this.parent){
+			this.parent.expandWrapper();
+		}
+	}catch(e){elementError(e);}
 }
 task.prototype.isDescendant = function(checkTask){
-	let p = this.parent;
-	while(p){
-		if(p === checkTask){return true;}
-		p = p.parent;
-	}
-	return false;
+	try{
+		let p = this.parent;
+		while(p){
+			if(p === checkTask){return true;}
+			p = p.parent;
+		}
+		return false;
+	}catch(e){elementError(e);}
 }
 task.prototype.countDescendants = function(){
-	let total = this.children.length;
-	for(let i=0;i<this.children.length;i++){
-		total += this.children[i].countDescendants();
-	}
-	return total;
+	try{
+		let total = this.children.length;
+		for(let i=0;i<this.children.length;i++){
+			total += this.children[i].countDescendants();
+		}
+		return total;
+	}catch(e){elementError(e);}
 }
 task.prototype.collapseDescendants = function(){
-	const div = document.getElementById(`${this.btn.id}D`);
-	if(div){
-		div.style.removeProperty('max-height');
-	}
-	
-	for(let index in this.children){
-		this.children[index].collapseDescendants();
-	}
+	try{
+		const div = document.getElementById(`${this.btn.id}D`);
+		if(div){
+			div.style.removeProperty('max-height');
+		}
+		
+		for(let index in this.children){
+			this.children[index].collapseDescendants();
+		}
+	}catch(e){elementError(e);}
 }
 task.prototype.descendantReminders = function(){
-	let reminders = this.reminders;
-	this.children.forEach(x => {reminders += x.descendantReminders()});
-	return reminders;
+	try{
+		let reminders = this.reminders;
+		this.children.forEach(x => {reminders += x.descendantReminders()});
+		return reminders;
+	}catch(e){elementError(e);}
 }
 
 //Some hacked together save/load data to try to minimize storage space required.
@@ -1339,94 +1388,102 @@ function storage(){
 	this.data = importData(temp);
 }
 storage.prototype.saveCurrent = function(){
-	const temp = JSON.parse(localStorage.getItem('ATL')) || {};
-	if(!temp[currentRoutine.id]){
-		temp[currentRoutine.id] = [];
-	}
-	
-	const saveData = buildCurrentSave();
-	temp[currentRoutine.id].push(saveData);
-	
-	localStorage.setItem('ATL', JSON.stringify(temp));
-	this.data = importData(temp);
+	try{
+		const temp = JSON.parse(localStorage.getItem('ATL')) || {};
+		if(!temp[currentRoutine.id]){
+			temp[currentRoutine.id] = [];
+		}
+		
+		const saveData = buildCurrentSave();
+		temp[currentRoutine.id].push(saveData);
+		
+		localStorage.setItem('ATL', JSON.stringify(temp));
+		this.data = importData(temp);
+	}catch(e){elementError(e);}
 }
 storage.prototype.export64 = function(){
-	const str = localStorage.getItem('ATL');
-	const temp = btoa(encodeURIComponent(str));
-	const name = `ATL_export_${dateFormat()}.txt`;
-	
-    const dl = document.createElement('a');
-    document.body.appendChild(dl);
-	
-    dl.href = `data:text/plain;charset=utf-8,${temp}`;
-    dl.target = '_self';
-    dl.download = name;
-    dl.click(); 
-	
-	dl.remove();
+	try{
+		const str = localStorage.getItem('ATL');
+		const temp = btoa(encodeURIComponent(str));
+		const name = `ATL_export_${dateFormat()}.txt`;
+		
+		const dl = document.createElement('a');
+		document.body.appendChild(dl);
+		
+		dl.href = `data:text/plain;charset=utf-8,${temp}`;
+		dl.target = '_self';
+		dl.download = name;
+		dl.click(); 
+		
+		dl.remove();
+	}catch(e){elementError(e);}
 }
 storage.prototype.import64 = function(file){
-	
-	const reader = new FileReader();
-	reader.onload = function(event){
-		const text = decodeURIComponent(event.target.result);
-		const temp = JSON.parse(text);
+	try{
+		const reader = new FileReader();
+		reader.onload = function(event){
+			const text = decodeURIComponent(event.target.result);
+			const temp = JSON.parse(text);
+			
+			const newData = importData(temp);
+			merge(this.data, newData);
+			
+			alert("Data Imported");
+			document.getElementById('import').value = null;
+		}
 		
-		const newData = importData(temp);
-		merge(this.data, newData);
-		
-		alert("Data Imported");
-		document.getElementById('import').value = null;
-	}
-	
-	reader.readAsText(file);
+		reader.readAsText(file);
+	}catch(e){elementError(e);}
 }
 
 const Storage = new storage();
 const alpha = new task(-1, "Routine", null, null, null, null);
 function init(){
-	dPush('Init Starting');
-	window.addEventListener('resize', placeFloatButtons);
+	try{
+		dPush('Init Starting');
+		window.addEventListener('resize', placeFloatButtons);
+		
+		routineName = document.getElementById("routineName");
+		startStopTimer = document.getElementById("startStop");
+		timerDisplay = document.getElementById("timerDisplay");
+		timerArea = document.getElementById("timer");
+		undoArea = document.getElementById("undoArea");
+		routineArea = document.getElementById("routineArea");
+		rightMenu = document.getElementById("rightMenu");
+		taskArea = document.getElementById("taskArea");
+		floatyButtons = document.getElementById("floatyButtons");
+		doneBtn = document.getElementById("btnDone");
+		remindArea = document.getElementById("remindArea");	
+		currentReminds = document.getElementById("currentReminds");
+		graphModal = document.getElementById("graphModalWrapper");
+		
+		dPush('\tAdding Routines:');
+		for(let index in routines){
+			const r = routines[index];
+			dPush('\t\t'+r.name);
+			availableRoutines.push(new routine(r.id, r.name, r.icon,
+				r.audio, r.taskAudioPrefix, r.taskAudioSuffix, r.audioEncouragement, r.timeExpiredAudio, r.reminderLimit,
+			r.theme, r.loopAudio, r.loopDelay, r.autoAdvanceTimer, r.autoAdvanceDone, r.enforceChildrenOrder, r.hideCompletedTasks, r.tasks));
+		}
+		
+		dPush('\tAdding All Tasks Routine');
+		const taskIDs = tasks.map(x => {return {id:x.id}});
+		availableRoutines.push(new routine(-1, "All Tasks", null, null, null, null, null, null, null, null, null, null, null, null, null, taskIDs));
+		
+		dPush('Adding Routine buttons:');
+		for(let index in availableRoutines){
+			const r = availableRoutines[index];
+			dPush('\t\t'+r.btn.textContent);
+			routineArea.appendChild(r.btn);
+		}
+		
+		if(localStorage.getItem('InProgress') !== null){
+			document.getElementById('inProgress').classList.remove('hide');
+		}
+		
+		dPush('\tInit Complete');
+	}catch(e){elementError(e);}
 	
-	routineName = document.getElementById("routineName");
-	startStopTimer = document.getElementById("startStop");
-	timerDisplay = document.getElementById("timerDisplay");
-	timerArea = document.getElementById("timer");
-	undoArea = document.getElementById("undoArea");
-	routineArea = document.getElementById("routineArea");
-	rightMenu = document.getElementById("rightMenu");
-	taskArea = document.getElementById("taskArea");
-	floatyButtons = document.getElementById("floatyButtons");
-	doneBtn = document.getElementById("btnDone");
-	remindArea = document.getElementById("remindArea");	
-	currentReminds = document.getElementById("currentReminds");
-	graphModal = document.getElementById("graphModalWrapper");
-	
-	dPush('\tAdding Routines:');
-	for(let index in routines){
-		const r = routines[index];
-		dPush('\t\t'+r.name);
-		availableRoutines.push(new routine(r.id, r.name, r.icon,
-			r.audio, r.taskAudioPrefix, r.taskAudioSuffix, r.audioEncouragement, r.timeExpiredAudio, r.reminderLimit,
-		r.theme, r.loopAudio, r.loopDelay, r.autoAdvanceTimer, r.autoAdvanceDone, r.enforceChildrenOrder, r.hideCompletedTasks, r.tasks));
-	}
-	
-	dPush('\tAdding All Tasks Routine');
-	const taskIDs = tasks.map(x => {return {id:x.id}});
-	availableRoutines.push(new routine(-1, "All Tasks", null, null, null, null, null, null, null, null, null, null, null, null, null, taskIDs));
-	
-	dPush('Adding Routine buttons:');
-	for(let index in availableRoutines){
-		const r = availableRoutines[index];
-		dPush('\t\t'+r.btn.textContent);
-		routineArea.appendChild(r.btn);
-	}
-	
-	if(localStorage.getItem('InProgress') !== null){
-		document.getElementById('inProgress').classList.remove('hide');
-	}
-	
-	dPush('\tInit Complete');
 }
 
 window.onbeforeunload = function(){
