@@ -1031,7 +1031,9 @@ task.prototype.select = function(){
 }
 task.prototype.taskNum = function(){
 	try{
-		return this.btn.id.replace("Routine_","").replaceAll("_",".");
+		let id = this.btn.id || '';
+		id = id.replace("Routine_","").replaceAll("_",".");
+		return id;
 	}catch(e){elementError(e);}
 	
 }
