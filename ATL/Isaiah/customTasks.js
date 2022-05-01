@@ -3,7 +3,6 @@
 const routines = [
 	{
 		id:0,
-		theme:{body:"#FFF", unstarted:"#777", current:"#093", completed:"#890"},
 		name:"Morning",
 		audio:"morning",
 		loopAudio:true,
@@ -33,7 +32,6 @@ const routines = [
 	},
 	{
 		id:1,
-		theme:"dark",
 		name:"Afternoon",
 		loopAudio:true,
 		loopDelay:10,
@@ -49,7 +47,6 @@ const routines = [
 	},
 	{
 		id:2,
-		theme:"dark",
 		name:"Evening",
 		audio:"evening",
 		loopAudio:true,

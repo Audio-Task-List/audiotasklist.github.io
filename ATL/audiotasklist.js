@@ -758,7 +758,7 @@ function routine(id, name, icon, audio, taskAudioPrefix, taskAudioSuffix, audioE
 }
 routine.prototype.playAudio = function(){
 	try{
-		dPush('Routine.PlayAudio: ' + this.audio);
+		dPush('Routine.PlayAudio: ' + (this.audio!==null));
 		if(this.audio){
 			
 			try{
@@ -824,10 +824,9 @@ routine.prototype.select = function(){
 		completedData = [];
 		
 		if(this.theme){
-			dPush('\tSet Theme' + this.theme);
+			dPush('\tSet Theme' + JSON.stringify(this.theme));
 			setTheme(this.theme);
 		}
-		else{setTheme('Light');}
 		
 		if(autoAdvanceTimer){
 			autoAdvance();
@@ -841,7 +840,7 @@ routine.prototype.select = function(){
 }
 routine.prototype.playTaskAudioPrefix = function(){
 	try{
-		dPush('playTaskAudioPrefix: ' + this.taskAudioPrefix);
+		dPush('playTaskAudioPrefix: ' + (this.taskAudioPrefix!==null));
 		if(this.taskAudioPrefix){
 			this.taskAudioPrefix.play();
 			return true;
@@ -854,7 +853,7 @@ routine.prototype.playTaskAudioPrefix = function(){
 }
 routine.prototype.playTaskAudioSuffix = function(){
 	try{
-		dPush('playTaskAudioSuffix: ' + this.taskAudioSuffix);
+		dPush('playTaskAudioSuffix: ' + (this.taskAudioSuffix!==null));
 		if(this.taskAudioSuffix){
 			this.taskAudioSuffix.play();
 			return true;
@@ -867,7 +866,7 @@ routine.prototype.playTaskAudioSuffix = function(){
 }
 routine.prototype.playEncouragement = function(){
 	try{
-		dPush('playEncouragement: ' + this.audioEncouragement);
+		dPush('playEncouragement: ' + (this.audioEncouragement!==null));
 		if(this.audioEncouragement){
 			isEncouraging = true;
 			this.audioEncouragement.play();
@@ -881,7 +880,7 @@ routine.prototype.playEncouragement = function(){
 }
 routine.prototype.playTimeExpiredAudio = function(){
 	try{
-		dPush('playTimeExpiredAudio: ' + this.timeExpiredAudio);
+		dPush('playTimeExpiredAudio: ' + (this.timeExpiredAudio!==null));
 		if(this.timeExpiredAudio){
 			this.timeExpiredAudio.play();
 			return true;
@@ -940,7 +939,7 @@ function task(taskID, id, text, time, audio, icon, parent) {
 }
 task.prototype.playAudio = function(){
 	try{
-		dPush('Task playAudio: ' + this.text);
+		dPush(`Task.playAudio: ${this.text} ${(this.text!==null)}`);
 		if(loopTimeout){
 			clearTimeout(loopTimeout);
 		}
