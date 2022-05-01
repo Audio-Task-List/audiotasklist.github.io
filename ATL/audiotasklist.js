@@ -615,7 +615,7 @@ function audioPrefixEnded(){
 }
 function audioEnded() {
 	try{
-		dPush(`audioEnded: ${currentTask.name} ${loopAudio}`);
+		dPush(`audioEnded: ${currentTask?currentTask.text:'NULL'} ${loopAudio}`);
 		if(currentRoutine.playTaskAudioSuffix()){return;}
 		if(loopAudio && currentTask){
 			loopTimeout = setTimeout(() => {if(currentTask){currentTask.playAudio()}}, loopDelay); 
@@ -1033,9 +1033,11 @@ task.prototype.taskNum = function(){
 	try{
 		dPush('\t\t'+this.btn.id)
 		let id = this.btn.id || '';
-		dPush('\t\t'+id)
-		id = id.replace("Routine_","").replaceAll("_",".");
-		dPush('\t\t'+id)
+		dPush('\t\tA'+id)
+		id = id.replace("Routine_","");
+		dPush('\t\tB'+id)
+		id = id.replaceAll("_",".");
+		dPush('\t\tC'+id)
 		return id;
 	}catch(e){elementError(e);}
 	
