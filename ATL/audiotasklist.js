@@ -76,8 +76,6 @@ function windowError(message, source, lineno, colno, error){
 	displayDiagnostics();
 }
 function elementError(e){
-	console.error(e);
-	
 	dPush('##############################################');
 	dPush("ELEMENT ERROR");
 	dPush(e.message);
@@ -1064,7 +1062,7 @@ task.prototype.complete = function(){
 		
 		const newRow = {
 			id: this.taskID,
-			taskNum: this.taskNum,
+			taskNum: this.taskNum(),
 			name: this.text,
 			started: this.started,
 			completed: this.completed,
@@ -1072,7 +1070,7 @@ task.prototype.complete = function(){
 			allocated: this.time,
 			reminders:this.descendantReminders()
 		};
-		dPush('\tAdd Completed Row: ' JSON.stringify(newRow));
+		dPush('\tAdd Completed Row: ' + JSON.stringify(newRow));
 		addTableRow(newRow);
 		
 		//if there is no parent this is the alpha and we all done here.
