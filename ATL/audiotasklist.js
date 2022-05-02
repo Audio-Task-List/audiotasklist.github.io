@@ -1,5 +1,6 @@
 "use strict";
 //on import success; indicate done; remove filename from input
+//confirm clear data/alert on success
 
 //Update demo routines
 //default
@@ -90,6 +91,12 @@ function clearChildNodes(id){
 	while(e.firstChild){
 		e.removeChild(e.lastChild);
 	}
+}
+function replaceAll(input, find, replace){
+	while(input.includes(find)){
+		input = input.replace(find, replace);
+	}
+	return input;
 }
 
 function sortData(a, b){
@@ -487,6 +494,7 @@ function resetTimer(){
 }
 
 function undoLastComplete(){
+	try{
 	if(!lastCompletedTask || !lastCompletedTask.completed){return;}
 	
 	if(currentTask){
@@ -521,6 +529,8 @@ function undoLastComplete(){
 	currentTime = currentTask.time - (Date.now() - currentTask.started);
 	lastCompletedTask = null;
 	undoArea.classList.add('hide');
+	} catch(e){elementError(e);}
+
 }
 function clickDone(){
 	try{
@@ -531,9 +541,7 @@ function clickDone(){
 			autoAdvance();
 		}
 	}
-	catch(e){
-		elementError(e);
-	}
+	catch(e){elementError(e);}
 }
 function completeCurrentTask(){
 	try{
@@ -592,6 +600,7 @@ function placeFloatButtons(){
 }
 
 function remind(){
+	try{
 	if(!currentTask){return;}
 	currentTask.reminders++;
 	currentReminds.textContent = currentTask.reminders;
@@ -600,45 +609,36 @@ function remind(){
 	const reminder = new Audio(`..\\audio\\${Math.min(currentTask.reminders,4)}reminder.mp3`);
 	reminder.addEventListener('ended', () => currentTask.playAudio());
 	reminder.play();
+	} catch(e){elementError(e);}
 }
 
 function audioPrefixEnded(){
 	try{
-		dPush('audioPrefixEnded');
 		if(currentTask){
 			currentTask.playAudio();
 		}
 	}
-	catch(e){
-		elementError(e);
-	}
+	catch(e){elementError(e);}
 }
 function audioEnded() {
 	try{
-		dPush(`audioEnded: ${currentTask?currentTask.text:'NULL'} ${loopAudio}`);
 		if(currentRoutine.playTaskAudioSuffix()){return;}
 		if(loopAudio && currentTask){
 			loopTimeout = setTimeout(() => {if(currentTask){currentTask.playAudio()}}, loopDelay); 
 		}
 	}
-	catch(e){
-		elementError(e);
-	}
+	catch(e){elementError(e);}
 }
 function audioSuffixEnded(){
 	try{
-		dPush('audioSuffixEnded');
 		if(loopAudio && currentTask){
 			loopTimeout = setTimeout(() => currentTask.playAudio(), loopDelay); 
 		}
 	}
-	catch(e){
-		elementError(e);
-	}
+	catch(e){elementError(e);}
 }
 function audioEncouragementEnded(){
 	try{
-		dPush('audioEncouragementEnded');
 		if(!autoAdvanceTimer && ! autoAdvanceDone){return;}
 		isEncouraging = false;
 		const next = getNextUncompletedTask(lastCompletedTask);
@@ -647,9 +647,7 @@ function audioEncouragementEnded(){
 			next.expandWrapper();
 		}
 	}
-	catch(e){
-		elementError(e);
-	}
+	catch(e){elementError(e);}
 	
 }
 function audioError(id) {
@@ -768,7 +766,6 @@ function routine(id, name, icon, audio, taskAudioPrefix, taskAudioSuffix, audioE
 }
 routine.prototype.playAudio = function(){
 	try{
-		dPush('Routine.PlayAudio: ' + (this.audio!==null));
 		if(this.audio){
 			
 			try{
@@ -800,7 +797,6 @@ routine.prototype.select = function(){
 		autoAdvanceDone = this.autoAdvanceDone;
 		enforceChildrenOrder = this.enforceChildrenOrder;
 		hideCompletedTasks = this.hideCompletedTasks;
-		dPush('\tRoutine Options Loaded');
 		
 		if(this.icon){
 			document.getElementById("routineImage").style.backgroundImage = this.icon;
@@ -813,14 +809,12 @@ routine.prototype.select = function(){
 		document.getElementById("chkOrder").checked = enforceChildrenOrder;
 		document.getElementById("chkHideComplete").checked = hideCompletedTasks;	
 		
-		dPush('\tTimer Init');
 		alpha.text = this.name;
 		this.playAudio();
 		alpha.started = Date.now();
 		currentRoutine = this;
 		hideRoutines();
 		
-		dPush('\tPrepare Tasks');
 		clearChildNodes("completedTable");
 		clearChildNodes("taskArea");
 		alpha.children = [];
@@ -834,7 +828,6 @@ routine.prototype.select = function(){
 		completedData = [];
 		
 		if(this.theme){
-			dPush('\tSet Theme' + JSON.stringify(this.theme));
 			setTheme(this.theme);
 		}
 		
@@ -850,7 +843,6 @@ routine.prototype.select = function(){
 }
 routine.prototype.playTaskAudioPrefix = function(){
 	try{
-		dPush('playTaskAudioPrefix: ' + (this.taskAudioPrefix!==null));
 		if(this.taskAudioPrefix){
 			this.taskAudioPrefix.play();
 			return true;
@@ -863,7 +855,6 @@ routine.prototype.playTaskAudioPrefix = function(){
 }
 routine.prototype.playTaskAudioSuffix = function(){
 	try{
-		dPush('playTaskAudioSuffix: ' + (this.taskAudioSuffix!==null));
 		if(this.taskAudioSuffix){
 			this.taskAudioSuffix.play();
 			return true;
@@ -876,7 +867,6 @@ routine.prototype.playTaskAudioSuffix = function(){
 }
 routine.prototype.playEncouragement = function(){
 	try{
-		dPush('playEncouragement: ' + (this.audioEncouragement!==null));
 		if(this.audioEncouragement){
 			isEncouraging = true;
 			this.audioEncouragement.play();
@@ -890,7 +880,6 @@ routine.prototype.playEncouragement = function(){
 }
 routine.prototype.playTimeExpiredAudio = function(){
 	try{
-		dPush('playTimeExpiredAudio: ' + (this.timeExpiredAudio!==null));
 		if(this.timeExpiredAudio){
 			this.timeExpiredAudio.play();
 			return true;
@@ -949,7 +938,6 @@ function task(taskID, id, text, time, audio, icon, parent) {
 }
 task.prototype.playAudio = function(){
 	try{
-		dPush(`Task.playAudio: ${this.text} ${(this.text!==null)}`);
 		if(loopTimeout){
 			clearTimeout(loopTimeout);
 		}
@@ -991,7 +979,6 @@ task.prototype.select = function(){
 		currentTask = null;
 		undoArea.classList.toggle('hide', !lastCompletedTask)
 		
-		dPush('\tManage sub-divs');
 		//if sibling has child tasks and none are completed collapse 
 		const siblings = this.siblings();
 		for(let index in siblings){
@@ -1016,7 +1003,6 @@ task.prototype.select = function(){
 		}
 		currentReminds.textContent = this.reminders;
 		
-		dPush('\tSet Current');
 		this.setCurrent();
 		currentTime = this.time;
 		startTimer();
@@ -1031,13 +1017,8 @@ task.prototype.select = function(){
 }
 task.prototype.taskNum = function(){
 	try{
-		dPush('\t\t'+this.btn.id)
-		let id = this.btn.id || '';
-		dPush('\t\tA'+id)
-		id = id.replace("Routine_","");
-		dPush('\t\tB'+id)
-		id = id.replaceAll("_",".");
-		dPush('\t\tC'+id)
+		let id = (this.btn.id || '').replace("Routine_","");
+		id = replaceAll(id,"_",".");
 		return id;
 	}catch(e){elementError(e);}
 	
@@ -1053,7 +1034,6 @@ task.prototype.complete = function(){
 		this.btn.classList.remove('current');
 		this.btn.classList.add('completed');
 		lastCompletedTask = this;
-		dPush('\tCompletedTime:' + this.completed);
 		
 		if(hideCompletedTasks)
 		{
@@ -1063,7 +1043,6 @@ task.prototype.complete = function(){
 		//if has child task div collapse it.
 		const div = document.getElementById(`${this.btn.id}D`);
 		if(div){
-			dPush('\tCollapse Sub-div');
 			div.style.removeProperty('max-height');
 		}
 		
@@ -1093,7 +1072,6 @@ task.prototype.complete = function(){
 			return;
 		}
 		else{
-			dPush('Save In Progress');
 			const saveData = {routine:currentRoutine.id ,tasks:buildCurrentSave()};
 			localStorage.setItem('InProgress', JSON.stringify(saveData));
 		}
@@ -1304,7 +1282,7 @@ function restoreInProgress(){
 		const datum = data[i];
 		const task = tasks.find(x => x.id===datum.id);
 		
-		const taskNum = `alpha_${datum.taskNum.replaceAll('.','_')}`;
+		const taskNum = `alpha_${replaceAll(datum.taskNum,'.','_')}`;
 		const routineTask = findTaskByNum(alpha, taskNum);
 		if(!routineTask){continue;}
 		
@@ -1462,23 +1440,18 @@ function init(){
 		currentReminds = document.getElementById("currentReminds");
 		graphModal = document.getElementById("graphModalWrapper");
 		
-		dPush('\tAdding Routines:');
 		for(let index in routines){
 			const r = routines[index];
-			dPush('\t\t'+r.name);
 			availableRoutines.push(new routine(r.id, r.name, r.icon,
 				r.audio, r.taskAudioPrefix, r.taskAudioSuffix, r.audioEncouragement, r.timeExpiredAudio, r.reminderLimit,
 			r.theme, r.loopAudio, r.loopDelay, r.autoAdvanceTimer, r.autoAdvanceDone, r.enforceChildrenOrder, r.hideCompletedTasks, r.tasks));
 		}
 		
-		dPush('\tAdding All Tasks Routine');
 		const taskIDs = tasks.map(x => {return {id:x.id}});
 		availableRoutines.push(new routine(-1, "All Tasks", null, null, null, null, null, null, null, null, null, null, null, null, null, taskIDs));
 		
-		dPush('Adding Routine buttons:');
 		for(let index in availableRoutines){
 			const r = availableRoutines[index];
-			dPush('\t\t'+r.btn.textContent);
 			routineArea.appendChild(r.btn);
 		}
 		
