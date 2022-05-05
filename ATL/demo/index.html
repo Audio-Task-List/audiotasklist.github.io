@@ -7,6 +7,7 @@
 		<script src="customTasks.js"></script>
 		<script src="../audiotasklist.js"></script>
 		<script src="../graph.js"></script>
+		<script src="../generateData.js"></script>
 		<style>
 			.current{}
 			.completed{}
@@ -108,7 +109,12 @@
 			<div id="graphModal" class="graphModal">
 				<button id="closeGraphModal" class="closeMenuButton" onclick="hideGraphModal()">X</button>
 				<button id="resetGraph" class="resetButton hide" onclick="resetGraphOptions()">Reset</button>
+				<div id="saveGraphButtons" class="saveGraphButtons hide">
+					<button id="dlGraph" onclick="saveGraphImage()">Save Graph</button>
+					<button id="dlTable" onclick="saveGraphTable()">Save Table</button>
+				</div>
 				<h3>Graphing & Analysis Tools</h3>
+				<button onclick="generateDummyData(this)">Generate Dummy Data for Graphing & Analysis (Might take a minute, please be patient)</button>
 				<div  class="modalContent">
 					<div id="modalContentWrapper" class="modalContentWrapper fullHeight">
 						<div id="modalSideArea" class="graphOptions">
@@ -150,10 +156,6 @@
 							</div>
 							<div id="sideGraphData" class="graphData hide">
 								<div id="dataWrapper">
-									<div>
-										<button id="dlGraph" onclick="saveGraphImage()">Save Graph</button>
-										<button id="dlTable" onclick="saveGraphTable()">Save Table</button>
-									</div>
 									<table id="graphDataTable" class="graphDataTable">
 										<thead id="tableHead" class="tableHead"></thead>
 										<tbody id="tableBody" class="tableBody"></tbody>
@@ -167,10 +169,6 @@
 						</div>
 					</div>
 					<div id="bottomGraphData" class="bottomGraphData hide">
-						<div style="float:right;">
-							<button id="dlGraphBottom" onclick="saveGraphImage()">Save Graph</button>
-							<button id="dlTableBottom" onclick="saveGraphTable()">Save Table</button>
-						</div>
 					</div>
 				</div>
 			</div>
