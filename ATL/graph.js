@@ -1,4 +1,6 @@
 "use strict";
+//BUG: fix non-instance graphs when multiple tasks have the same text.
+
 //for non-instance select subgroup of all data
 	//date pickers
 
@@ -8,8 +10,9 @@
 	//modal/info details
 	//nothing?
 	
-//have a pivot table on non-instance graphs?
-
+//stacked bar % time leafs; date is xAxis
+//stacked bar total time leafs; date is xAxis
+//stacked bar total reminders leafs; date is xAxis
 
 const instanceGraphs = ['flame', 'waterfall', 'pie'];
 const twoPi = Math.PI*2;
@@ -50,7 +53,8 @@ function resetGraphOptions(){
 	document.getElementById("sideGraphData").classList.add('hide');
 	document.getElementById("bottomGraphData").classList.add('hide');
 	document.getElementById('resetGraph').classList.add('hide');
-
+	document.getElementById('saveGraphButtons').classList.add('hide');
+	
 	document.getElementById("modalSideArea").classList.remove('hide');
 	document.getElementById("graphOptionWrapper").classList.remove('hide');
 
@@ -287,9 +291,18 @@ function filterRoutineLeafs(input){
 function filterData(input){
 	const from = document.getElementById('dateFrom').valueAsDate;
 	const to = document.getElementById('dateTo').valueAsDate;
-	console.log(from, to, input);
+	console.log(input)
+	const output = {};
 	
-	return input;
+	for(let [key,value] of Object.entries(input)){
+		const date = new Date(parseInt(key));
+		if(date>from && date<to){
+			output[key]=value;
+		}
+	}
+	
+	console.log(output);
+	return output;
 }
 function buildFlameData(){
 	const data = Storage.data[selectedRoutine][selectedInstance];
@@ -732,7 +745,7 @@ function buildXY(){
 	const a = h/20 *cos;
 	const b = (w-graphData.yAxis)/(taskNames.length+1) * sin;
 	const fontHeight = Math.min(a,b);
-	console.log(fontHeight);
+
 	ctx.font = getFont(fontHeight);
 	ctx.fillStyle = "#000000";
 	for(let i=0;i<taskNames.length;i++){
@@ -1132,5 +1145,6 @@ function analyze(){
 	graph = document.getElementById("Graph");
 
 	document.getElementById('resetGraph').classList.remove('hide');
+	document.getElementById('saveGraphButtons').classList.remove('hide');
 	calcSize();
 }

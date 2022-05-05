@@ -1,18 +1,31 @@
-"use strict";
 //on import success; indicate done; remove filename from input
 //confirm clear data/alert on success
 
-//Update demo routines
-//default
-//Loop Audio
-//next task when complete: just new audio files
-//hide completed
-//audio previxes
-//audio suffixes
-//task completion audio
-//time expired audio
+//Update demo routines & icons
+	//default
+	//Loop Audio
+	//next task when complete: just new audio files
+	//hide completed
+	//audio prefixes
+	//audio suffixes
+	//task completion audio
+	//time expired audio
 
-//demo icons
+//make landing page
+	//alternating blocks 2/3 picture - 1/3 text | 1/3 text - 2/3 picture
+	//~400px high?
+	//show features
+		//customizable routines
+		//nestable tasks
+		//audio reminders
+		//auto avance on done/time
+		//track completion time and reminders per task
+		//graph data
+		//custom colors per routine
+		//custom icons per task/routine
+	//link to demo
+	//email link - apply for alpha access
+"use strict";
 
 let availableRoutines = [];
 let routineArea = null;
@@ -434,7 +447,7 @@ function autoAdvance(){
 function dateFormat(input){
 	if(!input){input = new Date();}
 	const M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-	return `${input.getDate().toString().padStart(2, '0')} ${M[input.getMonth()]} ${input.getFullYear()} - ${input.getHours().toString().padStart(2, '0')}:${input.getMinutes().toString().padStart(2, '0')}`;
+	return `${input.getFullYear()} ${M[input.getMonth()]} ${input.getDate().toString().padStart(2, '0')} - ${input.getHours().toString().padStart(2, '0')}:${input.getMinutes().toString().padStart(2, '0')}`;
 }
 function formatTime(totalMilliseconds, showCentiseconds=false) {
 	const minutes = parseInt(totalMilliseconds / 60000, 10).toString().padStart(2, '0');
@@ -594,7 +607,6 @@ function placeFloatButtons(){
 		floatyButtons.style.removeProperty('top');
 	}
 	
-	
 	floatyButtons.classList.remove('hide');
 	doneBtn.classList.toggle('hide', autoAdvanceTimer);
 }
@@ -622,7 +634,7 @@ function audioPrefixEnded(){
 }
 function audioEnded() {
 	try{
-		if(currentRoutine.playTaskAudioSuffix()){return;}
+		if(currentRoutine && currentRoutine.playTaskAudioSuffix()){return;}
 		if(loopAudio && currentTask){
 			loopTimeout = setTimeout(() => {if(currentTask){currentTask.playAudio()}}, loopDelay); 
 		}
@@ -655,6 +667,7 @@ function audioError(id) {
 }
 
 function createSubTaskDiv(parent, id){
+	if(!parent){return null;}
 	const div = document.createElement('div');
 	div.id = `${id}D`;
 	div.classList.add('subtaskDiv');
@@ -670,7 +683,9 @@ function createTask(parentDiv, taskID, index, parentTask){
 	dPush(`\t\t\t${t.text}`);
 	
 	const newTask = new task(taskID, Number(index)+1, t.text, t.time, t.audio, t.icon, parentTask);
-	parentDiv.appendChild(newTask.btn);
+	if(parentDiv) {
+		parentDiv.appendChild(newTask.btn);
+	}
 	
 	return newTask;
 }
@@ -682,6 +697,28 @@ function loadTasks(parentDiv, taskIDs, parentTask){
 		if(t.tasks && t.tasks.length > 0){
 			const d = createSubTaskDiv(parentDiv, newTask.btn.id);
 			loadTasks(d, t.tasks, newTask);
+		}
+	}
+}
+
+function createTaskLite(taskID, index, parentTask){
+	dPush(`\t\tCreate Task Lite: ${taskID}`);
+	const temp = tasks.filter(x => x.id === taskID);
+	if(temp.length === 0){return null;}
+	const t = temp[0];
+	dPush(`\t\t\t${t.text}`);
+	
+	const newTask = new task(taskID, Number(index)+1, t.text, t.time, t.audio, t.icon, parentTask, true);
+	
+	return newTask;
+}
+function loadTasksLite(taskIDs, parentTask){
+	dPush('\tLoad Tasks Lite: ' + parentTask.text);
+	for(let index in taskIDs){
+		const t = taskIDs[index];
+		const newTask = createTaskLite(t.id, index, parentTask);
+		if(t.tasks && t.tasks.length > 0){
+			loadTasksLite(t.tasks, newTask);
 		}
 	}
 }
@@ -891,7 +928,7 @@ routine.prototype.playTimeExpiredAudio = function(){
 	}
 }
 
-function task(taskID, id, text, time, audio, icon, parent) {
+function task(taskID, id, text, time, audio, icon, parent, isLite=false) {
 	this.taskID = taskID;//used to look up task
 	this.id = id;//used to make the btn.id
 	this.parent = parent;
@@ -900,9 +937,18 @@ function task(taskID, id, text, time, audio, icon, parent) {
 	}
 	
 	this.text = text;
+	
+	this.children = [];
+	this.started = 0;
+	this.completed = 0;
+	this.reminders = 0;
+	this.time = time*1000 || 0;
+
 	this.btn = document.createElement('div');
 	this.btn.id = this.buildID();
-	
+
+	if(isLite){return;}
+
 	if(icon){
 		const img = document.createElement("div");
 		img.classList.add('btnIcon');
@@ -924,17 +970,12 @@ function task(taskID, id, text, time, audio, icon, parent) {
 		this.btn.classList.add('notAllowed');
 	}
 	
-	this.time = time*1000 || 0;
 	if(audio) {
 		this.audio = new Audio(`.\\audio\\${audio}.mp3`);
 		this.audio.addEventListener('ended', () => audioEnded());
 		this.audio.addEventListener('error', () => audioError(this.id));
 	}
 	
-	this.children = [];
-	this.started = 0;
-	this.completed = 0;
-	this.reminders = 0;
 }
 task.prototype.playAudio = function(){
 	try{
@@ -1023,6 +1064,18 @@ task.prototype.taskNum = function(){
 	}catch(e){elementError(e);}
 	
 }
+task.prototype.completedRow = function(){
+	return {
+		id: this.taskID,
+		taskNum: this.taskNum(),
+		name: this.text,
+		started: this.started,
+		completed: this.completed,
+		duration: formatTime(this.completed - this.started),
+		allocated: this.time,
+		reminders:this.descendantReminders()
+	};
+}
 task.prototype.complete = function(){
 	try{
 		dPush('Task.Complete: ' + this.text);
@@ -1046,18 +1099,12 @@ task.prototype.complete = function(){
 			div.style.removeProperty('max-height');
 		}
 		
-		const newRow = {
-			id: this.taskID,
-			taskNum: this.taskNum(),
-			name: this.text,
-			started: this.started,
-			completed: this.completed,
-			duration: formatTime(this.completed - this.started),
-			allocated: this.time,
-			reminders:this.descendantReminders()
-		};
+		const newRow = this.completedRow();
 		dPush('\tAdd Completed Row: ' + JSON.stringify(newRow));
 		addTableRow(newRow);
+		if(currentRoutine){
+			currentRoutine.playEncouragement();
+		}
 		
 		//if there is no parent this is the alpha and we all done here.
 		if(!this.parent){
@@ -1066,7 +1113,6 @@ task.prototype.complete = function(){
 			stopTimer();
 			timerDisplay.textContent = formatTime(0);
 			Storage.saveCurrent();
-			
 			currentRoutine = null;
 			localStorage.removeItem('InProgress');
 			return;
@@ -1083,10 +1129,6 @@ task.prototype.complete = function(){
 		
 		//check parent
 		this.parent.complete();
-		
-		if(currentRoutine){
-			currentRoutine.playEncouragement();
-		}
 	}
 	catch(e){
 		elementError(e);
@@ -1199,10 +1241,11 @@ task.prototype.descendantReminders = function(){
 }
 
 //Some hacked together save/load data to try to minimize storage space required.
-//Eventually this might just be in a DB so I won't need to save/load this rubbish
+//Eventually this might just be totaly refactored and stored in a DB?
 const cBase = 93;
 const cOffset = 33;
 function stringToInt(input){
+	if(!input){return 0};
 	if(input === "¿"){return -1;}
 	let output = 0;
 	
@@ -1234,7 +1277,7 @@ function buildCurrentSave(){
 	
 	for(let i=0;i<completedData.length;i++){
 		const c = completedData[i];
-		newData.push(`${intToString(c.id)} ${c.taskNum} ${intToString(c.started-epoch)} ${intToString(c.completed-epoch)} ${intToString(c.reminders)}`);
+		newData.push(`${intToString(c.id)} ${c.taskNum} ${intToString(c.allocated/1000)} ${intToString(c.started-epoch)} ${intToString(c.completed-epoch)} ${intToString(c.reminders)}`);
 	}
 	
 	return newData.join('│');
@@ -1248,15 +1291,16 @@ function loadSave(input){
 	
 	for(let i=1;i<input.length;i++){
 		const temp = input[i].split(" ");
-		if(temp.length != 5){continue;}
+		if(temp.length != 6){continue;}
 		
 		const id = stringToInt(temp[0]);
 		const taskNum = temp[1];
-		const start = stringToInt(temp[2]);
-		const done = stringToInt(temp[3]);
-		const reminders = stringToInt(temp[4]);
+		const allocated = stringToInt(temp[2])*1000;
+		const start = stringToInt(temp[3]);
+		const done = stringToInt(temp[4]);
+		const reminders = stringToInt(temp[5]);
 		
-		output.data.push({id:id, taskNum:taskNum, started: start, completed:done, reminders:reminders});
+		output.data.push({id:id, taskNum:taskNum, allocated:allocated, started: start, completed:done, reminders:reminders});
 	}
 	
 	return output;
@@ -1365,6 +1409,10 @@ function importData(input){
 	return data;
 }
 function storage(){
+	this.data = {};
+	this.importData();
+}
+storage.prototype.importData = function(){
 	const temp = JSON.parse(localStorage.getItem('ATL'));
 	if(!temp){return;}
 	
@@ -1381,12 +1429,26 @@ storage.prototype.saveCurrent = function(){
 		temp[currentRoutine.id].push(saveData);
 		
 		localStorage.setItem('ATL', JSON.stringify(temp));
-		this.data = importData(temp);
+		this.data = importData(temp);//fix this to be less bad.
 	}catch(e){elementError(e);}
 }
 storage.prototype.export64 = function(){
 	try{
-		const str = localStorage.getItem('ATL');
+		const saveData = {};
+		for(let [rID, value] of Object.entries(this.data)){
+			const routineData = [];
+			for(let [epoch, completedData] of Object.entries(value)){
+				const saveDatums = [];
+				saveDatums.push(intToString(epoch));
+				for(let i=0;i<completedData.length;i++){
+					const c = completedData[i];
+					saveDatums.push(`${intToString(c.id)} ${c.taskNum} ${intToString(c.allocated/1000)} ${intToString(c.started)} ${intToString(c.completed)} ${intToString(c.reminders)}`);
+				}
+				routineData.push(saveDatums.join('│'));
+			}
+			saveData[rID] = routineData;
+		}
+		const str = JSON.stringify(saveData);
 		const temp = btoa(encodeURIComponent(str));
 		const name = `ATL_export_${dateFormat()}.txt`;
 		
@@ -1416,6 +1478,16 @@ storage.prototype.import64 = function(file){
 		}
 		
 		reader.readAsText(file);
+	}catch(e){elementError(e);}
+}
+storage.prototype.appendData = function(routineID, data){
+	try{
+		if(!this.data[routineID]){
+			this.data[routineID] = [];
+		}
+		for(let i=0;i<data.length;i++){
+			this.data[routineID][data[i].epoch] = data[i].data;
+		}
 	}catch(e){elementError(e);}
 }
 

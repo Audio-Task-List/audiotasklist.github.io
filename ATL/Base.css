@@ -342,6 +342,16 @@ select {
 	font-size: 10pt;
 }
 
+.saveGraphButtons{
+    position: fixed;
+    right: 5%;
+    bottom: 0;
+    background-color: #FFF;
+    padding: 5px;
+    border: 1px solid #333;
+    border-radius: 5px;
+}
+
 .tableBody>tr:nth-child(even){
 	background-color:#CCC;
 }
