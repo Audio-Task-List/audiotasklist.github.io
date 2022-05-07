@@ -192,7 +192,6 @@ function changeColor(sender, className){
 function setClassProperty(className, property, value){
 	if(value === null){return;}
 	const stylesheet = document.styleSheets[1];
-	if(!stylesheet){console.error("E1"); return;}
 	let rule;
 	for(let i = 0; i < stylesheet.cssRules.length; i++) {
 		if(stylesheet.cssRules[i].selectorText === className) {
@@ -1321,7 +1320,6 @@ function restoreInProgress(){
 	if(inProgress){inProgress.select();}
 	
 	const data = loadSave(temp.tasks);
-	console.log(data);
 	for(let i=0;i<data.length;i++){
 		const datum = data[i];
 		const task = tasks.find(x => x.id===datum.id);
@@ -1368,14 +1366,24 @@ function importFile(e){
 		return;
 	}
 	
-	const f = e.target.files;
-	if(!f || f.length === 0){return;}
-	for(let i=0;i<f.length;i++){
-		Storage.import64(f[i]);
+	try{
+		const f = e.target.files;
+		if(!f || f.length === 0){return;}
+		for(let i=0;i<f.length;i++){
+			Storage.import64(f[i]);
+		}
+		alert("Data imported");
+		document.getElementById('import').value = null;
+	} catch(e){
+		alert("Error importing data");
+		console.error(e);
 	}
 }
 function clearStorage(){
-	localStorage.clear();
+	if(confirm("Do you want to clear all stored data?")){
+		localStorage.clear();
+		alert("Data cleared");
+	}
 }
 let isPrimitive = (input) => {
 	return input === null 

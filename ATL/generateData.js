@@ -127,7 +127,7 @@ function generateInstanceData(r, day){
 function buildInstanceSave(epoch, data){
 	const newData = [];
 	newData.push(intToString(epoch));
-	console.log(data);
+
 	for(let i=0;i<data.length;i++){
 		const c = data[i];
 		newData.push(`${intToString(c.id)} ${c.taskNum} ${intToString(c.allocated/1000)} ${intToString(c.started)} ${intToString(c.completed)} ${intToString(c.reminders)}`);

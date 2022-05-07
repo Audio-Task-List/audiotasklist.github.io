@@ -214,7 +214,7 @@ const tasks = [
 	},
 	{
 		id:23,
-		text:"Travel time",
+		text:"Go Upstairs",
 		time:60,
 		audio:"upstairs"
 	},
@@ -226,7 +226,7 @@ const tasks = [
 	},
 	{
 		id:25,
-		text:"Travel time",
+		text:"Go Downstairs",
 		time:60,
 		audio:"downstairs"
 	},
