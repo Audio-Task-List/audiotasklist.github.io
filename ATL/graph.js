@@ -921,61 +921,49 @@ function graphMouseMove(e){
 function drawClickedObject(){
 	if(!clickedObject){return;}
 
+	const dataH = Math.min(h/12,18);
+	const midH = clickedObject.y+clickedObject.h/2;
+	const midW = clickedObject.x+clickedObject.w/2;
+	const pipSize = 15;
+	let drawPip = true;
+
+	let x = midW + pipSize;
+	let y = midH - dataH*1.5;
+
+	const instanceName = dateFormat(new Date(parseInt(selectedInstance||clickedObject.data.instance)));
+	const text = clickedObject.data.task.text;
+	let value = '';
+	
 	switch(graphType){
 		case "flame":
 		case "waterfall":
 		{
-			const dataH = Math.min(h/12,18);
-			
-			const instanceName = dateFormat(new Date(parseInt(selectedInstance)));
-			const text = clickedObject.data.task.text;
-			const value = formatTime(clickedObject.data.y-clickedObject.data.x, true);
-			
-			ctx.font = getFont(dataH);
-			const width = Math.max(ctx.measureText(instanceName).width,ctx.measureText(text).width,ctx.measureText(value).width); 
-			
-			const x = clickedObject.x+Math.min(30,clickedObject.w/2);
-			const y = clickedObject.y + graphData.yScale/2 - dataH*1.5;
-			
-			ctx.beginPath();
-			ctx.fillStyle="#FFFFFF";
-			ctx.strokeStyle="#000000";
-			ctx.rect(x, y, width+4,dataH*4);
-			ctx.stroke();
-			ctx.fill();
-			ctx.closePath();
-			
-			ctx.beginPath();
-			ctx.fillStyle="#000000";
-			ctx.font = getFont(dataH);
-			ctx.fillText(instanceName, x+2,y+dataH);
-			ctx.fillText(text, x+2,y+dataH*2);
-			ctx.fillText(value, x+2,y+dataH*3);
-			ctx.closePath();
+			value = formatTime(clickedObject.data.y-clickedObject.data.x, true);
 			break;
 		}
 		case "pie":{
-			const dataH = Math.min(h/12,18);
+			value = formatTime(clickedObject.data.y-clickedObject.data.x, true);
+			drawPip = false;
 			
-			const instanceName = dateFormat(new Date(parseInt(selectedInstance)));
-			const duration = formatTime(clickedObject.data.y-clickedObject.data.x, true);
-			
-			ctx.beginPath();
-			ctx.fillStyle="#000000";
-			ctx.font = getFont(dataH);
-			ctx.fillText(instanceName, 5,dataH);
-			ctx.fillText(clickedObject.data.task.text, 5,dataH*2);
-			ctx.fillText(duration, 5,dataH*3);
-			ctx.closePath();
+			x = 5;
+			y = 5;
+			break;
+		}
+		case "stackedPercent":{
+			value = clickedObject.data.value;
+			break;
+		}
+		case "stackedTotal":{
+			value = formatTime(clickedObject.data.y, true);
+			break;
+		}
+		case "stackedReminders":{
+			value = clickedObject.data.y;
 			break;
 		}
 		case "reminders":
 		case "time":
 		{
-			const dataH = Math.min(h/12,18);
-			
-			const instanceName = dateFormat(new Date(parseInt(clickedObject.data.instance)));
-			
 			ctx.beginPath();
 			ctx.fillStyle="#000000";
 			ctx.font = getFont(dataH);
@@ -1007,48 +995,48 @@ function drawClickedObject(){
 				ctx.fillText(text, datum.x+5,datum.y, size);
 				ctx.closePath();
 			}
-			break;
-		}
-		case "stackedPercent":
-		case "stackedTotal":
-		case "stackedReminders":{
-			const dataH = Math.min(h/12,18);
-			
-			const instanceName = dateFormat(new Date(parseInt(clickedObject.data.instance)));
-			const text = clickedObject.data.task.text;
-			const value = graphType === "stackedPercent"?clickedObject.data.value:
-						graphType === "stackedTotal"?formatTime(clickedObject.data.y, true):
-						graphType === "stackedReminders"?clickedObject.data.y:"";
-			
-			ctx.font = getFont(dataH);
-			const width = Math.max(ctx.measureText(instanceName).width,ctx.measureText(text).width,ctx.measureText(value).width); 
-			const midH = clickedObject.y+clickedObject.h/2;
-			const x = clickedObject.x+Math.min(30,clickedObject.w/2);
-			const y = midH - dataH*2;
-			
-			ctx.beginPath();
-			ctx.fillStyle="#FFFFFF";
-			ctx.strokeStyle="#000000";
-			ctx.rect(x, y, width+4,dataH*4);
-			ctx.moveTo(x,midH);
-			ctx.lineTo(x-Math.min(15,clickedObject.w/4),midH);
-			ctx.stroke();
-			ctx.fill();
-			ctx.closePath();
-			
-			ctx.beginPath();
-			ctx.fillStyle="#000000";
-			ctx.font = getFont(dataH);
-			ctx.fillText(instanceName, x+2,y+dataH);
-			ctx.fillText(text, x+2,y+dataH*2);
-			ctx.fillText(value, x+2,y+dataH*3);
-			ctx.closePath();
-			break;
+			return;
 		}
 		default:{
 			return;
 		}
 	}
+
+	ctx.font = getFont(dataH);
+	const width = Math.max(ctx.measureText(instanceName).width,ctx.measureText(text).width,ctx.measureText(value).width); 
+	
+	y = Math.max(2,y);
+	let leftPip = true;
+	if(x+width > w){
+		x = midW - width - pipSize;
+		leftPip = false;
+	}
+
+	ctx.beginPath();
+	ctx.fillStyle="#FFFFFF";
+	ctx.strokeStyle="#000000";
+	ctx.rect(x, y, width+4,dataH*3+5);
+	if(drawPip){
+		if(leftPip){
+			ctx.moveTo(x,midH);
+			ctx.lineTo(x-pipSize,midH);
+		}
+		else{
+			ctx.moveTo(x+width,midH);
+			ctx.lineTo(x+width+pipSize,midH);
+		}
+	}
+	ctx.stroke();
+	ctx.fill();
+	ctx.closePath();
+	
+	ctx.beginPath();
+	ctx.fillStyle="#000000";
+	ctx.font = getFont(dataH);
+	ctx.fillText(instanceName, x+2,y+dataH);
+	ctx.fillText(text, x+2,y+dataH*2);
+	ctx.fillText(value, x+2,y+dataH*3);
+	ctx.closePath();
 }
 function drawCurrentObject(){
 	if(!currentObject){return;}
@@ -1703,7 +1691,10 @@ function resize(){
 function calcSize(){
 	if(!graph){graph = document.getElementById("Graph");}
 	const r = document.getElementById("graphWrapper").getBoundingClientRect();
-	//graph.getBoundingClientRect();
+	
+	currentObject = null;
+	clickedObject = null;
+	
 	w = r.width;
 	h = r.height;
 
