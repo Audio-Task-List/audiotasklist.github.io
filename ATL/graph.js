@@ -1,19 +1,6 @@
 "use strict";
 //BUG: fix non-instance graphs when multiple tasks have the same text.
 
-//for non-instance select subgroup of all data
-	//date pickers
-
-//graph.onclick??
-	//show values for selected 
-	//highlight data table
-	//modal/info details
-	//nothing?
-	
-//stacked bar % time leafs; date is xAxis
-//stacked bar total time leafs; date is xAxis
-//stacked bar total reminders leafs; date is xAxis
-
 const instanceGraphs = ['flame', 'waterfall', 'pie'];
 const twoPi = Math.PI*2;
 const halfPi = Math.PI/2;
@@ -933,7 +920,6 @@ function graphMouseMove(e){
 }
 function drawClickedObject(){
 	if(!clickedObject){return;}
-	console.log(clickedObject);
 
 	switch(graphType){
 		case "flame":
@@ -1036,14 +1022,16 @@ function drawClickedObject(){
 			
 			ctx.font = getFont(dataH);
 			const width = Math.max(ctx.measureText(instanceName).width,ctx.measureText(text).width,ctx.measureText(value).width); 
-			
-			const x = clickedObject.x+Math.min(30,clickedObject.w/4);
-			const y = clickedObject.y + clickedObject.h/2 - dataH*1.5;
+			const midH = clickedObject.y+clickedObject.h/2;
+			const x = clickedObject.x+Math.min(30,clickedObject.w/2);
+			const y = midH - dataH*2;
 			
 			ctx.beginPath();
 			ctx.fillStyle="#FFFFFF";
 			ctx.strokeStyle="#000000";
 			ctx.rect(x, y, width+4,dataH*4);
+			ctx.moveTo(x,midH);
+			ctx.lineTo(x-Math.min(15,clickedObject.w/4),midH);
 			ctx.stroke();
 			ctx.fill();
 			ctx.closePath();
@@ -1147,7 +1135,11 @@ function buildXY(){
 	const xMargin = w * .01;
 	const yMargin = h * .01;
 	
-	const xLabels = [...new Set(graphData.DataPoints.map(x => x.task?x.task.text:x.taskNum))];
+	const xLabels = [...new Set(graphData.DataPoints.map(x => `${x.taskNum}*${x.task?x.task.text:x.taskNum}`))]
+		.map(x => { 
+			const temp = x.split('*'); 
+			return {taskNum:temp[0], text:temp[1]}
+		});
 
 	graphData.DataPoints.sort((a,b) => parseInt(b.instance)-parseInt(a.instance) || a.taskNum.localeCompare(b.taskNum));
 	
@@ -1165,7 +1157,7 @@ function buildXY(){
 	ctx.fillStyle = "#000000";
 	ctx.strokeStyle="#000000";
 	for(let i=0;i<xLabels.length;i++){
-		const text = xLabels[i];
+		const text = xLabels[i].text;
 		const size = ctx.measureText(text).width;
 		xLabel = Math.max(size, xLabel);
 	}
@@ -1177,7 +1169,7 @@ function buildXY(){
 
 	const labelPos = {};
 	for(let i=0;i<xLabels.length;i++){
-		const text = xLabels[i];
+		const text = xLabels[i].text;
 		const size = ctx.measureText(text).width;
 		ctx.save();
 		const x = graphData.xStep*(i+.5) + graphData.yAxis - (size*cos);
@@ -1187,7 +1179,7 @@ function buildXY(){
 		ctx.fillText(text, 0,0);
 		ctx.restore();
 		
-		labelPos[text] = graphData.xStep*(i+.5) + graphData.yAxis;
+		labelPos[xLabels[i].taskNum] = graphData.xStep*(i+.5) + graphData.yAxis;
 		ctx.beginPath();
 		ctx.moveTo(graphData.xStep*(i+.5) + graphData.yAxis, graphData.xAxis-5);
 		ctx.lineTo(graphData.xStep*(i+.5) + graphData.yAxis, graphData.xAxis);
@@ -1490,7 +1482,7 @@ function buildTimeGraph(){
 		//start path		
 		const first = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[0]);
 		ctx.beginPath();
-		const tempX = labelPos[first.task?first.task.text:first.taskNum];
+		const tempX = labelPos[first.taskNum];
 		const tempY = graphData.xAxis-((first.y-first.x)*graphData.yScale);
 		graphObjects.push(new graphObject(tempX, tempY, null, null, 4, 0, twoPi, first));
 		ctx.arc(tempX, tempY, 4,0,twoPi);
@@ -1502,7 +1494,7 @@ function buildTimeGraph(){
 			const prev = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[j-1]);
 			const datum = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[j]);
 
-			const x = labelPos[datum.task?datum.task.text:datum.taskNum];
+			const x = labelPos[datum.taskNum];
 			const y = graphData.xAxis-((datum.y-datum.x)*graphData.yScale);
 			graphObjects.push(new graphObject(x, y, null, null, 4, 0, twoPi, datum));
 
@@ -1512,7 +1504,7 @@ function buildTimeGraph(){
 			ctx.closePath();
 			
 			ctx.beginPath();
-			ctx.moveTo(labelPos[prev.task?prev.task.text:prev.taskNum], graphData.xAxis-((prev.y-prev.x)*graphData.yScale));
+			ctx.moveTo(labelPos[prev.taskNum], graphData.xAxis-((prev.y-prev.x)*graphData.yScale));
 			ctx.lineTo(x, y);
 			ctx.stroke();
 			ctx.closePath();
@@ -1536,7 +1528,7 @@ function buildRemindersGraph(){
 		//start path		
 		const first = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[0]);
 		ctx.beginPath();
-		const tempX = labelPos[first.task?first.task.text:first.taskNum];
+		const tempX = labelPos[first.taskNum];
 		const tempY = graphData.xAxis-(first.x*graphData.yScale);
 		graphObjects.push(new graphObject(tempX, tempY, null, null, 4, 0, twoPi, first));
 		ctx.arc(tempX, tempY, 4,0,twoPi);
@@ -1548,7 +1540,7 @@ function buildRemindersGraph(){
 			const prev = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[j-1]);
 			const datum = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[j]);
 
-			const x = labelPos[datum.task?datum.task.text:datum.taskNum];
+			const x = labelPos[datum.taskNum];
 			const y = graphData.xAxis-(datum.x*graphData.yScale);
 			graphObjects.push(new graphObject(x, y, null, null, 4, 0, twoPi, datum));
 
@@ -1558,7 +1550,7 @@ function buildRemindersGraph(){
 			ctx.closePath();
 			
 			ctx.beginPath();
-			ctx.moveTo(labelPos[prev.task?prev.task.text:prev.taskNum], graphData.xAxis-(prev.x*graphData.yScale));
+			ctx.moveTo(labelPos[prev.taskNum], graphData.xAxis-(prev.x*graphData.yScale));
 			ctx.lineTo(x, y);
 			ctx.stroke();
 			ctx.closePath();

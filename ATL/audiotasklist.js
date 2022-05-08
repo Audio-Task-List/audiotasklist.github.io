@@ -1,30 +1,3 @@
-//on import success; indicate done; remove filename from input
-//confirm clear data/alert on success
-
-//Update demo routines & icons
-	//default
-	//Loop Audio
-	//next task when complete: just new audio files
-	//hide completed
-	//audio prefixes
-	//audio suffixes
-	//task completion audio
-	//time expired audio
-
-//make landing page
-	//alternating blocks 2/3 picture - 1/3 text | 1/3 text - 2/3 picture
-	//~400px high?
-	//show features
-		//customizable routines
-		//nestable tasks
-		//audio reminders
-		//auto avance on done/time
-		//track completion time and reminders per task
-		//graph data
-		//custom colors per routine
-		//custom icons per task/routine
-	//link to demo
-	//email link - apply for alpha access
 "use strict";
 
 let availableRoutines = [];
@@ -86,8 +59,6 @@ function windowError(message, source, lineno, colno, error){
 	dPush(`${source} ${lineno}:${colno}`);
 	dPush(error);
 	dPush('##############################################');
-	
-	displayDiagnostics();
 }
 function elementError(e){
 	dPush('##############################################');
@@ -95,8 +66,6 @@ function elementError(e){
 	dPush(e.message);
 	dPush(e.stack);
 	dPush('##############################################');
-	
-	displayDiagnostics();
 }
 
 function clearChildNodes(id){
@@ -146,9 +115,10 @@ function addTableRow(rowData){
 		const numCell = newRow.insertCell();
 		const nameCell = newRow.insertCell();
 		const durationCell = newRow.insertCell();
-		const remindersCell = newRow.insertCell();
+		const reminderCell = newRow.insertCell();
 		
 		durationCell.style.textAlign = "center";
+		reminderCell.style.textAlign = "center";
 		
 		const a = rowData.allocated?`Allocated: ${formatTime(rowData.allocated)}`:'';
 		const c = currentRoutine.reminderLimit?`Reminder Limit: ${currentRoutine.reminderLimit}`:'';
@@ -162,7 +132,7 @@ function addTableRow(rowData){
 		numCell.textContent = rowData.taskNum;
 		nameCell.textContent = rowData.name;
 		durationCell.textContent = rowData.duration;
-		remindersCell.textContent = rowData.reminders;
+		reminderCell.textContent = rowData.reminders;
 		
 		dPush(`\tRow Data: ${rowData.taskNum} ${rowData.name} ${rowData.duration}/${formatTime(rowData.allocated)} ${rowData.reminders}`);
 	}
@@ -1320,12 +1290,17 @@ function restoreInProgress(){
 	if(inProgress){inProgress.select();}
 	
 	const data = loadSave(temp.tasks);
-	for(let i=0;i<data.length;i++){
-		const datum = data[i];
+	alpha.started = data.epoch;
+	
+	for(let i=0;i<data.data.length;i++){
+		const datum = data.data[i];
 		const task = tasks.find(x => x.id===datum.id);
-		
-		const taskNum = `alpha_${replaceAll(datum.taskNum,'.','_')}`;
+
+		console.log("I", i, datum, task);
+
+		const taskNum = `Routine_${replaceAll(datum.taskNum,'.','_')}`;
 		const routineTask = findTaskByNum(alpha, taskNum);
+		console.log("TN", taskNum, routineTask);
 		if(!routineTask){continue;}
 		
 		routineTask.started = datum.started;
