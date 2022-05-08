@@ -6,6 +6,7 @@ body {
 
 a {
 	font-weight:bold;
+	margin:5px 0;
 }
 
 li{
@@ -28,9 +29,13 @@ li{
 	line-height:50px;
 }
 
-.menuLinks{
+.menuLinksWrapper{
 	position:fixed;
 	right:10px;
+}
+.menuLink{
+	width:120px;
+	display:inline-block;
 }
 
 .title{
@@ -40,6 +45,7 @@ li{
 
 .contentWrapper{
 	padding-top:50px;
+	margin:0 auto;
 }
 
 .rowWrapper {
@@ -48,31 +54,39 @@ li{
 }
 
 .row{
-	width:850px;
 	height:300px;
 	min-height:300px;
 	display:flex;
+	flex-direction:row;
+	justify-content:center;
 }
 
 .imageBlock {
 	width:550px;
 	height:300px;
 	padding:0 10px;
+	text-align:center;
+	line-height:300px;//remove list line
+}
+
+.image{
+	max-width:550px;
+	max-height:300px;
 }
 
 .textBlock{
 	width:250px;
 	height:300px;
 	padding:0 10px;
-}
-
-.oneLineBlock{
-	line-height:300px;
+	display:flex;
+	flex-direction:column;
+	justify-content:center;
 }
 
 .footer{
 	padding:25px 10px;
 	font-size:10pt;
+	text-align:center;
 }
 
 .build{

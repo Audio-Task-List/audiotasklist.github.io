@@ -334,7 +334,7 @@ var routines = [
 var tasks = [
 	{
 		id:0,
-		text:'Eat Breakfast',
+		text:'Breakfast Time',
 		time:3,
 		audio:'breakfast',
 		icon:'breakfast.png'
@@ -347,75 +347,75 @@ var tasks = [
 	},
 	{
 		id:2,
-		text:'Eat Oatmeal',
-		time:3,
+		text:'Oatmeal',
+		time:300,
 		audio:'eat',
 		icon:'breakfast.png'
 	},
 	{
 		id:3,
 		text:'Underwear On',
-		time:3,
+		time:30,
 		audio:'underwear'
 	},
 	{
 		id:4,
 		text:'Pants On',
-		time:3,
+		time:30,
 		audio:'trousers'
 	},
 	{
 		id:5,
 		text:'Shirt On',
-		time:3,
+		time:30,
 		audio:'shirt'
 	},
 	{
 		id:6,
 		text:'Long Sleeved Shirt On',
-		time:3,
+		time:30,
 		audio:'longShirt'
 	},
 	{
 		id:7,
 		text:'Socks On',
-		time:3,
+		time:30,
 		audio:'socks'
 	},
 	{
 		id:8,
 		text:'Drink Milk',
-		time:3,
+		time:120,
 		audio:'milk'
 	},
 	{
 		id:9,
 		text:'Medicine',
-		time:3,
+		time:30,
 		audio:'medicine'
 	},
 	{
 		id:10,
 		text:'Potty Try',
-		time:3,
+		time:300,
 		audio:'potty'
 	},
 	{
 		id:11,
 		text:'Shoes On',
-		time:3,
+		time:120,
 		audio:'shoes'
 	},
 	{
 		id:12,
-		text:'Eat',
-		time:30,
+		text:'Cook Oatmeal',
+		time:180,
 		audio:'eat'
 	},
 	{
 		id:13,
-		text:'Put Dish in the sink',
-		time:3,
+		text:'Eat Oatmeal',
+		time:900,
 		audio:'dishes'
 	},
 	{

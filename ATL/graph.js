@@ -1,19 +1,6 @@
 "use strict";
 //BUG: fix non-instance graphs when multiple tasks have the same text.
 
-//for non-instance select subgroup of all data
-	//date pickers
-
-//graph.onclick??
-	//show values for selected 
-	//highlight data table
-	//modal/info details
-	//nothing?
-	
-//stacked bar % time leafs; date is xAxis
-//stacked bar total time leafs; date is xAxis
-//stacked bar total reminders leafs; date is xAxis
-
 const instanceGraphs = ['flame', 'waterfall', 'pie'];
 const twoPi = Math.PI*2;
 const halfPi = Math.PI/2;
@@ -26,6 +13,9 @@ let ctx = null;
 let graphType = null;
 let selectedRoutine = null;
 let selectedInstance = null;
+let currentObject = null;
+let clickedObject = null;
+
 let w = 0;
 let h = 0;
 
@@ -40,7 +30,6 @@ const graphColors = [
 
 function resetGraphOptions(){
 	document.getElementById('graphType').value = "Select Graph Type";
-	document.getElementById('chkRoutineTotal').checked = false;
 	graphType = null;
 	selectedRoutine = null;
 	selectedInstance = null;
@@ -62,6 +51,9 @@ function resetGraphOptions(){
 	document.getElementById('modalContentWrapper').classList.remove('partialHeight');
 	document.getElementById('modalSideArea').style.removeProperty('min-width');
 	
+	clickedObject = null;
+	currentObject = null;
+	
 	if(ctx){
 		ctx.fillStyle = "#FFFFFF";
 		ctx.beginPath();
@@ -71,6 +63,7 @@ function resetGraphOptions(){
 }
 
 function showGraphModal(){
+	if(!graph){graph = document.getElementById("Graph");}
 	hideRightMenu();
 	graphModal.classList.remove('hide');
 }
@@ -86,7 +79,7 @@ function getSelectText(id){
 function saveGraphImage(){
     const graphImage = graph.toDataURL('image/png');
 	const routineName = getSelectText('selectGraphRoutine');
-	const instanceName = selectedInstance?getSelectText('selectGraphInstance'):dateFormat();
+	const instanceName = selectedInstance?dateFormat(new Date(parseInt(selectedInstance))):dateFormat();
 	const name = `ATL_graph_${graphType}_${routineName}_${instanceName}.png`;
 
     const dlImage = graphImage.replace("image/png", "image/octet-stream");
@@ -117,7 +110,7 @@ function saveGraphTable(){
     const csv_string = csv.join('\n');
 
 	const routineName = getSelectText('selectGraphRoutine');
-	const instanceName = selectedInstance?getSelectText('selectGraphInstance'):dateFormat();
+	const instanceName = selectedInstance?dateFormat(new Date(parseInt(selectedInstance))):dateFormat();
 	const name = `ATL_table_${graphType}_${routineName}_${instanceName}.csv`;
 
 	const dl = document.createElement('a');
@@ -261,6 +254,7 @@ function GraphData(){
 	this.yScale = 0;
 	this.xAxis = 0;
 	this.yAxis = 0;
+	this.xStep = 0;
 	
 	this.DataPoints = [];
 }
@@ -291,7 +285,6 @@ function filterRoutineLeafs(input){
 function filterData(input){
 	const from = document.getElementById('dateFrom').valueAsDate;
 	const to = document.getElementById('dateTo').valueAsDate;
-	console.log(input)
 	const output = {};
 	
 	for(let [key,value] of Object.entries(input)){
@@ -301,7 +294,6 @@ function filterData(input){
 		}
 	}
 	
-	console.log(output);
 	return output;
 }
 function buildFlameData(){
@@ -310,12 +302,12 @@ function buildFlameData(){
 	if(!base){return;}
 	const r = routines.find(x => x.id === selectedRoutine);
 	
-	graphData.maxX = base.completed - base.started;
+	graphData.maxX = base.completed;
 	graphData.maxY = tasksMaxDepth(r.tasks);
 	
 	for(let i=0;i<data.length;i++){
 		if(data[i].id === -1){continue;}
-		graphData.DataPoints.push(new DataPoint(null, data[i].id, data[i].taskNum, data[i].started-base.started, data[i].completed-base.started));
+		graphData.DataPoints.push(new DataPoint(null, data[i].id, data[i].taskNum, data[i].started, data[i].completed));
 	}
 }
 function buildWaterfallData(){
@@ -324,46 +316,43 @@ function buildWaterfallData(){
 	const base = data.find(x => x.id===-1);
 	if(!base){return;}
 	
-	graphData.maxX = base.completed - base.started;
+	graphData.maxX = base.completed;
 	graphData.maxY = data.length - 1;
 	
 	for(let i=0;i<data.length;i++){
 		if(data[i].id === -1){continue;}
-		graphData.DataPoints.push(new DataPoint(null, data[i].id, data[i].taskNum, data[i].started-base.started, data[i].completed-base.started));
+		graphData.DataPoints.push(new DataPoint(null, data[i].id, data[i].taskNum, data[i].started, data[i].completed));
 	}
 }
 function buildPieData(){
 	const data = Storage.data[selectedRoutine][selectedInstance];
 
-	const base = data.find(x => x.id===-1);
-	if(!base){return;}
-	
-	graphData.maxX = base.completed - base.started;
 	graphData.maxY = 0;
 	
+	let sum = 0;
 	const filtered = filterLeaf(data);
 	for(let i=0;i<filtered.length;i++){
 		if(filtered[i].id === -1){continue;}
-		graphData.DataPoints.push(new DataPoint(null, filtered[i].id, filtered[i].taskNum, filtered[i].started-base.started, filtered[i].completed-base.started));
+		graphData.DataPoints.push(new DataPoint(null, filtered[i].id, filtered[i].taskNum, filtered[i].started, filtered[i].completed));
+		sum += filtered[i].completed-filtered[i].started;
 	}
+	graphData.maxX = sum;
 }
 function buildTimeData(){
 	const data = filterData(Storage.data[selectedRoutine]);
 	const filtered = filterRoutineLeafs(data);
 	const keys = Object.keys(filtered);
-	const includeTotal = document.getElementById('chkRoutineTotal').checked;
 	graphData.maxX = keys.length;
 	
 	let maxY = 0;
 	for(let i=0;i<keys.length;i++){
 		const key = keys[i];
 		const temp = filtered[key];
-		const base = temp.find(x => x.id===-1);
 		
 		for(let j=0;j<temp.length;j++){
-			if(!includeTotal && temp[j].id===-1){continue;}
+			if(temp[j].id===-1){continue;}
 			maxY = Math.max(maxY, temp[j].completed - temp[j].started);
-			graphData.DataPoints.push(new DataPoint(key, temp[j].id, temp[j].taskNum, temp[j].started-base.started, temp[j].completed-base.started));
+			graphData.DataPoints.push(new DataPoint(key, temp[j].id, temp[j].taskNum, temp[j].started, temp[j].completed));
 		}
 	}
 	graphData.maxY = maxY;
@@ -372,7 +361,6 @@ function buildRemindersData(){
 	const data = filterData(Storage.data[selectedRoutine]);
 	const filtered = filterRoutineLeafs(data);
 	const keys = Object.keys(filtered);
-	const includeTotal = document.getElementById('chkRoutineTotal').checked;
 	graphData.maxX = keys.length;
 	
 	let maxY = 0;
@@ -380,13 +368,83 @@ function buildRemindersData(){
 		const key = keys[i];
 		const temp = filtered[key];
 		for(let j=0;j<temp.length;j++){
-			if(!includeTotal && temp[j].id===-1){continue;}
+			if(temp[j].id===-1){continue;}
 			maxY = Math.max(maxY, temp[j].reminders);
 			graphData.DataPoints.push(new DataPoint(key, temp[j].id, temp[j].taskNum, temp[j].reminders, 0));
 		}
 	}
 	graphData.maxY = maxY;
 
+}
+function buildStackedPercentData(){
+	const data = filterData(Storage.data[selectedRoutine]);
+	const filtered = filterRoutineLeafs(data);
+	const keys = Object.keys(filtered);
+	graphData.maxX = keys.length;
+	graphData.maxY = 100;
+	
+	for(let i=0;i<keys.length;i++){
+		const key = keys[i];
+		const temp = filtered[key];
+		const base = temp.find(x => x.id===-1);
+		const total = temp.reduce((sum, x) => sum += x.id===-1?0:(x.completed-x.started),0);
+		
+		let sum = 0;
+		for(let j=0;j<temp.length;j++){
+			if(temp[j].id===-1){continue;}
+			const percent = 100 * (temp[j].completed - temp[j].started) / total;
+			graphData.DataPoints.push(new DataPoint(key, temp[j].id, temp[j].taskNum, sum, sum + percent));
+			sum += percent;
+		}
+	}
+}
+function buildStackedTotalData(){
+	const data = filterData(Storage.data[selectedRoutine]);
+	const filtered = filterRoutineLeafs(data);
+	const keys = Object.keys(filtered);
+	graphData.maxX = keys.length;
+	let maxY = 0;
+	
+	for(let i=0;i<keys.length;i++){
+		const key = keys[i];
+		const temp = filtered[key];
+		const base = temp.find(x => x.id===-1);
+		
+		let sum = 0;
+		for(let j=0;j<temp.length;j++){
+			if(temp[j].id===-1){continue;}
+			const duration = temp[j].completed - temp[j].started;
+			graphData.DataPoints.push(new DataPoint(key, temp[j].id, temp[j].taskNum, sum, duration));
+			sum += duration;
+		}
+		maxY = Math.max(sum, maxY);
+	}
+	
+	graphData.maxY = maxY;
+}
+function buildStackedReminderData(){
+	const data = filterData(Storage.data[selectedRoutine]);
+	const filtered = filterRoutineLeafs(data);
+	const keys = Object.keys(filtered);
+	graphData.maxX = keys.length;
+	let maxY = 0;
+	
+	for(let i=0;i<keys.length;i++){
+		const key = keys[i];
+		const temp = filtered[key];
+		const base = temp.find(x => x.id===-1);
+		
+		let sum = 0;
+		for(let j=0;j<temp.length;j++){
+			if(temp[j].id===-1){continue;}
+			const reminders = temp[j].reminders;
+			graphData.DataPoints.push(new DataPoint(key, temp[j].id, temp[j].taskNum, sum, reminders));
+			sum += reminders;
+		}
+		maxY = Math.max(sum, maxY);
+	}
+
+	graphData.maxY = maxY;
 }
 function buildData(){
 	switch(graphType){
@@ -408,6 +466,18 @@ function buildData(){
 		}
 		case "reminders":{
 			buildRemindersData();
+			break;
+		}
+		case "stackedPercent":{
+			buildStackedPercentData();
+			break;
+		}
+		case "stackedTotal":{
+			buildStackedTotalData();
+			break;
+		}
+		case "stackedReminders":{
+			buildStackedReminderData();
 			break;
 		}
 		default:{
@@ -631,6 +701,129 @@ function buildRemindersTable(head, body, foot){
 		}
 	}
 }
+function buildStackedPercentTable(head, body, foot){
+	const hr = document.createElement('tr');
+	head.appendChild(hr);
+
+	const cols = [...new Set(graphData.DataPoints.map(x => x.instance))];
+	const rows = [...new Set(graphData.DataPoints.map(x => x.taskNum))];
+	
+	const name = document.createElement('th');
+	name.textContent = "Task Name";
+	name.classList.add('textCell');
+	hr.appendChild(name);
+	
+	for(let i=0;i<cols.length;i++){
+		const temp = document.createElement('th');
+		temp.textContent = dateFormat(new Date(parseInt(cols[i])));
+		temp.classList.add('textCell');
+		hr.appendChild(temp);
+	}
+	
+	graphData.DataPoints.sort((a,b) => parseInt(b.instance)-parseInt(a.instance) || a.taskNum.localeCompare(b.taskNum));
+	
+	for(let i=0;i<rows.length;i++){
+		const tr = document.createElement('tr');
+		body.appendChild(tr);
+
+		const n = document.createElement('td');
+		const temp = graphData.DataPoints.find(x => x.taskNum === rows[i]);
+		n.textContent = temp.task?temp.task.text : temp.taskNum;
+		n.classList.add('textCell');
+		tr.appendChild(n);			
+
+		for(let j=0;j<cols.length;j++){
+			const datum = graphData.DataPoints.find(x => x.instance === cols[j] && x.taskNum === rows[i]);
+			const p = Math.floor(100 * (datum.y-datum.x))/100;
+			datum.value = p+"%";
+			const d = document.createElement('td');
+			d.textContent = p+"%";
+			d.classList.add('dataCell');
+			tr.appendChild(d);
+		}
+	}
+}
+function buildStackedTotalTable(head, body, foot){
+	const hr = document.createElement('tr');
+	head.appendChild(hr);
+
+	const cols = [...new Set(graphData.DataPoints.map(x => x.instance))];
+	const rows = [...new Set(graphData.DataPoints.map(x => x.taskNum))];
+	
+	const name = document.createElement('th');
+	name.textContent = "Task Name";
+	name.classList.add('textCell');
+	hr.appendChild(name);
+	
+	for(let i=0;i<cols.length;i++){
+		const temp = document.createElement('th');
+		temp.textContent = dateFormat(new Date(parseInt(cols[i])));
+		temp.classList.add('textCell');
+		hr.appendChild(temp);
+	}
+	
+	graphData.DataPoints.sort((a,b) => parseInt(b.instance)-parseInt(a.instance) || a.taskNum.localeCompare(b.taskNum));
+	
+	for(let i=0;i<rows.length;i++){
+		const tr = document.createElement('tr');
+		body.appendChild(tr);
+
+		const n = document.createElement('td');
+		const temp = graphData.DataPoints.find(x => x.taskNum === rows[i]);
+		n.textContent = temp.task?temp.task.text : temp.taskNum;
+		n.classList.add('textCell');
+		tr.appendChild(n);			
+
+		for(let j=0;j<cols.length;j++){
+			const datum = graphData.DataPoints.find(x => x.instance === cols[j] && x.taskNum === rows[i]);
+
+			const d = document.createElement('td');
+			d.textContent = formatTime(datum.y, true);
+			d.classList.add('dataCell');
+			tr.appendChild(d);
+		}
+	}	
+}
+function buildStackedReminderTable(head, body, foot){
+	const hr = document.createElement('tr');
+	head.appendChild(hr);
+
+	const cols = [...new Set(graphData.DataPoints.map(x => x.instance))];
+	const rows = [...new Set(graphData.DataPoints.map(x => x.taskNum))];
+	
+	const name = document.createElement('th');
+	name.textContent = "Task Name";
+	name.classList.add('textCell');
+	hr.appendChild(name);
+	
+	for(let i=0;i<cols.length;i++){
+		const temp = document.createElement('th');
+		temp.textContent = dateFormat(new Date(parseInt(cols[i])));
+		temp.classList.add('textCell');
+		hr.appendChild(temp);
+	}
+	
+	graphData.DataPoints.sort((a,b) => parseInt(b.instance)-parseInt(a.instance) || a.taskNum.localeCompare(b.taskNum));
+	
+	for(let i=0;i<rows.length;i++){
+		const tr = document.createElement('tr');
+		body.appendChild(tr);
+
+		const n = document.createElement('td');
+		const temp = graphData.DataPoints.find(x => x.taskNum === rows[i]);
+		n.textContent = temp.task?temp.task.text : temp.taskNum;
+		n.classList.add('textCell');
+		tr.appendChild(n);			
+
+		for(let j=0;j<cols.length;j++){
+			const datum = graphData.DataPoints.find(x => x.instance === cols[j] && x.taskNum === rows[i]);
+			const d = document.createElement('td');
+			d.textContent = datum.y;
+			d.classList.add('dataCell');
+			tr.appendChild(d);
+		}
+	}	
+}
 function buildTable(){
 	const head = document.getElementById("tableHead");
 	const body = document.getElementById("tableBody");
@@ -658,6 +851,18 @@ function buildTable(){
 		}
 		case "reminders":{
 			buildRemindersTable(head, body, foot);
+			break;
+		}
+		case "stackedPercent":{
+			buildStackedPercentTable(head, body, foot);
+			break;
+		}
+		case "stackedTotal":{
+			buildStackedTotalTable(head, body, foot);
+			break;
+		}
+		case "stackedReminders":{
+			buildStackedReminderTable(head, body, foot);
 			break;
 		}
 		default:{
@@ -699,29 +904,215 @@ graphObject.prototype.checkHit = function(x,y){
 	}
 	return false;
 }
+
 function graphClick(e){
+	clickedObject = currentObject;
+	buildGraph();
+}
+function graphMouseMove(e){
 	const rect = e.srcElement.getBoundingClientRect();
-	let obj = graphObjects.find(x => x.checkHit(e.x - rect.x, e.y - rect.y));
-	if(obj){
-		//what to do here?
-		console.log(obj);
-		const a = obj.data.instance?dateFormat(new Date(parseInt(obj.data.instance))):'N/A';
-		const b = obj.data.task?obj.data.task.text:'Routine';
-		const c = 
-		console.log(a,b);
+	const obj = graphObjects.find(x => x.checkHit(e.x - rect.x, e.y - rect.y));
+	if(obj === currentObject){return;}
+	
+	currentObject = obj;
+	graph.style.cursor = obj?'pointer':'default';
+	buildGraph();
+}
+function drawClickedObject(){
+	if(!clickedObject){return;}
+
+	const dataH = Math.min(h/12,18);
+	const midH = clickedObject.y+clickedObject.h/2;
+	const midW = clickedObject.x+clickedObject.w/2;
+	const pipSize = 15;
+	let drawPip = true;
+
+	let x = midW + pipSize;
+	let y = midH - dataH*1.5;
+
+	const instanceName = dateFormat(new Date(parseInt(selectedInstance||clickedObject.data.instance)));
+	const text = clickedObject.data.task.text;
+	let value = '';
+	
+	switch(graphType){
+		case "flame":
+		case "waterfall":
+		{
+			value = formatTime(clickedObject.data.y-clickedObject.data.x, true);
+			break;
+		}
+		case "pie":{
+			value = formatTime(clickedObject.data.y-clickedObject.data.x, true);
+			drawPip = false;
+			
+			x = 5;
+			y = 5;
+			break;
+		}
+		case "stackedPercent":{
+			value = clickedObject.data.value;
+			break;
+		}
+		case "stackedTotal":{
+			value = formatTime(clickedObject.data.y, true);
+			break;
+		}
+		case "stackedReminders":{
+			value = clickedObject.data.y;
+			break;
+		}
+		case "reminders":
+		case "time":
+		{
+			ctx.beginPath();
+			ctx.fillStyle="#000000";
+			ctx.font = getFont(dataH);
+			ctx.fillText("Instance: " + instanceName, graphData.yAxis+3, dataH);
+			ctx.closePath();
+		
+			const instanceData = graphObjects.filter(x => x.data.instance === clickedObject.data.instance);
+			const height = h/40;
+			const font = getFont(height);
+			
+			for(let i=0;i<instanceData.length;i++){
+				const datum = instanceData[i];
+				const text = graphType==="time"?
+					formatTime(datum.data.y-datum.data.x, true)
+					: datum.data.x;
+					
+				ctx.beginPath();
+				ctx.strokeStyle="#000000";
+				ctx.fillStyle="#FFFFFF";
+				
+				const size = Math.min(graphData.xStep,ctx.measureText(text).width);
+				ctx.rect(datum.x+3,datum.y-height*1.5, size+4, height*2);
+				ctx.fill();
+				ctx.stroke();
+				ctx.closePath();
+				
+				ctx.beginPath();
+				ctx.fillStyle="#000000";
+				ctx.fillText(text, datum.x+5,datum.y, size);
+				ctx.closePath();
+			}
+			return;
+		}
+		default:{
+			return;
+		}
+	}
+
+	ctx.font = getFont(dataH);
+	const width = Math.max(ctx.measureText(instanceName).width,ctx.measureText(text).width,ctx.measureText(value).width); 
+	
+	y = Math.max(2,y);
+	let leftPip = true;
+	if(x+width > w){
+		x = midW - width - pipSize;
+		leftPip = false;
+	}
+
+	ctx.beginPath();
+	ctx.fillStyle="#FFFFFF";
+	ctx.strokeStyle="#000000";
+	ctx.rect(x, y, width+4,dataH*3+5);
+	if(drawPip){
+		if(leftPip){
+			ctx.moveTo(x,midH);
+			ctx.lineTo(x-pipSize,midH);
+		}
+		else{
+			ctx.moveTo(x+width,midH);
+			ctx.lineTo(x+width+pipSize,midH);
+		}
+	}
+	ctx.stroke();
+	ctx.fill();
+	ctx.closePath();
+	
+	ctx.beginPath();
+	ctx.fillStyle="#000000";
+	ctx.font = getFont(dataH);
+	ctx.fillText(instanceName, x+2,y+dataH);
+	ctx.fillText(text, x+2,y+dataH*2);
+	ctx.fillText(value, x+2,y+dataH*3);
+	ctx.closePath();
+}
+function drawCurrentObject(){
+	if(!currentObject){return;}
+	switch(graphType){
+		case "flame":
+		case "waterfall":
+		case "stackedPercent":
+		case "stackedTotal":
+		case "stackedReminders":
+		{
+			ctx.beginPath();
+			ctx.strokeStyle = "#000000";
+			ctx.lineWidth=4;
+			ctx.rect(currentObject.x, currentObject.y, currentObject.w, currentObject.h);
+			ctx.stroke();
+			ctx.closePath();
+			
+			ctx.beginPath();
+			ctx.strokeStyle = "#FFFFFF";
+			ctx.lineWidth=2;
+			ctx.rect(currentObject.x, currentObject.y, currentObject.w, currentObject.h);
+			ctx.stroke();			
+			ctx.closePath();
+			break;
+		}
+		case "pie":{
+			ctx.beginPath();
+			ctx.lineWidth=4;
+			ctx.strokeStyle="#000000";
+			ctx.moveTo(w/2, h/2);
+			ctx.arc(w/2, h/2, currentObject.r, currentObject.s, currentObject.e);
+			ctx.lineTo(w/2,h/2);
+			ctx.stroke();
+			ctx.closePath();
+			
+			ctx.beginPath();
+			ctx.lineWidth=2;
+			ctx.strokeStyle="#FFFFFF";
+			ctx.moveTo(w/2, h/2);
+			ctx.arc(w/2, h/2, currentObject.r, currentObject.s, currentObject.e);
+			ctx.lineTo(w/2,h/2);
+			ctx.stroke();
+			ctx.closePath();
+
+			break;
+		}
+		case "reminders":
+		case "time":
+		{
+			ctx.beginPath();
+			ctx.fillStyle = "#000000";
+			ctx.arc(currentObject.x, currentObject.y, currentObject.r*2, currentObject.s, currentObject.e);
+			ctx.fill();
+			ctx.closePath();
+			
+			ctx.beginPath();
+			ctx.strokeStyle = "#FFFFFF";
+			ctx.arc(currentObject.x, currentObject.y, currentObject.r, currentObject.s, currentObject.e);
+			ctx.stroke();			
+			ctx.closePath();
+			break;
+		}
+		default:{
+			return;
+		}
 	}
 }
 
+const timeScaleGroups = [0,1,5,10,50,100,500,1000,5000,60*1000,5*60*1000,60*60*1000];
 function getFont(height){
 	let fontSize = Math.min(16,Math.floor(height));
-	
 	return fontSize+"px sans-serif";
-	
 }
 function buildXY(){
 	let stepScale = 5;
 	if(graphType === 'time'){
-		const timeScaleGroups = [0,200,5000,60*1000,5*60*1000,60*60*1000];
 		let i=0;
 		while(timeScaleGroups[i]<graphData.maxY && i<timeScaleGroups.length){i++;}
 		stepScale = timeScaleGroups[i-1];
@@ -732,7 +1123,11 @@ function buildXY(){
 	const xMargin = w * .01;
 	const yMargin = h * .01;
 	
-	const taskNames = [...new Set(graphData.DataPoints.map(x => x.task?x.task.text:x.taskNum))];
+	const xLabels = [...new Set(graphData.DataPoints.map(x => `${x.taskNum}*${x.task?x.task.text:x.taskNum}`))]
+		.map(x => { 
+			const temp = x.split('*'); 
+			return {taskNum:temp[0], text:temp[1]}
+		});
 
 	graphData.DataPoints.sort((a,b) => parseInt(b.instance)-parseInt(a.instance) || a.taskNum.localeCompare(b.taskNum));
 	
@@ -743,25 +1138,117 @@ function buildXY(){
 	const sin = Math.sin(rot);
 
 	const a = h/20 *cos;
-	const b = (w-graphData.yAxis)/(taskNames.length+1) * sin;
+	const b = (w-graphData.yAxis)/(xLabels.length+1) * sin;
 	const fontHeight = Math.min(a,b);
 
 	ctx.font = getFont(fontHeight);
 	ctx.fillStyle = "#000000";
-	for(let i=0;i<taskNames.length;i++){
-		const text = taskNames[i];
+	ctx.strokeStyle="#000000";
+	for(let i=0;i<xLabels.length;i++){
+		const text = xLabels[i].text;
 		const size = ctx.measureText(text).width;
 		xLabel = Math.max(size, xLabel);
 	}
 	
 	//xAxis
-	const xStep = (w - graphData.yAxis - xMargin - xMargin) / (taskNames.length);
+	graphData.xStep = (w - graphData.yAxis - xMargin - xMargin) / (xLabels.length);
 	xLabel *= sin;
 	graphData.xAxis = h - xLabel - yMargin - yMargin - (20 * sin);
 
 	const labelPos = {};
-	for(let i=0;i<taskNames.length;i++){
-		const text = taskNames[i];
+	for(let i=0;i<xLabels.length;i++){
+		const text = xLabels[i].text;
+		const size = ctx.measureText(text).width;
+		ctx.save();
+		const x = graphData.xStep*(i+.5) + graphData.yAxis - (size*cos);
+		const y = h - xLabel - yMargin + (size*sin);
+		ctx.translate(x, y);
+		ctx.rotate(-rot);
+		ctx.fillText(text, 0,0);
+		ctx.restore();
+		
+		labelPos[xLabels[i].taskNum] = graphData.xStep*(i+.5) + graphData.yAxis;
+		ctx.beginPath();
+		ctx.moveTo(graphData.xStep*(i+.5) + graphData.yAxis, graphData.xAxis-5);
+		ctx.lineTo(graphData.xStep*(i+.5) + graphData.yAxis, graphData.xAxis);
+		ctx.stroke();
+		ctx.closePath();
+	}
+
+	//yAxis
+	const ySpace = (graphData.xAxis - yMargin) / 5;
+	for(let i=0;i<=5;i++){
+		const text = graphType === 'time' ? formatTime(yStep*i*(stepScale/5)) : (yStep*i).toString();
+		const size = ctx.measureText(text).width;
+		const x = graphData.yAxis - size - 5;
+		const y = graphData.xAxis - ySpace*i;
+		ctx.fillText(text, x, y+Math.min(fontHeight/3,5));
+		ctx.lineWidth=1;
+		ctx.strokeStyle = "#CCCCCC";
+		ctx.beginPath();
+		ctx.moveTo(graphData.yAxis,y);
+		ctx.lineTo(w,y);
+		ctx.stroke();
+		ctx.closePath();
+	}
+	
+	ctx.beginPath();
+	ctx.strokeStyle = "#000000";
+	ctx.lineWidth=2;
+	ctx.moveTo(graphData.yAxis, graphData.xAxis);
+	ctx.lineTo(w, graphData.xAxis);
+	ctx.moveTo(graphData.yAxis, 0);
+	ctx.lineTo(graphData.yAxis, graphData.xAxis);
+	ctx.stroke();
+	ctx.closePath();
+	
+	graphData.xScale = (w - graphData.yAxis)/(graphData.maxX - graphData.minX) * .98;
+	graphData.yScale = (graphData.xAxis)/(graphData.maxY - graphData.minY) * .98;
+
+	return labelPos;
+}
+function buildStackedXY(){
+	let stepScale = 5;
+	if(graphType === 'time'){
+		let i=0;
+		while(timeScaleGroups[i]<graphData.maxY && i<timeScaleGroups.length){i++;}
+		stepScale = timeScaleGroups[i-1];
+	}
+	const yStep = Math.max(1,Math.ceil((graphData.maxY-graphData.minY)/stepScale));
+	graphData.maxY = graphData.minY + (yStep * stepScale);
+	
+	const xMargin = w * .01;
+	const yMargin = h * .01;
+	
+	const xLabels = [...new Set(graphData.DataPoints.map(x => dateFormat(new Date(parseInt(x.instance)))))];
+	graphData.DataPoints.sort((a,b) => parseInt(b.instance)-parseInt(a.instance) || a.taskNum.localeCompare(b.taskNum));
+	
+	graphData.yAxis = 100;
+	let xLabel = 0;
+	const rot = Math.PI/8;
+	const cos = Math.cos(rot);
+	const sin = Math.sin(rot);
+
+	const a = h/20 *cos;
+	const b = (w-graphData.yAxis)/(xLabels.length+1) * sin;
+	const fontHeight = Math.min(a,b);
+
+	ctx.font = getFont(fontHeight);
+	ctx.fillStyle = "#000000";
+	for(let i=0;i<xLabels.length;i++){
+		const text = xLabels[i];
+		const size = ctx.measureText(text).width;
+		xLabel = Math.max(size, xLabel);
+	}
+	
+	//xAxis
+	const xStep = (w - graphData.yAxis - xMargin - xMargin) / (xLabels.length);
+	xLabel *= sin;
+	graphData.xAxis = h - xLabel - yMargin - yMargin - (20 * sin);
+
+	const labelPos = {};
+	for(let i=0;i<xLabels.length;i++){
+		const text = xLabels[i];
 		const size = ctx.measureText(text).width;
 		ctx.save();
 		const x = xStep*(i+.5) + graphData.yAxis - (size*cos);
@@ -779,16 +1266,6 @@ function buildXY(){
 		ctx.closePath();
 	}
 	
-	ctx.beginPath();
-	ctx.moveTo(graphData.yAxis, graphData.xAxis);
-	ctx.lineTo(w, graphData.xAxis);
-	ctx.stroke();
-	
-	ctx.beginPath();
-	ctx.moveTo(graphData.yAxis, 0);
-	ctx.lineTo(graphData.yAxis, graphData.xAxis);
-	ctx.stroke();
-
 	//yAxis
 	const ySpace = (graphData.xAxis - yMargin) / 5;
 	for(let i=0;i<=5;i++){
@@ -805,6 +1282,16 @@ function buildXY(){
 		ctx.stroke();
 		ctx.closePath();
 	}
+	
+	ctx.beginPath();
+	ctx.strokeStyle = "#000000";
+	ctx.lineWidth=2;
+	ctx.moveTo(graphData.yAxis, graphData.xAxis);
+	ctx.lineTo(w, graphData.xAxis);
+	ctx.moveTo(graphData.yAxis, 0);
+	ctx.lineTo(graphData.yAxis, graphData.xAxis);
+	ctx.stroke();
+	ctx.closePath();
 	
 	graphData.xScale = (w - graphData.yAxis)/(graphData.maxX - graphData.minX) * .98;
 	graphData.yScale = (graphData.xAxis)/(graphData.maxY - graphData.minY) * .98;
@@ -835,9 +1322,10 @@ function buildFlameGraph(){
 		ctx.fillRect(x1, y1, x2, y2);
 		ctx.rect(x1, y1, x2, y2);
 		graphObjects.push(new graphObject(x1, y1, x2, y2, null, null, null, datum));
-		ctx.closePath();
 		ctx.stroke();
+		ctx.closePath();
 		
+		ctx.beginPath();
 		ctx.font = getFont(x2);
 		ctx.fillStyle = "#000000";
 		const text = datum.task?datum.task.text:datum.taskNum;
@@ -851,6 +1339,7 @@ function buildFlameGraph(){
 		ctx.rotate(-Math.PI/2);
 		ctx.fillText(text, 0,0);
 		ctx.restore();
+		ctx.closePath();
 	}
 }
 function buildWaterfallGraph(){
@@ -981,7 +1470,7 @@ function buildTimeGraph(){
 		//start path		
 		const first = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[0]);
 		ctx.beginPath();
-		const tempX = labelPos[first.task?first.task.text:first.taskNum];
+		const tempX = labelPos[first.taskNum];
 		const tempY = graphData.xAxis-((first.y-first.x)*graphData.yScale);
 		graphObjects.push(new graphObject(tempX, tempY, null, null, 4, 0, twoPi, first));
 		ctx.arc(tempX, tempY, 4,0,twoPi);
@@ -993,7 +1482,7 @@ function buildTimeGraph(){
 			const prev = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[j-1]);
 			const datum = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[j]);
 
-			const x = labelPos[datum.task?datum.task.text:datum.taskNum];
+			const x = labelPos[datum.taskNum];
 			const y = graphData.xAxis-((datum.y-datum.x)*graphData.yScale);
 			graphObjects.push(new graphObject(x, y, null, null, 4, 0, twoPi, datum));
 
@@ -1003,7 +1492,7 @@ function buildTimeGraph(){
 			ctx.closePath();
 			
 			ctx.beginPath();
-			ctx.moveTo(labelPos[prev.task?prev.task.text:prev.taskNum], graphData.xAxis-((prev.y-prev.x)*graphData.yScale));
+			ctx.moveTo(labelPos[prev.taskNum], graphData.xAxis-((prev.y-prev.x)*graphData.yScale));
 			ctx.lineTo(x, y);
 			ctx.stroke();
 			ctx.closePath();
@@ -1027,7 +1516,7 @@ function buildRemindersGraph(){
 		//start path		
 		const first = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[0]);
 		ctx.beginPath();
-		const tempX = labelPos[first.task?first.task.text:first.taskNum];
+		const tempX = labelPos[first.taskNum];
 		const tempY = graphData.xAxis-(first.x*graphData.yScale);
 		graphObjects.push(new graphObject(tempX, tempY, null, null, 4, 0, twoPi, first));
 		ctx.arc(tempX, tempY, 4,0,twoPi);
@@ -1039,7 +1528,7 @@ function buildRemindersGraph(){
 			const prev = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[j-1]);
 			const datum = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[j]);
 
-			const x = labelPos[datum.task?datum.task.text:datum.taskNum];
+			const x = labelPos[datum.taskNum];
 			const y = graphData.xAxis-(datum.x*graphData.yScale);
 			graphObjects.push(new graphObject(x, y, null, null, 4, 0, twoPi, datum));
 
@@ -1049,7 +1538,7 @@ function buildRemindersGraph(){
 			ctx.closePath();
 			
 			ctx.beginPath();
-			ctx.moveTo(labelPos[prev.task?prev.task.text:prev.taskNum], graphData.xAxis-(prev.x*graphData.yScale));
+			ctx.moveTo(labelPos[prev.taskNum], graphData.xAxis-(prev.x*graphData.yScale));
 			ctx.lineTo(x, y);
 			ctx.stroke();
 			ctx.closePath();
@@ -1057,7 +1546,101 @@ function buildRemindersGraph(){
 		ctx.closePath();
 	}
 }
+function buildStackedPercentGraph(){
+	const labelPos = buildStackedXY();
+	const series = [...new Set(graphData.DataPoints.map(x => x.instance))];
+	const taskNums = [...new Set(graphData.DataPoints.map(x => x.taskNum))].sort();
+
+	for(let i=0;i<series.length;i++){
+		ctx.strokeStyle = "#000000";
+		ctx.lineWidth = 2;
+		
+		const dateLabel = dateFormat(new Date(parseInt(series[i])));
+		const w = graphData.xScale * .8;
+		const x = labelPos[dateLabel] - w/2;
+		for(let j=0;j<taskNums.length;j++){
+			const datum = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[j]);
+			
+			const y = graphData.xAxis-(datum.y*graphData.yScale);
+			const h = (datum.y-datum.x)*graphData.yScale;
+			graphObjects.push(new graphObject(x, y, w, h, null, null, null, datum));
+			
+			ctx.beginPath();
+			ctx.fillStyle = graphColors[j % graphColors.length];
+			ctx.rect(x, y, w, h);
+			ctx.stroke();
+			ctx.fill();
+			ctx.closePath();
+		}
+	}
+}
+function buildStackedTotalGraph(){
+	const labelPos = buildStackedXY();
+	const series = [...new Set(graphData.DataPoints.map(x => x.instance))];
+	const taskNums = [...new Set(graphData.DataPoints.map(x => x.taskNum))].sort();
+
+	for(let i=0;i<series.length;i++){
+		ctx.strokeStyle = "#000000";
+		ctx.lineWidth = 2;
+		
+		const dateLabel = dateFormat(new Date(parseInt(series[i])));
+		const w = graphData.xScale * .8;
+		const x = labelPos[dateLabel] - w/2;
+		for(let j=0;j<taskNums.length;j++){
+			const datum = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[j]);
+
+			const y = graphData.xAxis-((datum.x+datum.y)*graphData.yScale);
+			const h = datum.y*graphData.yScale;
+			graphObjects.push(new graphObject(x, y, w, h, null, null, null, datum));
+			
+			ctx.beginPath();
+			ctx.fillStyle = graphColors[j % graphColors.length];
+			ctx.rect(x, y, w, h);
+			ctx.stroke();
+			ctx.fill();
+			ctx.closePath();
+		}
+	}
+}
+function buildStackedReminderGraph(){
+	const labelPos = buildStackedXY();
+	const series = [...new Set(graphData.DataPoints.map(x => x.instance))];
+	const taskNums = [...new Set(graphData.DataPoints.map(x => x.taskNum))].sort();
+
+	for(let i=0;i<series.length;i++){
+		ctx.strokeStyle = "#000000";
+		ctx.lineWidth = 2;
+		
+		const dateLabel = dateFormat(new Date(parseInt(series[i])));
+		const w = graphData.xScale * .8;
+		const x = labelPos[dateLabel] - w/2;
+		for(let j=0;j<taskNums.length;j++){
+			const datum = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[j]);
+			
+			const y = graphData.xAxis-((datum.x+datum.y)*graphData.yScale);
+			const h = datum.y*graphData.yScale;
+
+			graphObjects.push(new graphObject(x, y, w, h, null, null, null, datum));
+			
+			ctx.beginPath();
+			ctx.fillStyle = graphColors[j % graphColors.length];
+			ctx.rect(x, y, w, h);
+			ctx.stroke();
+			ctx.fill();
+			ctx.closePath();
+		}
+	}
+}
 function buildGraph(){
+	if(!ctx){return;}
+	ctx.beginPath();
+	ctx.fillStyle="#FFFFFF";
+	ctx.rect(0,0,w,h);
+	ctx.fill();
+	ctx.closePath();
+	
+	graphObjects = [];
+	
 	switch(graphType){
 		case "flame":{
 			buildFlameGraph();
@@ -1079,10 +1662,25 @@ function buildGraph(){
 			buildRemindersGraph();
 			break;
 		}
+		case "stackedPercent":{
+			buildStackedPercentGraph();
+			break;
+		}
+		case "stackedTotal":{
+			buildStackedTotalGraph();
+			break;
+		}
+		case "stackedReminders":{
+			buildStackedReminderGraph();
+			break;
+		}
 		default:{
 			return;
 		}
 	}
+	
+	drawCurrentObject();
+	drawClickedObject();
 }
 
 let resizerDelay;
@@ -1093,7 +1691,10 @@ function resize(){
 function calcSize(){
 	if(!graph){graph = document.getElementById("Graph");}
 	const r = document.getElementById("graphWrapper").getBoundingClientRect();
-	//graph.getBoundingClientRect();
+	
+	currentObject = null;
+	clickedObject = null;
+	
 	w = r.width;
 	h = r.height;
 
