@@ -1105,7 +1105,7 @@ function drawCurrentObject(){
 	}
 }
 
-const timeScaleGroups = [0,1,5,10,50,100,500,1000,5000,60*1000,5*60*1000,60*60*1000];
+const timeScaleGroups = [0,1000,30*1000,60*1000,5*60*1000,60*60*1000];
 function getFont(height){
 	let fontSize = Math.min(16,Math.floor(height));
 	return fontSize+"px sans-serif";
@@ -1209,7 +1209,7 @@ function buildXY(){
 }
 function buildStackedXY(){
 	let stepScale = 5;
-	if(graphType === 'time'){
+	if(graphType === 'stackedTotal'){
 		let i=0;
 		while(timeScaleGroups[i]<graphData.maxY && i<timeScaleGroups.length){i++;}
 		stepScale = timeScaleGroups[i-1];
@@ -1269,7 +1269,7 @@ function buildStackedXY(){
 	//yAxis
 	const ySpace = (graphData.xAxis - yMargin) / 5;
 	for(let i=0;i<=5;i++){
-		const text = graphType === 'time' ? formatTime(yStep*i*(stepScale/5)) : (yStep*i).toString();
+		const text = graphType === 'stackedTotal' ? formatTime(yStep*i*(stepScale/5)) : (yStep*i).toString();
 		const size = ctx.measureText(text).width;
 		const x = graphData.yAxis - size - 5;
 		const y = graphData.xAxis - ySpace*i;
