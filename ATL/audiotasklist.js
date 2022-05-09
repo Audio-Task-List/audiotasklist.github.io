@@ -1503,7 +1503,7 @@ function init(){
 		}
 		
 		const taskIDs = tasks.map(x => {return {id:x.id}});
-		availableRoutines.push(new routine(-1, "All Tasks", null, null, null, null, null, null, null, null, null, null, null, null, null, taskIDs));
+		availableRoutines.push(new routine(-1, "All Tasks", null, null, null, null, null, null, null, null, null, null, null, null, null, null, taskIDs));
 		
 		for(let index in availableRoutines){
 			const r = availableRoutines[index];
