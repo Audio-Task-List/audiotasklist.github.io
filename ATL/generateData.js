@@ -1,22 +1,3 @@
-//build demo data generator.
-	//for each routine
-		//pick 10-100? days over the last 12? months
-		//foreach day:
-			//get leaf tasks in order:
-				//leaf task start = autoAdvanceTimer||autoAdvanceDone ? 1 second gap : (random * 30) + 5 seconds gap
-				//leaf task duration = autoAdvanceTimer ? taskTime : (random * taskTime) + taskTime/2
-				//leaf completed = start + duration
-
-			//rest of tasks:
-				//task start = first leaf start 
-				//task completed = last leaf complete
-		
-	//see how big that much data is and adjust number of days.
-		//check size in browser storage
-		//check size of export file
-		//refactor save/load if it is too big.
-		//save task allotted time?
-		
 "use strict";
 
 function getDays(){
