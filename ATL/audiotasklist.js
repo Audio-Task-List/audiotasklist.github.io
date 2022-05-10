@@ -486,8 +486,9 @@ function undoLastComplete(){
 		currentTask.collapseDescendants();
 	}
 	
-	const temp = lastCompletedTask.taskNum();
-	completedData = completedData.filter(x => x.taskNum !== temp);
+	const taskNum = lastCompletedTask.taskNum();
+	if(taskNum === 'Routine'){return;}
+	completedData = completedData.filter(x => x.taskNum !== taskNum);
 	sortCompletedData();
 	
 	lastCompletedTask.completed=0; 
@@ -511,8 +512,8 @@ function undoLastComplete(){
 	currentTime = currentTask.time - (Date.now() - currentTask.started);
 	lastCompletedTask = null;
 	undoArea.classList.add('hide');
-	} catch(e){elementError(e);}
-
+	} 
+	catch(e){elementError(e);}
 }
 function clickDone(){
 	try{
@@ -1074,6 +1075,9 @@ task.prototype.complete = function(){
 		if(currentRoutine){
 			currentRoutine.playEncouragement();
 		}
+
+		document.getElementById("completedArea").classList.remove('hide');
+		undoArea.classList.toggle('hide', !lastCompletedTask )
 		
 		//if there is no parent this is the alpha and we all done here.
 		if(!this.parent){
@@ -1084,15 +1088,15 @@ task.prototype.complete = function(){
 			Storage.saveCurrent();
 			currentRoutine = null;
 			localStorage.removeItem('InProgress');
+			lastCompletedTask = null;
+			undoArea.classList.add('hide');
 			return;
 		}
 		else{
 			const saveData = {routine:currentRoutine.id ,tasks:buildCurrentSave()};
 			localStorage.setItem('InProgress', JSON.stringify(saveData));
 		}
-		document.getElementById("completedArea").classList.remove('hide');
 		currentTask = null;
-		undoArea.classList.toggle('hide', !lastCompletedTask )
 		stopTimer();
 		resetTimer();
 		
