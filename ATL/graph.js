@@ -1,5 +1,4 @@
 "use strict";
-//BUG: fix non-instance graphs when multiple tasks have the same text.
 
 const instanceGraphs = ['flame', 'waterfall', 'pie'];
 const twoPi = Math.PI*2;
@@ -46,7 +45,7 @@ function resetGraphOptions(){
 	
 	document.getElementById("modalSideArea").classList.remove('hide');
 	document.getElementById("graphOptionWrapper").classList.remove('hide');
-
+	
 	document.getElementById('modalContentWrapper').classList.add('fullHeight');
 	document.getElementById('modalContentWrapper').classList.remove('partialHeight');
 	document.getElementById('modalSideArea').style.removeProperty('min-width');
@@ -81,7 +80,7 @@ function saveGraphImage(){
 	const routineName = getSelectText('selectGraphRoutine');
 	const instanceName = selectedInstance?dateFormat(new Date(parseInt(selectedInstance))):dateFormat();
 	const name = `ATL_graph_${graphType}_${routineName}_${instanceName}.png`;
-
+	
     const dlImage = graphImage.replace("image/png", "image/octet-stream");
 	
 	const dl = document.createElement('a');
@@ -90,7 +89,7 @@ function saveGraphImage(){
 	dl.setAttribute("href", dlImage);
     dl.target = '_self';
     dl.download = name;
-
+	
     document.body.appendChild(dl);
 	dl.click(); 
     document.body.removeChild(dl);
@@ -104,139 +103,151 @@ function saveGraphTable(){
         for (let j = 0; j < cols.length; j++) {
             const data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ').replace(/"/g, '""');
             row.push('"' + data + '"');
-        }
+		}
         csv.push(row.join(','));
-    }
+	}
     const csv_string = csv.join('\n');
-
+	
 	const routineName = getSelectText('selectGraphRoutine');
 	const instanceName = selectedInstance?dateFormat(new Date(parseInt(selectedInstance))):dateFormat();
 	const name = `ATL_table_${graphType}_${routineName}_${instanceName}.csv`;
-
+	
 	const dl = document.createElement('a');
-
+	
 	dl.target = '_self';
     dl.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv_string));
     dl.setAttribute('download', name);
-
+	
 	document.body.appendChild(dl);
     dl.click();
     document.body.removeChild(dl);
 }
 
 function selectGraphType(value){
-	graphType = value;
-	selectedRoutine = null;
-	selectedInstance = null;
-	document.getElementById('generateGraph').classList.add('hide');
-	document.getElementById("sideGraphData").classList.add('hide');
-	document.getElementById("graphInstance").classList.add('hide');
-	document.getElementById('graphTotal').classList.add('hide');
-	document.getElementById('modalContentWrapper').classList.add('fullHeight');
-	document.getElementById('modalContentWrapper').classList.remove('partialHeight');
-	document.getElementById("graphRoutine").classList.remove('hide');
-
-	//populate routines
-	const ddl = document.getElementById('selectGraphRoutine');
-	clearChildNodes('selectGraphRoutine');
-	
-	const o = document.createElement('option');
-	o.setAttribute('selected', null);
-	o.setAttribute('disabled', null);
-	o.setAttribute('hidden', null);
-	o.textContent = "Select Routine";
-	ddl.appendChild(o);
-	
-	const keys = Object.keys(Storage.data).map(x => parseInt(x));
-	for(let i=0;i<availableRoutines.length;i++){
-		const r = availableRoutines[i];
-		if(r.id === -1 || !keys.includes(r.id)){continue;}
+	try{
+		graphType = value;
+		selectedRoutine = null;
+		selectedInstance = null;
+		document.getElementById('generateGraph').classList.add('hide');
+		document.getElementById("sideGraphData").classList.add('hide');
+		document.getElementById("graphInstance").classList.add('hide');
+		document.getElementById('graphTotal').classList.add('hide');
+		document.getElementById('modalContentWrapper').classList.add('fullHeight');
+		document.getElementById('modalContentWrapper').classList.remove('partialHeight');
+		document.getElementById("graphRoutine").classList.remove('hide');
+		
+		//populate routines
+		const ddl = document.getElementById('selectGraphRoutine');
+		clearChildNodes('selectGraphRoutine');
 		
 		const o = document.createElement('option');
-		o.setAttribute('value', r.id);
-		o.textContent = r.name;
+		o.setAttribute('selected', null);
+		o.setAttribute('disabled', null);
+		o.setAttribute('hidden', null);
+		o.textContent = "Select Routine";
 		ddl.appendChild(o);
-	}
-	
-}
-function onSelectGraphRoutine(value){
-	selectedRoutine = parseInt(value);
-	selectedInstance = null;
-	
-	const instanceGraph = instanceGraphs.includes(graphType);
-	document.getElementById('generateGraph').classList.toggle('hide', instanceGraph);
-	document.getElementById("graphInstance").classList.toggle('hide', !instanceGraph);
-	document.getElementById('graphTotal').classList.toggle('hide', instanceGraph);
-	
-	const instanceKeys = Object.keys(Storage.data[selectedRoutine]).map(x => parseInt(x));
-	
-	if(!instanceGraph){ 
-		//set dateFrom to new Date - 7 days
-		const min = Math.min(...instanceKeys);
-		document.getElementById('dateFrom').valueAsDate = new Date(min);
-		document.getElementById('dateTo').valueAsDate = new Date();
-		return; 
-	}
-	
-	const ddl = document.getElementById('ddlYearMonth');
-	clearChildNodes('ddlYearMonth');
-	
-	const o = document.createElement('option');
-	o.setAttribute('selected', null);
-	o.setAttribute('disabled', null);
-	o.setAttribute('hidden', null);
-	o.textContent = "Select Year-Month";
-	ddl.appendChild(o);
-	
-	instanceGroups = {};
-	
-	for(let i=0;i<instanceKeys.length;i++){
-		const iKey = instanceKeys[i];
-		const date = new Date(iKey);
-		const yearMonth = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}`;
 		
-		if(!instanceGroups[yearMonth]){
-			instanceGroups[yearMonth] = [];
+		const keys = Object.keys(Storage.data).map(x => parseInt(x));
+		for(let i=0;i<availableRoutines.length;i++){
+			const r = availableRoutines[i];
+			if(r.id === -1 || !keys.includes(r.id)){continue;}
 			
 			const o = document.createElement('option');
-			o.setAttribute('value', yearMonth);
-			o.textContent = yearMonth;
+			o.setAttribute('value', r.id);
+			o.textContent = r.name;
 			ddl.appendChild(o);
 		}
-		instanceGroups[yearMonth].push(iKey);
 	}
-	
-	document.getElementById('graphInstance').classList.remove('hide');
-	document.getElementById('selectGraphInstance').classList.add('hide');
+	catch(e){elementError(e);}
 }
-function getMonthInstances(sender){
-	//populate instances of routine
-	const ddl = document.getElementById('ddlGraphInstance');
-	clearChildNodes('ddlGraphInstance');
-	
-	const o = document.createElement('option');
-	o.setAttribute('selected', null);
-	o.setAttribute('disabled', null);
-	o.setAttribute('hidden', null);
-	o.textContent = "Select Instance";
-	ddl.appendChild(o);
-	
-	const keys = instanceGroups[sender.value];
-	for(let i=0;i<keys.length;i++){
-		const key = keys[i];
-		const d = new Date(parseInt(key, 10));
+function onSelectGraphRoutine(value){
+	try
+	{
+		selectedRoutine = parseInt(value);
+		selectedInstance = null;
+		
+		const instanceGraph = instanceGraphs.includes(graphType);
+		document.getElementById('generateGraph').classList.toggle('hide', instanceGraph);
+		document.getElementById("graphInstance").classList.toggle('hide', !instanceGraph);
+		document.getElementById('graphTotal').classList.toggle('hide', instanceGraph);
+		
+		const instanceKeys = Object.keys(Storage.data[selectedRoutine]).map(x => parseInt(x));
+		
+		if(!instanceGraph){ 
+			//set dateFrom to new Date - 7 days
+			const min = Math.min(...instanceKeys);
+			document.getElementById('dateFrom').valueAsDate = new Date(min);
+			document.getElementById('dateTo').valueAsDate = new Date();
+			return; 
+		}
+		
+		const ddl = document.getElementById('ddlYearMonth');
+		clearChildNodes('ddlYearMonth');
 		
 		const o = document.createElement('option');
-		o.setAttribute('value', key);
-		o.textContent = dateFormat(d);
+		o.setAttribute('selected', null);
+		o.setAttribute('disabled', null);
+		o.setAttribute('hidden', null);
+		o.textContent = "Select Year-Month";
 		ddl.appendChild(o);
+		
+		instanceGroups = {};
+		
+		for(let i=0;i<instanceKeys.length;i++){
+			const iKey = instanceKeys[i];
+			const date = new Date(iKey);
+			const yearMonth = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}`;
+			
+			if(!instanceGroups[yearMonth]){
+				instanceGroups[yearMonth] = [];
+				
+				const o = document.createElement('option');
+				o.setAttribute('value', yearMonth);
+				o.textContent = yearMonth;
+				ddl.appendChild(o);
+			}
+			instanceGroups[yearMonth].push(iKey);
+		}
+		
+		document.getElementById('graphInstance').classList.remove('hide');
+		document.getElementById('selectGraphInstance').classList.add('hide');
 	}
-	
-	document.getElementById('selectGraphInstance').classList.remove('hide');
+	catch(e){elementError(e);}
+}
+function getMonthInstances(sender){
+	try{
+		//populate instances of routine
+		const ddl = document.getElementById('ddlGraphInstance');
+		clearChildNodes('ddlGraphInstance');
+		
+		const o = document.createElement('option');
+		o.setAttribute('selected', null);
+		o.setAttribute('disabled', null);
+		o.setAttribute('hidden', null);
+		o.textContent = "Select Instance";
+		ddl.appendChild(o);
+		
+		const keys = instanceGroups[sender.value];
+		for(let i=0;i<keys.length;i++){
+			const key = keys[i];
+			const d = new Date(parseInt(key, 10));
+			
+			const o = document.createElement('option');
+			o.setAttribute('value', key);
+			o.textContent = dateFormat(d);
+			ddl.appendChild(o);
+		}
+		
+		document.getElementById('selectGraphInstance').classList.remove('hide');
+	}
+	catch(e){elementError(e);}
 }
 function selectGraphRoutineInstance(value){
-	selectedInstance = value;
-	document.getElementById('generateGraph').classList.remove('hide');
+	try{
+		selectedInstance = value;
+		document.getElementById('generateGraph').classList.remove('hide');
+	}
+	catch(e){elementError(e);}
 }
 
 function tasksMaxDepth(tasks){
@@ -312,7 +323,7 @@ function buildFlameData(){
 }
 function buildWaterfallData(){
 	const data = Storage.data[selectedRoutine][selectedInstance];
-
+	
 	const base = data.find(x => x.id===-1);
 	if(!base){return;}
 	
@@ -326,7 +337,7 @@ function buildWaterfallData(){
 }
 function buildPieData(){
 	const data = Storage.data[selectedRoutine][selectedInstance];
-
+	
 	graphData.maxY = 0;
 	
 	let sum = 0;
@@ -374,7 +385,7 @@ function buildRemindersData(){
 		}
 	}
 	graphData.maxY = maxY;
-
+	
 }
 function buildStackedPercentData(){
 	const data = filterData(Storage.data[selectedRoutine]);
@@ -443,7 +454,7 @@ function buildStackedReminderData(){
 		}
 		maxY = Math.max(sum, maxY);
 	}
-
+	
 	graphData.maxY = maxY;
 }
 function buildData(){
@@ -623,7 +634,7 @@ function buildPieTable(head, body, foot){
 function buildTimeTable(head, body, foot){
 	const hr = document.createElement('tr');
 	head.appendChild(hr);
-
+	
 	const cols = [...new Set(graphData.DataPoints.map(x => x.instance))];
 	const rows = [...new Set(graphData.DataPoints.map(x => x.taskNum))];
 	
@@ -644,16 +655,16 @@ function buildTimeTable(head, body, foot){
 	for(let i=0;i<rows.length;i++){
 		const tr = document.createElement('tr');
 		body.appendChild(tr);
-
+		
 		const n = document.createElement('td');
 		const temp = graphData.DataPoints.find(x => x.taskNum === rows[i]);
 		n.textContent = temp.task?temp.task.text : temp.taskNum;
 		n.classList.add('textCell');
 		tr.appendChild(n);			
-
+		
 		for(let j=0;j<cols.length;j++){
 			const datum = graphData.DataPoints.find(x => x.instance === cols[j] && x.taskNum === rows[i]);
-
+			
 			const d = document.createElement('td');
 			d.textContent = formatTime(datum.y-datum.x, true);
 			d.classList.add('dataCell');
@@ -664,7 +675,7 @@ function buildTimeTable(head, body, foot){
 function buildRemindersTable(head, body, foot){
 	const hr = document.createElement('tr');
 	head.appendChild(hr);
-
+	
 	const cols = [...new Set(graphData.DataPoints.map(x => x.instance))];
 	const rows = [...new Set(graphData.DataPoints.map(x => x.taskNum))];
 	
@@ -685,13 +696,13 @@ function buildRemindersTable(head, body, foot){
 	for(let i=0;i<rows.length;i++){
 		const tr = document.createElement('tr');
 		body.appendChild(tr);
-
+		
 		const n = document.createElement('td');
 		const temp = graphData.DataPoints.find(x => x.taskNum === rows[i]);
 		n.textContent = temp.task?temp.task.text : temp.taskNum;
 		n.classList.add('textCell');
 		tr.appendChild(n);			
-
+		
 		for(let j=0;j<cols.length;j++){
 			const datum = graphData.DataPoints.find(x => x.instance === cols[j] && x.taskNum === rows[i]);
 			const d = document.createElement('td');
@@ -704,7 +715,7 @@ function buildRemindersTable(head, body, foot){
 function buildStackedPercentTable(head, body, foot){
 	const hr = document.createElement('tr');
 	head.appendChild(hr);
-
+	
 	const cols = [...new Set(graphData.DataPoints.map(x => x.instance))];
 	const rows = [...new Set(graphData.DataPoints.map(x => x.taskNum))];
 	
@@ -725,13 +736,13 @@ function buildStackedPercentTable(head, body, foot){
 	for(let i=0;i<rows.length;i++){
 		const tr = document.createElement('tr');
 		body.appendChild(tr);
-
+		
 		const n = document.createElement('td');
 		const temp = graphData.DataPoints.find(x => x.taskNum === rows[i]);
 		n.textContent = temp.task?temp.task.text : temp.taskNum;
 		n.classList.add('textCell');
 		tr.appendChild(n);			
-
+		
 		for(let j=0;j<cols.length;j++){
 			const datum = graphData.DataPoints.find(x => x.instance === cols[j] && x.taskNum === rows[i]);
 			const p = Math.floor(100 * (datum.y-datum.x))/100;
@@ -746,7 +757,7 @@ function buildStackedPercentTable(head, body, foot){
 function buildStackedTotalTable(head, body, foot){
 	const hr = document.createElement('tr');
 	head.appendChild(hr);
-
+	
 	const cols = [...new Set(graphData.DataPoints.map(x => x.instance))];
 	const rows = [...new Set(graphData.DataPoints.map(x => x.taskNum))];
 	
@@ -767,16 +778,16 @@ function buildStackedTotalTable(head, body, foot){
 	for(let i=0;i<rows.length;i++){
 		const tr = document.createElement('tr');
 		body.appendChild(tr);
-
+		
 		const n = document.createElement('td');
 		const temp = graphData.DataPoints.find(x => x.taskNum === rows[i]);
 		n.textContent = temp.task?temp.task.text : temp.taskNum;
 		n.classList.add('textCell');
 		tr.appendChild(n);			
-
+		
 		for(let j=0;j<cols.length;j++){
 			const datum = graphData.DataPoints.find(x => x.instance === cols[j] && x.taskNum === rows[i]);
-
+			
 			const d = document.createElement('td');
 			d.textContent = formatTime(datum.y, true);
 			d.classList.add('dataCell');
@@ -787,7 +798,7 @@ function buildStackedTotalTable(head, body, foot){
 function buildStackedReminderTable(head, body, foot){
 	const hr = document.createElement('tr');
 	head.appendChild(hr);
-
+	
 	const cols = [...new Set(graphData.DataPoints.map(x => x.instance))];
 	const rows = [...new Set(graphData.DataPoints.map(x => x.taskNum))];
 	
@@ -808,13 +819,13 @@ function buildStackedReminderTable(head, body, foot){
 	for(let i=0;i<rows.length;i++){
 		const tr = document.createElement('tr');
 		body.appendChild(tr);
-
+		
 		const n = document.createElement('td');
 		const temp = graphData.DataPoints.find(x => x.taskNum === rows[i]);
 		n.textContent = temp.task?temp.task.text : temp.taskNum;
 		n.classList.add('textCell');
 		tr.appendChild(n);			
-
+		
 		for(let j=0;j<cols.length;j++){
 			const datum = graphData.DataPoints.find(x => x.instance === cols[j] && x.taskNum === rows[i]);
 			const d = document.createElement('td');
@@ -888,7 +899,7 @@ graphObject.prototype.checkHit = function(x,y){
 	if(this.x && this.y && this.w && this.h){
 		const deltaX = x-this.x;
 		const deltaY = y-this.y;
-
+		
 		return  this.x < x && deltaX < this.w && this.y < y && deltaY < this.h;
 	}
 	if(this.x && this.y && this.r && this.s!==null && this.e!==null){//s & e could be 0
@@ -920,16 +931,16 @@ function graphMouseMove(e){
 }
 function drawClickedObject(){
 	if(!clickedObject){return;}
-
+	
 	const dataH = Math.min(h/12,18);
 	const midH = clickedObject.y+clickedObject.h/2;
 	const midW = clickedObject.x+clickedObject.w/2;
 	const pipSize = 15;
 	let drawPip = true;
-
+	
 	let x = midW + pipSize;
 	let y = midH - dataH*1.5;
-
+	
 	const instanceName = dateFormat(new Date(parseInt(selectedInstance||clickedObject.data.instance)));
 	const text = clickedObject.data.task.text;
 	let value = '';
@@ -969,7 +980,7 @@ function drawClickedObject(){
 			ctx.font = getFont(dataH);
 			ctx.fillText("Instance: " + instanceName, graphData.yAxis+3, dataH);
 			ctx.closePath();
-		
+			
 			const instanceData = graphObjects.filter(x => x.data.instance === clickedObject.data.instance);
 			const height = h/40;
 			const font = getFont(height);
@@ -977,9 +988,9 @@ function drawClickedObject(){
 			for(let i=0;i<instanceData.length;i++){
 				const datum = instanceData[i];
 				const text = graphType==="time"?
-					formatTime(datum.data.y-datum.data.x, true)
-					: datum.data.x;
-					
+				formatTime(datum.data.y-datum.data.x, true)
+				: datum.data.x;
+				
 				ctx.beginPath();
 				ctx.strokeStyle="#000000";
 				ctx.fillStyle="#FFFFFF";
@@ -1001,7 +1012,7 @@ function drawClickedObject(){
 			return;
 		}
 	}
-
+	
 	ctx.font = getFont(dataH);
 	const width = Math.max(ctx.measureText(instanceName).width,ctx.measureText(text).width,ctx.measureText(value).width); 
 	
@@ -1011,7 +1022,7 @@ function drawClickedObject(){
 		x = midW - width - pipSize;
 		leftPip = false;
 	}
-
+	
 	ctx.beginPath();
 	ctx.fillStyle="#FFFFFF";
 	ctx.strokeStyle="#000000";
@@ -1080,7 +1091,7 @@ function drawCurrentObject(){
 			ctx.lineTo(w/2,h/2);
 			ctx.stroke();
 			ctx.closePath();
-
+			
 			break;
 		}
 		case "reminders":
@@ -1124,11 +1135,11 @@ function buildXY(){
 	const yMargin = h * .01;
 	
 	const xLabels = [...new Set(graphData.DataPoints.map(x => `${x.taskNum}*${x.task?x.task.text:x.taskNum}`))]
-		.map(x => { 
-			const temp = x.split('*'); 
-			return {taskNum:temp[0], text:temp[1]}
-		});
-
+	.map(x => { 
+		const temp = x.split('*'); 
+		return {taskNum:temp[0], text:temp[1]}
+	});
+	
 	graphData.DataPoints.sort((a,b) => parseInt(b.instance)-parseInt(a.instance) || a.taskNum.localeCompare(b.taskNum));
 	
 	graphData.yAxis = 50;
@@ -1136,11 +1147,11 @@ function buildXY(){
 	const rot = Math.PI/8;
 	const cos = Math.cos(rot);
 	const sin = Math.sin(rot);
-
+	
 	const a = h/20 *cos;
 	const b = (w-graphData.yAxis)/(xLabels.length+1) * sin;
 	const fontHeight = Math.min(a,b);
-
+	
 	ctx.font = getFont(fontHeight);
 	ctx.fillStyle = "#000000";
 	ctx.strokeStyle="#000000";
@@ -1154,7 +1165,7 @@ function buildXY(){
 	graphData.xStep = (w - graphData.yAxis - xMargin - xMargin) / (xLabels.length);
 	xLabel *= sin;
 	graphData.xAxis = h - xLabel - yMargin - yMargin - (20 * sin);
-
+	
 	const labelPos = {};
 	for(let i=0;i<xLabels.length;i++){
 		const text = xLabels[i].text;
@@ -1174,7 +1185,7 @@ function buildXY(){
 		ctx.stroke();
 		ctx.closePath();
 	}
-
+	
 	//yAxis
 	const ySpace = (graphData.xAxis - yMargin) / 5;
 	for(let i=0;i<=5;i++){
@@ -1204,7 +1215,7 @@ function buildXY(){
 	
 	graphData.xScale = (w - graphData.yAxis)/(graphData.maxX - graphData.minX) * .98;
 	graphData.yScale = (graphData.xAxis)/(graphData.maxY - graphData.minY) * .98;
-
+	
 	return labelPos;
 }
 function buildStackedXY(){
@@ -1228,11 +1239,11 @@ function buildStackedXY(){
 	const rot = Math.PI/8;
 	const cos = Math.cos(rot);
 	const sin = Math.sin(rot);
-
+	
 	const a = h/20 *cos;
 	const b = (w-graphData.yAxis)/(xLabels.length+1) * sin;
 	const fontHeight = Math.min(a,b);
-
+	
 	ctx.font = getFont(fontHeight);
 	ctx.fillStyle = "#000000";
 	for(let i=0;i<xLabels.length;i++){
@@ -1245,7 +1256,7 @@ function buildStackedXY(){
 	const xStep = (w - graphData.yAxis - xMargin - xMargin) / (xLabels.length);
 	xLabel *= sin;
 	graphData.xAxis = h - xLabel - yMargin - yMargin - (20 * sin);
-
+	
 	const labelPos = {};
 	for(let i=0;i<xLabels.length;i++){
 		const text = xLabels[i];
@@ -1295,7 +1306,7 @@ function buildStackedXY(){
 	
 	graphData.xScale = (w - graphData.yAxis)/(graphData.maxX - graphData.minX) * .98;
 	graphData.yScale = (graphData.xAxis)/(graphData.maxY - graphData.minY) * .98;
-
+	
 	return labelPos;
 }
 
@@ -1330,10 +1341,10 @@ function buildFlameGraph(){
 		ctx.fillStyle = "#000000";
 		const text = datum.task?datum.task.text:datum.taskNum;
 		const size = ctx.measureText(text);
-
+		
 		const tx = x1 + Math.min(20,x2-1);
 		const ty = y1 + size.width + 5;
-
+		
 		ctx.save();
 		ctx.translate(tx,ty);
 		ctx.rotate(-Math.PI/2);
@@ -1348,13 +1359,13 @@ function buildWaterfallGraph(){
 	const yMargin = h * .01;
 	
 	graphData.yScale = h/(graphData.maxY - graphData.minY) * .98;
-
+	
 	//write names and get longest name
 	graphData.DataPoints.sort((a,b) => a.taskNum.localeCompare(b.taskNum));
 	let longestName = 0;
 	for(let i=0;i<graphData.DataPoints.length;i++){
 		const datum = graphData.DataPoints[i];
-
+		
 		ctx.font = getFont(graphData.yScale);
 		ctx.fillStyle = "#000000";
 		const text = datum.task?datum.task.text:datum.taskNum;
@@ -1405,17 +1416,17 @@ function buildPieGraph(){
 	
 	ctx.save();
 	ctx.translate(center.x,center.y);
-
+	
 	let start = 0;
 	for(let i=0;i<graphData.DataPoints.length;i++){
 		const datum = graphData.DataPoints[i];
 		const duration = twoPi * (datum.y-datum.x)/totalTime;
 		const end = start + duration;
-
+		
 		ctx.fillStyle = graphColors[i % graphColors.length];
 		ctx.strokeStyle = "#000000";
 		ctx.lineWidth = 2;
-
+		
 		ctx.beginPath();
 		ctx.moveTo(0, 0);
 		ctx.arc(0, 0, r, 0, duration);
@@ -1431,7 +1442,7 @@ function buildPieGraph(){
 		const maxWidth = Math.floor(r*.8);
 		const tx = r-Math.min(size.width, maxWidth)-10;
 		const ty = 0;
-
+		
 		ctx.rotate(duration/2);
 		const textAngle = start + duration/2;
 		ctx.translate(tx,ty);
@@ -1460,7 +1471,7 @@ function buildTimeGraph(){
 	
 	const series = [...new Set(graphData.DataPoints.map(x => x.instance))];
 	const taskNums = [...new Set(graphData.DataPoints.map(x => x.taskNum))].sort();
-
+	
 	for(let i=0;i<series.length;i++){
 		//get color
 		ctx.fillStyle = graphColors[i % graphColors.length];
@@ -1477,42 +1488,42 @@ function buildTimeGraph(){
 		
 		ctx.fill();
 		ctx.closePath();
-
-	for(let j=1;j<taskNums.length;j++){
+		
+		for(let j=1;j<taskNums.length;j++){
 			const prev = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[j-1]);
 			const datum = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[j]);
-
+			
 			const x = labelPos[datum.taskNum];
 			const y = graphData.xAxis-((datum.y-datum.x)*graphData.yScale);
 			graphObjects.push(new graphObject(x, y, null, null, 4, 0, twoPi, datum));
-
+			
 			ctx.beginPath();
 			ctx.arc(x, y, 4,0,twoPi);
 			ctx.fill();
 			ctx.closePath();
 			
-			ctx.beginPath();
-			ctx.moveTo(labelPos[prev.taskNum], graphData.xAxis-((prev.y-prev.x)*graphData.yScale));
-			ctx.lineTo(x, y);
-			ctx.stroke();
-			ctx.closePath();
+			//ctx.beginPath();
+			//ctx.moveTo(labelPos[prev.taskNum], graphData.xAxis-((prev.y-prev.x)*graphData.yScale));
+			//ctx.lineTo(x, y);
+			//ctx.stroke();
+			//ctx.closePath();
 		}
 		ctx.closePath();
 	}
-
+	
 }
 function buildRemindersGraph(){
 	const labelPos = buildXY();
 	
 	const series = [...new Set(graphData.DataPoints.map(x => x.instance))];
 	const taskNums = [...new Set(graphData.DataPoints.map(x => x.taskNum))].sort();
-
+	
 	for(let i=0;i<series.length;i++){
 		//get color
 		ctx.fillStyle = graphColors[i % graphColors.length];
 		ctx.strokeStyle = graphColors[i % graphColors.length];
 		ctx.lineWidth = 2;
-
+		
 		//start path		
 		const first = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[0]);
 		ctx.beginPath();
@@ -1527,21 +1538,21 @@ function buildRemindersGraph(){
 		for(let j=1;j<taskNums.length;j++){
 			const prev = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[j-1]);
 			const datum = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[j]);
-
+			
 			const x = labelPos[datum.taskNum];
 			const y = graphData.xAxis-(datum.x*graphData.yScale);
 			graphObjects.push(new graphObject(x, y, null, null, 4, 0, twoPi, datum));
-
+			
 			ctx.beginPath();
 			ctx.arc(x, y, 4,0,twoPi);
 			ctx.fill();
 			ctx.closePath();
 			
-			ctx.beginPath();
-			ctx.moveTo(labelPos[prev.taskNum], graphData.xAxis-(prev.x*graphData.yScale));
-			ctx.lineTo(x, y);
-			ctx.stroke();
-			ctx.closePath();
+			//ctx.beginPath();
+			//ctx.moveTo(labelPos[prev.taskNum], graphData.xAxis-(prev.x*graphData.yScale));
+			//ctx.lineTo(x, y);
+			//ctx.stroke();
+			//ctx.closePath();
 		}
 		ctx.closePath();
 	}
@@ -1550,7 +1561,7 @@ function buildStackedPercentGraph(){
 	const labelPos = buildStackedXY();
 	const series = [...new Set(graphData.DataPoints.map(x => x.instance))];
 	const taskNums = [...new Set(graphData.DataPoints.map(x => x.taskNum))].sort();
-
+	
 	for(let i=0;i<series.length;i++){
 		ctx.strokeStyle = "#000000";
 		ctx.lineWidth = 2;
@@ -1578,7 +1589,7 @@ function buildStackedTotalGraph(){
 	const labelPos = buildStackedXY();
 	const series = [...new Set(graphData.DataPoints.map(x => x.instance))];
 	const taskNums = [...new Set(graphData.DataPoints.map(x => x.taskNum))].sort();
-
+	
 	for(let i=0;i<series.length;i++){
 		ctx.strokeStyle = "#000000";
 		ctx.lineWidth = 2;
@@ -1588,7 +1599,7 @@ function buildStackedTotalGraph(){
 		const x = labelPos[dateLabel] - w/2;
 		for(let j=0;j<taskNums.length;j++){
 			const datum = graphData.DataPoints.find(x => x.instance === series[i] && x.taskNum === taskNums[j]);
-
+			
 			const y = graphData.xAxis-((datum.x+datum.y)*graphData.yScale);
 			const h = datum.y*graphData.yScale;
 			graphObjects.push(new graphObject(x, y, w, h, null, null, null, datum));
@@ -1606,7 +1617,7 @@ function buildStackedReminderGraph(){
 	const labelPos = buildStackedXY();
 	const series = [...new Set(graphData.DataPoints.map(x => x.instance))];
 	const taskNums = [...new Set(graphData.DataPoints.map(x => x.taskNum))].sort();
-
+	
 	for(let i=0;i<series.length;i++){
 		ctx.strokeStyle = "#000000";
 		ctx.lineWidth = 2;
@@ -1619,7 +1630,7 @@ function buildStackedReminderGraph(){
 			
 			const y = graphData.xAxis-((datum.x+datum.y)*graphData.yScale);
 			const h = datum.y*graphData.yScale;
-
+			
 			graphObjects.push(new graphObject(x, y, w, h, null, null, null, datum));
 			
 			ctx.beginPath();
@@ -1689,50 +1700,53 @@ function resize(){
 	resizerDelay = setTimeout(calcSize, 20);
 }
 function calcSize(){
-	if(!graph){graph = document.getElementById("Graph");}
-	const r = document.getElementById("graphWrapper").getBoundingClientRect();
-	
-	currentObject = null;
-	clickedObject = null;
-	
-	w = r.width;
-	h = r.height;
-
-	graphObjects = [];
-	graph.width = w;
-	graph.height = h;
-
-	ctx = graph.getContext('2d');
-	
-	ctx.fillStyle = "#FFFFFF";
-	ctx.beginPath();
-	ctx.fillRect(0,0,w,h);
-	
-	ctx.strokeStyle = "#000000";
-	ctx.lineWidth = 1;
-	ctx.rect(1,1,w-2,h-2);
-	ctx.stroke();
-	
-	graphData.minX = 0;
-	graphData.minY = 0;
-	graphData.xScale = 0;
-	graphData.yScale = 0;
-	graphData.DataPoints = [];
-
-	buildData();
-	buildTable();
-	buildGraph();
+	try{
+		if(!graph){graph = document.getElementById("Graph");}
+		const r = document.getElementById("graphWrapper").getBoundingClientRect();
+		
+		currentObject = null;
+		clickedObject = null;
+		
+		w = r.width;
+		h = r.height;
+		
+		graphObjects = [];
+		graph.width = w;
+		graph.height = h;
+		
+		ctx = graph.getContext('2d');
+		
+		ctx.fillStyle = "#FFFFFF";
+		ctx.beginPath();
+		ctx.fillRect(0,0,w,h);
+		
+		ctx.strokeStyle = "#000000";
+		ctx.lineWidth = 1;
+		ctx.rect(1,1,w-2,h-2);
+		ctx.stroke();
+		
+		graphData.minX = 0;
+		graphData.minY = 0;
+		graphData.xScale = 0;
+		graphData.yScale = 0;
+		graphData.DataPoints = [];
+		
+		buildData();
+		buildTable();
+		buildGraph();
+	}
+	catch(e){elementError(e);}	
 }
 
 function analyze(){
 	if(graphType === 'pie'){
 		document.getElementById('modalSideArea').style.minWidth = "225px";
 	}
-
+	
 	const isInstance = instanceGraphs.includes(graphType);
 	document.getElementById('sideGraphData').classList.toggle('hide', !isInstance);
 	document.getElementById('bottomGraphData').classList.toggle('hide', isInstance);
-
+	
 	document.getElementById('modalSideArea').classList.toggle('hide', !isInstance);
 	
 	document.getElementById('modalContentWrapper').classList.toggle('fullHeight', isInstance);
@@ -1740,11 +1754,11 @@ function analyze(){
 	
 	const dataWrapperParent = isInstance ? document.getElementById('sideGraphData') : document.getElementById('bottomGraphData');
 	dataWrapperParent.appendChild(document.getElementById('graphDataTable'));
-
+	
 	document.getElementById('graphOptionWrapper').classList.add('hide');
 	
 	graph = document.getElementById("Graph");
-
+	
 	document.getElementById('resetGraph').classList.remove('hide');
 	document.getElementById('saveGraphButtons').classList.remove('hide');
 	calcSize();
