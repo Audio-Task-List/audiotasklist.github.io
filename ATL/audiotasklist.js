@@ -652,9 +652,31 @@ function createTask(parentDiv, taskID, index, parentTask){
 	const t = temp[0];
 	dPush(`\t\t\t${t.text}`);
 	
-	const newTask = new task(taskID, Number(index)+1, t.text, t.time, t.audio, t.icon, parentTask);
+	const newTask = new task(taskID, Number(index)+1, t.text, t.time, t.audio, parentTask);
 	if(parentDiv) {
 		parentDiv.appendChild(newTask.btn);
+	}
+	
+	
+	if(t.icon){
+		const img = document.createElement("img");
+		img.classList.add('btnIcon');
+		//img.style.backgroundImage=`url(./icons/${icon})`;
+		img.src = `icons/${t.icon}`;
+		newTask.btn.insertBefore(img, newTask.btn.children[0]);
+	}
+	
+	if(t.iconAttribution){
+		document.getElementById('attribution').classList.remove('hide');
+		const p = document.getElementById('attributionLinks');
+		const li = document.createElement('li');
+		const a = document.createElement('a');
+		a.textContent = t.iconAttribution.text;
+		a.title = t.iconAttribution.title;
+		a.href = t.iconAttribution.url;
+		
+		//li.appendChild(a);
+		p.appendChild(a);
 	}
 	
 	return newTask;
@@ -671,6 +693,7 @@ function loadTasks(parentDiv, taskIDs, parentTask){
 	}
 }
 
+//used to generate dummy data.
 function createTaskLite(taskID, index, parentTask){
 	dPush(`\t\tCreate Task Lite: ${taskID}`);
 	const temp = tasks.filter(x => x.id === taskID);
@@ -678,7 +701,7 @@ function createTaskLite(taskID, index, parentTask){
 	const t = temp[0];
 	dPush(`\t\t\t${t.text}`);
 	
-	const newTask = new task(taskID, Number(index)+1, t.text, t.time, t.audio, t.icon, parentTask, true);
+	const newTask = new task(taskID, Number(index)+1, t.text, t.time, t.audio, parentTask, true);
 	
 	return newTask;
 }
@@ -898,7 +921,7 @@ routine.prototype.playTimeExpiredAudio = function(){
 	}
 }
 
-function task(taskID, id, text, time, audio, icon, parent, isLite=false) {
+function task(taskID, id, text, time, audio, parent, isLite=false) {
 	this.taskID = taskID;//used to look up task
 	this.id = id;//used to make the btn.id
 	this.parent = parent;
@@ -918,13 +941,6 @@ function task(taskID, id, text, time, audio, icon, parent, isLite=false) {
 	this.btn.id = this.buildID();
 
 	if(isLite){return;}
-
-	if(icon){
-		const img = document.createElement("div");
-		img.classList.add('btnIcon');
-		img.style.backgroundImage=`url(./icons/${icon})`;
-		this.btn.appendChild(img);
-	}
 	
 	if(text){
 		const txt = document.createElement('div');

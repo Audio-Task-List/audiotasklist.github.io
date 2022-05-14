@@ -407,3 +407,25 @@ select {
 	overflow:auto;
 	height:39%;
 }
+
+.attribution{
+	width:100%;
+	min-width:100%;
+	position:fixed;
+	bottom:0;
+	padding: 5px 10px;
+	border-top:solid 1px #333;
+	font-size:8pt;
+	color:#333;
+	background-color:#FFFFFF;
+}
+
+.attributionLinks{
+	display:inline-block;
+}
+
+.attributionLinks a{
+	color:#333;
+	display:inline-block;
+	padding:0 10px;
+}
