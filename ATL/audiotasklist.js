@@ -1513,6 +1513,8 @@ function init(){
 		dPush('Init Starting');
 		window.addEventListener('resize', placeFloatButtons);
 		
+		document.getElementById('build').textContent = '0.2022.0515.1752';
+		
 		routineName = document.getElementById("routineName");
 		startStopTimer = document.getElementById("startStop");
 		timerDisplay = document.getElementById("timerDisplay");

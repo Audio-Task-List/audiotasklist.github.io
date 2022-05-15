@@ -66,7 +66,7 @@ li{
 	height:300px;
 	padding:0 10px;
 	text-align:center;
-	line-height:300px;//remove list line
+	line-height:300px;
 }
 
 .image{
@@ -87,12 +87,4 @@ li{
 	padding:25px 10px;
 	font-size:10pt;
 	text-align:center;
-}
-
-.build{
-	position:fixed;
-	bottom:0;
-	right:0;
-	color:#CCC;
-	font-size:10pt;
 }

@@ -202,6 +202,21 @@
 					<textarea id="txtDiagnostics" rows="20" cols="100"></textarea>
 				</div>
 			</div>
+			<div id="floatyButtons" class="floatyButtons hide">
+				<button id="btnDone" class="btnDone" onclick="clickDone()">✓</button>
+				<div id="timer" class="timer">
+					<div id="timerDisplay" class="timerDisplay" onclick="startStop()">00:00</div>
+					<button id="startStop" class="timerButton" onclick="startStop()">Start</button>
+					<button id="reset" class="timerButton" onclick="resetTimer()">Reset</button>
+				</div>
+				<div id="remindArea" class="remindArea">
+					<button id="btnRemind" class="btnRemind" onclick="remind()">Remind</button>
+					<div id="remindDisplay" class="remindDisplay">Reminds:<span id="currentReminds">70</span></div>
+				</div>
+				<div id="taskImg" class="taskImg hide">
+					<img id="currentTaskImg" class="currentTaskImg" alt="Current Task Image" src="nunya" />
+				</div>
+			</div>
 		</div>
 		<div id="footer" class="footer">
 			<div id="attribution" class="attribution hide">
@@ -211,24 +226,10 @@
 				<div id="attributionLinks" class="attributionLinks">
 				</div>
 			</div>
+			<div id="build" class="build"></div>
 		</div>
 		<div id="undoArea" class="undoArea hide">
 			<button id="undoButton" class="undoButton" onclick="undoLastComplete()">Undo Last Complete</button>
-		</div>
-		<div id="floatyButtons" class="floatyButtons hide">
-			<button id="btnDone" class="btnDone" onclick="clickDone()">✓</button>
-			<div id="timer" class="timer">
-				<div id="timerDisplay" class="timerDisplay" onclick="startStop()">00:00</div>
-				<button id="startStop" class="timerButton" onclick="startStop()">Start</button>
-				<button id="reset" class="timerButton" onclick="resetTimer()">Reset</button>
-			</div>
-			<div id="remindArea" class="remindArea">
-				<button id="btnRemind" class="btnRemind" onclick="remind()">Remind</button>
-				<div id="remindDisplay" class="remindDisplay">Reminds:<span id="currentReminds">70</span></div>
-			</div>
-			<div id="taskImg" class="taskImg hide">
-				<img id="currentTaskImg" class="currentTaskImg" alt="Current Task Image" src="nunya" />
-			</div>
 		</div>
 		<script>init();</script>
 	</body>

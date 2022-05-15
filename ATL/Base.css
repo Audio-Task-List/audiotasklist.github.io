@@ -33,6 +33,14 @@ select {
 	min-height:75px;
 }
 
+.build{
+	position:fixed;
+	bottom:0;
+	right:10px;
+	color:#CCC;
+	font-size:10pt;
+}
+
 .taskArea{
 	padding-left:50px;	
 	padding-right:400px;
