@@ -70,6 +70,7 @@ function elementError(e){
 
 function clearChildNodes(id){
 	const e = document.getElementById(id);
+	if(!e){return;}
 	while(e.firstChild){
 		e.removeChild(e.lastChild);
 	}
