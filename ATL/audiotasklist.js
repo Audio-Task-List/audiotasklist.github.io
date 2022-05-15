@@ -532,6 +532,7 @@ function completeCurrentTask(){
 		if(!currentTask){return;}
 		dPush('completeCurrentTask: ' + currentTask.text);
 		floatyButtons.classList.add('hide');
+		document.getElementById('routineImage').classList.remove('hide');
 		currentTask.complete();
 		updateNotAllowed();
 		
@@ -547,6 +548,7 @@ function placeFloatButtons(){
 	if(!currentTask || currentTask.children.length !== 0){return;}
 	const r = currentTask.btn.getBoundingClientRect();
 	const offset = window.scrollY;
+	console.log(offset);
 	
 	const H = window.innerHeight;
 	const W = window.innerWidth;
@@ -579,6 +581,7 @@ function placeFloatButtons(){
 	}
 	
 	floatyButtons.classList.remove('hide');
+	document.getElementById('routineImage').classList.add('hide');
 	doneBtn.classList.toggle('hide', autoAdvanceTimer);
 }
 
@@ -641,13 +644,17 @@ function addRoutineAttribution(id){
 	const routine = routines.find(x => x.id === id);
 	if(!routine || !routine.iconAttribution){return;}
 
-	addAttribution(routine.iconAttribution.text, routine.iconAttribution.title, routine.iconAttribution.url);
+	const title = `${routine.name} icon attribution`;
+	const text = `${routine.name} icon created by ${routine.iconAttribution.creator}`;
+	addAttribution(text, title, routine.iconAttribution.url);
 }
 function addTaskAttribution(id){
 	const task = tasks.find(x => x.id === id);
 	if(!task || !task.iconAttribution){return;}
 
-	addAttribution(task.iconAttribution.text, task.iconAttribution.title, task.iconAttribution.url);
+	const title = `${task.text} icon attribution`;
+	const text = `${task.text} icon created by ${task.iconAttribution.creator}`;
+	addAttribution(text, title, task.iconAttribution.url);
 }
 function addAttribution(text, title, url){
 		document.getElementById('attribution').classList.remove('hide');
@@ -841,6 +848,8 @@ routine.prototype.select = function(){
 		
 		document.getElementById("settingsArea").classList.remove('hide');
 		floatyButtons.classList.add('hide');
+		document.getElementById('routineImage').classList.remove('hide');
+
 		stopTimer();
 		currentTime = 0;
 		
@@ -1004,6 +1013,8 @@ task.prototype.select = function(){
 		if(includesClass(this.btn, 'completed') || isEncouraging){return;}
 		
 		floatyButtons.classList.add('hide');
+		document.getElementById('routineImage').classList.remove('hide');
+
 		currentTask = null;
 		undoArea.classList.toggle('hide', !lastCompletedTask)
 		
@@ -1320,11 +1331,8 @@ function restoreInProgress(){
 		const datum = data.data[i];
 		const task = tasks.find(x => x.id===datum.id);
 
-		console.log("I", i, datum, task);
-
 		const taskNum = `Routine_${replaceAll(datum.taskNum,'.','_')}`;
 		const routineTask = findTaskByNum(alpha, taskNum);
-		console.log("TN", taskNum, routineTask);
 		if(!routineTask){continue;}
 		
 		routineTask.started = datum.started;
@@ -1504,6 +1512,8 @@ function init(){
 	try{
 		dPush('Init Starting');
 		window.addEventListener('resize', placeFloatButtons);
+		
+		document.getElementById('build').textContent = '0.2022.0515.1752';
 		
 		routineName = document.getElementById("routineName");
 		startStopTimer = document.getElementById("startStop");

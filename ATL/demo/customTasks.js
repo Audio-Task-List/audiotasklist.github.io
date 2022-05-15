@@ -148,8 +148,7 @@ var routines = [
 		icon:'list.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/list',
-			title:'list icon attribution',
-			text:'List icon created by Freepik'
+			creator:'Freepik'
 		},
 		tasks:[
 			{id:25},
@@ -487,8 +486,7 @@ var tasks = [
 		icon:'exam.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/homework',
-			title:'homework icon attribution',
-			text:'Homework icon created by Freepik'
+			creator:'Freepik'
 		}
 	},
 	{
@@ -498,8 +496,7 @@ var tasks = [
 		icon:'chores.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/cleaning',
-			title:'cleaning icon attribution',
-			text:'Cleaning icon created by photo3idea_studio'
+			creator:'photo3idea_studio'
 		}
 	},
 	{
@@ -509,8 +506,7 @@ var tasks = [
 		icon:'game.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/board-game',
-			title:'game icon attribution',
-			text:'Board game icons created by Freepik'
+			creator:'Freepik'
 		}
 	}
 ];				

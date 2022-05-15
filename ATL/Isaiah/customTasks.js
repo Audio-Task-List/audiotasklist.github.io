@@ -5,6 +5,11 @@ const routines = [
 		id:0,
 		name:"Morning",
 		audio:"morning",
+		icon:'sun.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/morning',
+			creator:'Icon Place'
+		},
 		loopAudio:true,
 		loopDelay:10,
 		autoAdvanceDone:true,
@@ -34,6 +39,11 @@ const routines = [
 	{
 		id:1,
 		name:"Afternoon",
+		icon:'afternoon.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/sunset',
+			creator:'Freepik'
+		},
 		loopAudio:true,
 		loopDelay:10,
 		autoAdvanceDone:true,
@@ -51,6 +61,11 @@ const routines = [
 		id:2,
 		name:"Evening",
 		audio:"evening",
+		icon:'evening.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/night',
+			creator:'kmg design'
+		},
 		loopAudio:true,
 		loopDelay:10,
 		autoAdvanceDone:true,
@@ -80,25 +95,45 @@ const tasks = [
 		id:0,
 		text:"Travel time",
 		time:120,
-		audio:"eatingTime"
+		audio:"eatingTime",
+		icon:"dining-table.png",
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/dining-room',
+			creator:'Freepik'
+		}
 	},
 	{
 		id:1,
 		text:"Eat up",
 		time:900,
-		audio:"breakfast"
+		audio:"breakfast",
+		icon:"oatmeal.png",
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/oatmeal',
+			creator:'photo3idea_studio'
+		}
 	},
 	{
 		id:2,
 		text:"Drink up",
 		time:420,
-		audio:"milk"
+		audio:"milk",
+		icon:"milk.png",
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/milk',
+			creator:'Smashicons'
+		}
 	},
 	{
 		id:3,
 		text:"Medicine time",
 		time:30,
-		audio:"medicine"
+		audio:"medicine",
+		icon:"medicine.png",
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/syringe',
+			creator:'vitalia221'
+		}
 	},
 	{
 		id:4,
@@ -110,19 +145,34 @@ const tasks = [
 		id:5,
 		text:"Brush your teeth",
 		time:180,
-		audio:"teeth"
+		audio:"teeth",		
+		icon:'brush-teeth.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/brush-teeth',
+			creator:'iconixar'
+		}
 	},
 	{
 		id:6,
 		text:"Pajamas off",
 		time:180,
-		audio:"unpajamas"
+		audio:"unpajamas",		
+		icon:'pajamas.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/pajamas',
+			creator:'iconixar'
+		}
 	},
 	{
 		id:7,
 		text:"Clothes in hamper",
 		time:60,
-		audio:"hamper"
+		audio:"hamper",		
+		icon:'hamper.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/hamper',
+			creator:'Flowicon'
+		}
 	},
 	{
 		id:8,
@@ -134,25 +184,46 @@ const tasks = [
 		id:9,
 		text:"Potty time",
 		time:300,
-		audio:"potty"
+		audio:"potty",
+		icon:'toilet.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/toilet',
+			creator:'Eucalyp'
+		}
 	},
 	{
 		id:10,
 		text:"Shoes on",
 		time:180,
-		audio:"shoes"
+		audio:"shoes",		
+		icon:'shoes.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/shoes',
+			creator:'Smashicons'
+		}
 	},
 	{
 		id:11,
 		text:"Eat a snack",
 		time:600,
-		audio:"snack"
+		audio:"snack",		
+		icon:'snack.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/crisps',
+			title:'Snack icon attribution',
+			creator:'Freepik'
+		}
 	},
 	{
 		id:12,
 		text:"Drink your water",
 		time:300,
-		audio:"water"
+		audio:"water",		
+		icon:'drink-water.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/drink',
+			creator:'GOWI'
+		}
 	},
 	{
 		id:13,
@@ -164,37 +235,67 @@ const tasks = [
 		id:14,
 		text:"Clothes off",
 		time:240,
-		audio:"undress"
+		audio:"undress",		
+		icon:'nude.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/body',
+			creator:'Freepik'
+		}
 	},
 	{
 		id:15,
 		text:"Wash time",
 		time:480,
-		audio:"bathe"
+		audio:"bathe",		
+		icon:'bath.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/bath',
+			creator:'Eucalyp'
+		}
 	},
 	{
 		id:16,
 		text:"Dry yourself",
 		time:180,
-		audio:"dry"
+		audio:"dry",		
+		icon:'towel.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/towel',
+			creator:'Konkapp'
+		}
 	},
 	{
 		id:17,
 		text:"Pajamas on",
 		time:240,
-		audio:"pjs"
+		audio:"pjs",		
+		icon:'pajamas.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/pajamas',
+			creator:'iconixar'
+		}
 	},
 	{
 		id:18,
 		text:"Pick out clothes",
 		time:180,
-		audio:"pick"
+		audio:"pick",		
+		icon:'pick.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/clothes',
+			creator:'Freepik'
+		}
 	},
 	{
 		id:19,
 		text:"Bed time",
 		time:60,
-		audio:"sleep"
+		audio:"sleep",		
+		icon:'sleep.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/sleep',
+			creator:'Smashicons'
+		}
 	},
 	{
 		id:20,
@@ -206,36 +307,66 @@ const tasks = [
 		id:21,
 		text:"Clothes on",
 		time:300,
-		audio:"dress"
+		audio:"dress",		
+		icon:'clothes.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/clothes',
+			creator:'Freepik'
+		}
 	},
 	{
 		id:22,
 		text:"Make your bed",
 		time:120,
-		audio:"bed"
+		audio:"bed",		
+		icon:'bed.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/bed',
+			creator:'Freepik'
+		}
 	},
 	{
 		id:23,
 		text:"Go Upstairs",
 		time:60,
-		audio:"upstairs"
+		audio:"upstairs",		
+		icon:'upstairs.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/upstairs',
+			creator:'kerismaker'
+		}
 	},
 	{
 		id:24,
 		text:"Throw away insert",
 		time:120,
-		audio:"throwAwayInsert"
+		audio:"throwAwayInsert",		
+		icon:'insert.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/sanitary-pad',
+			creator:'Freepik'
+		}
 	},
 	{
 		id:25,
 		text:"Go Downstairs",
 		time:60,
-		audio:"downstairs"
+		audio:"downstairs",		
+		icon:'downstairs.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/downstairs',
+			creator:'Freepik'
+		}
 	},
 	{
 		id:26,
 		text:"Collect reward",
 		time:30,
-		audio:"collect"
+		audio:"collect",		
+		icon:'token.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/tokens',
+			creator:'Vitaly Gorbachev'
+		}
 	}
 ];				

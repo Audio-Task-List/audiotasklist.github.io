@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
+		<title>ATL - Demo</title>
 		<meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
 		<link rel="icon" type="image/x-icon" href="../favicon.ico"/>
 		<link rel="stylesheet" type="text/css" href="../Base.css"/>
@@ -15,7 +16,7 @@
 			.notAllowed{}
 		</style>
 	</head>
-	<body class="contentWrapper" onresize="resize()" onerror="windowError(message, source, lineno, colno, error)">
+	<body onresize="resize()" onerror="windowError(message, source, lineno, colno, error)">
 		<div id="routineArea" class="routineArea routineAreaExpanded">
 			<button id="closeRoutines" class="closeRoutines" onclick="hideRoutines()">«</button>
 			<h1>Routines</h1>
@@ -26,58 +27,57 @@
 		</div>
 		<div id="rightMenu" class="rightMenu">
 			<button id="closeRightMenu" class="closeMenu" onclick="hideRightMenu()">X</button>
-			<p>
-				<h4>Theme</h4>
-				<div class="colorLabel">Body</div>
-				<input id="cContentWrapper" type="color" value="#000000" onchange="changeColor(this, '.contentWrapper')">
-				on
-				<input id="bgContentWrapper" type="color" value="#FFFFFF" onchange="changeBackgroundColor(this, '.contentWrapper')">
-				<br/>
-				<div class="colorLabel">Unstarted Tasks</div>
-				<input id="cUnstarted" type="color" value="#000000" onchange="changeColor(this, '.unstarted')">
-				on
-				<input id="bgUnstarted" type="color" value="#F2B138" onchange="changeBackgroundColor(this, '.unstarted')">
-				<br/>
-				<div class="colorLabel">Current Tasks</div>
-				<input id="cCurrent" type="color" value="#000000" onchange="changeColor(this, '.current')">
-				on
-				<input id="bgCurrent" type="color" value="#00FF00" onchange="changeBackgroundColor(this, '.current')">
-				<br/>
-				<div class="colorLabel">Completed Tasks</div>
-				<input id="cCompleted" type="color" value="#000000" onchange="changeColor(this, '.completed')">
-				on
-				<input id="bgCompleted" type="color" value="#4B38F2" onchange="changeBackgroundColor(this, '.completed')">
-				<br/>
-				<div class="colorLabel">Disabled Tasks</div>
-				<input id="cNotAllowed" type="color" value="#992222" onchange="changeColor(this, '.notAllowed')">
-				on
-				<input id="bgNotAllowed" type="color" value="#FFCCCC" onchange="changeBackgroundColor(this, '.notAllowed')">
-			</p>
+			<h4>Theme</h4>
+			<div class="colorLabel">Body</div>
+			<input id="cContentWrapper" type="color" value="#000000" onchange="changeColor(this, '.contentWrapper')">
+			on
+			<input id="bgContentWrapper" type="color" value="#FFFFFF" onchange="changeBackgroundColor(this, '.contentWrapper')">
+			<br/>
+			<div class="colorLabel">Unstarted Tasks</div>
+			<input id="cUnstarted" type="color" value="#000000" onchange="changeColor(this, '.unstarted')">
+			on
+			<input id="bgUnstarted" type="color" value="#F2B138" onchange="changeBackgroundColor(this, '.unstarted')">
+			<br/>
+			<div class="colorLabel">Current Tasks</div>
+			<input id="cCurrent" type="color" value="#000000" onchange="changeColor(this, '.current')">
+			on
+			<input id="bgCurrent" type="color" value="#00FF00" onchange="changeBackgroundColor(this, '.current')">
+			<br/>
+			<div class="colorLabel">Completed Tasks</div>
+			<input id="cCompleted" type="color" value="#000000" onchange="changeColor(this, '.completed')">
+			on
+			<input id="bgCompleted" type="color" value="#4B38F2" onchange="changeBackgroundColor(this, '.completed')">
+			<br/>
+			<div class="colorLabel">Disabled Tasks</div>
+			<input id="cNotAllowed" type="color" value="#992222" onchange="changeColor(this, '.notAllowed')">
+			on
+			<input id="bgNotAllowed" type="color" value="#FFCCCC" onchange="changeBackgroundColor(this, '.notAllowed')">
+			<hr/>
 			<div id="settingsArea" class="settings hide">
 				<hr/>
 				<h4>Routine Settings</h4>
 				<p>
 					<label for="chkLoop">Loop Audio</label>
-					<input id="chkLoop" type="checkbox" onchange="loopChange()"></input>
+					<input id="chkLoop" type="checkbox" onchange="loopChange()" />
 					<br/>
 					<label for="numDelay">Loop Delay (s)</label>
-					<input id="numDelay" type="number" min="0" max="600" onchange="loopDelayChange()"></input>
+					<input id="numDelay" type="number" min="0" max="600" onchange="loopDelayChange()" />
 				</p>
 				<p>
 					<label for="chkAutoTimer">Start next task when the timer expires</label>
-					<input id="chkAutoTimer" type="checkbox" onchange="autoTimerAdvanceChange()"></input>
+					<input id="chkAutoTimer" type="checkbox" onchange="autoTimerAdvanceChange()" />
 				</p>
 				<p>
 					<label for="chkAutoDone">Start next task when task is completed</label>
-					<input id="chkAutoDone" type="checkbox" onchange="autoDoneAdvanceChange()"></input>
+					<input id="chkAutoDone" type="checkbox" onchange="autoDoneAdvanceChange()" />
 				</p>
 				<p>
 					<label for="chkOrder">Enforce Task Order</label>
-					<input id="chkOrder" type="checkbox" onchange="enforceOrderChange()"></input>
+					<input id="chkOrder" type="checkbox" onchange="enforceOrderChange()" />
 				</p>
 				<p>
 					<label for="chkHideComplete">Hide Completed Tasks</label>
-					<input id="chkHideComplete" type="checkbox" onchange="hideCompletedChange()"></input>
+					<input id="chkHideComplete" type="checkbox" onchange="hideCompletedChange()" />
 				</p>
 			</div>
 			<hr/>
@@ -150,8 +150,8 @@
 								</div>
 								<div id="graphTotal" class="graphOptionWrapper hide">
 									<p>
-										<input id="dateFrom" type="date"></input>-
-										<input id="dateTo" type="date"></input>
+										<input id="dateFrom" type="date" />-
+										<input id="dateTo" type="date" />
 									</p>
 								</div>
 								<div id="generateGraph" class="hide">
@@ -177,61 +177,61 @@
 				</div>
 			</div>
 		</div>
-		<div id="topRow" class="topRow">
-			<div id="routineName" class="routineName"></div>
-		</div>
-		<img id="routineImage" class="routineIcon hide"></img>
-		<div id="content" class="contentWrapper">
-			<div id="taskArea" class="taskArea">
+		<div id="wrapper" class="wrapper">
+			<div id="topRow" class="topRow">
+				<div id="routineName" class="routineName"></div>
 			</div>
-			<div id="completedArea" class="completedArea hide">
-				<div style="text-align:center">
-				<h2>Completed Tasks:</h2>
+			<img id="routineImage" class="routineIcon hide" alt="Routine Image" src="nunya" />
+			<div id="content" class="content">
+				<div id="taskArea" class="taskArea">
 				</div>
-				<table class="completedTable">
-					<thead>
-						<tr>
-							<th class="completedColHeader" style="width:30px" onclick="sort('taskNum')">#</th>
-							<th class="completedColHeader" style="width:200px" onclick="sort('name')">Task</th>
-							<th class="completedColHeader" style="width:20px" onclick="sort('duration')">Duration</th>
-							<th class="completedColHeader" style="width:20px" onclick="sort('reminders')">Reminders</th>
-						</tr>
-					</thead>
-					<tbody id="completedTable" >
-					</tbody>
-				</table>
+				<div id="completedArea" class="completedArea hide">
+					<h2>Completed Tasks:</h2>
+					<table class="completedTable">
+						<thead>
+							<tr>
+								<th class="completedColHeader" style="width:30px" onclick="sort('taskNum')">#</th>
+								<th class="completedColHeader" style="width:200px" onclick="sort('name')">Task</th>
+								<th class="completedColHeader" style="width:20px" onclick="sort('duration')">Duration</th>
+								<th class="completedColHeader" style="width:20px" onclick="sort('reminders')">Reminders</th>
+							</tr>
+						</thead>
+						<tbody id="completedTable" >
+						</tbody>
+					</table>
+				</div>
+				<div id="diagnosticsArea" class="diagnosticsArea hide">
+					<textarea id="txtDiagnostics" rows="20" cols="100"></textarea>
+				</div>
 			</div>
-			<div id="diagnosticsArea" class="diagnosticsArea hide">
-				<textarea id="txtDiagnostics" rows="20" cols="100"></textarea>
+			<div id="floatyButtons" class="floatyButtons hide">
+				<button id="btnDone" class="btnDone" onclick="clickDone()">✓</button>
+				<div id="timer" class="timer">
+					<div id="timerDisplay" class="timerDisplay" onclick="startStop()">00:00</div>
+					<button id="startStop" class="timerButton" onclick="startStop()">Start</button>
+					<button id="reset" class="timerButton" onclick="resetTimer()">Reset</button>
+				</div>
+				<div id="remindArea" class="remindArea">
+					<button id="btnRemind" class="btnRemind" onclick="remind()">Remind</button>
+					<div id="remindDisplay" class="remindDisplay">Reminds:<span id="currentReminds">70</span></div>
+				</div>
+				<div id="taskImg" class="taskImg hide">
+					<img id="currentTaskImg" class="currentTaskImg" alt="Current Task Image" src="nunya" />
+				</div>
 			</div>
 		</div>
-		<div id="attribution" class="attribution hide">
-			Resources for this routine are from:
-			<div id="audioAttribution" class="audioAttribution attributionLinks hide"> 
-				<a href="https://freetts.com/" title="audio attribution">Audio generated from freetts.com</a>
+		<div id="footer" class="footer">
+			<div id="attribution" class="attribution hide">
+				<div id="audioAttribution" class="audioAttribution attributionLinks hide"> 
+					<a href="https://freetts.com/" title="audio attribution">Audio generated from freetts.com</a>
+				</div>
+				<div id="attributionLinks" class="attributionLinks">
+				</div>
 			</div>
-			<div id="attributionLinks" class="attributionLinks">
-			</div>
+			<div id="build" class="build"></div>
 		</div>
 		<div id="undoArea" class="undoArea hide">
 			<button id="undoButton" class="undoButton" onclick="undoLastComplete()">Undo Last Complete</button>
-		</div>
-		<div id="floatyButtons" class="floatyButtons hide">
-			<button id="btnDone" class="btnDone" onclick="clickDone()">✓</button>
-			<div id="timer" class="timer">
-				<div id="timerDisplay" class="timerDisplay" onclick="startStop()">00:00</div>
-				<button id="startStop" class="timerButton" onclick="startStop()">Start</button>
-				<button id="reset" class="timerButton" onclick="resetTimer()">Reset</button>
-			</div>
-			<div id="remindArea" class="remindArea">
-				<button id="btnRemind" class="btnRemind" onclick="remind()">Remind</button>
-				<div id="remindDisplay" class="remindDisplay">Reminds:<span id="currentReminds">70</span></div>
-			</div>
-			<div id="taskImg" class="taskImg hide">
-				<img id="currentTaskImg" class="currentTaskImg"></img>
-			</div>
-		</div>
-		<div class="themeArea">
 		</div>
 		<script>init();</script>
 	</body>
