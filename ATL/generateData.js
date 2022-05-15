@@ -1,5 +1,28 @@
 "use strict";
 
+
+//used to generate dummy data.
+function createTaskLite(taskID, index, parentTask){
+	dPush(`\t\tCreate Task Lite: ${taskID}`);
+	const temp = tasks.find(x => x.id === taskID);
+	if(!temp){return null;}
+	dPush(`\t\t\t${t.text}`);
+	
+	const newTask = new task(taskID, Number(index)+1, temp.text, temp.time, temp.audio, parentTask, true);
+	
+	return newTask;
+}
+function loadTasksLite(taskIDs, parentTask){
+	dPush('\tLoad Tasks Lite: ' + parentTask.text);
+	for(let index in taskIDs){
+		const t = taskIDs[index];
+		const newTask = createTaskLite(t.id, index, parentTask);
+		if(t.tasks && t.tasks.length > 0){
+			loadTasksLite(t.tasks, newTask);
+		}
+	}
+}
+
 function getDays(){
 	const now = Date.now();
 	const output = [];

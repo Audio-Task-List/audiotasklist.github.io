@@ -145,6 +145,7 @@ var routines = [
 		name:'Enforce Order',
 		enforceChildrenOrder:true,
 		reminderLimit:2,
+		icon:'list.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/list',
 			title:'list icon attribution',

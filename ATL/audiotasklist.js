@@ -636,6 +636,30 @@ function audioError(id) {
 	console.log("Audio not found:" + id);
 }
 
+function addRoutineAttribution(id){
+	const routine = routines.find(x => x.id === id);
+	if(!routine || !routine.iconAttribution){return;}
+
+	addAttribution(routine.iconAttribution.text, routine.iconAttribution.title, routine.iconAttribution.url);
+}
+function addTaskAttribution(id){
+	const task = tasks.find(x => x.id === id);
+	if(!task || !task.iconAttribution){return;}
+
+	addAttribution(task.iconAttribution.text, task.iconAttribution.title, task.iconAttribution.url);
+}
+function addAttribution(text, title, url){
+		document.getElementById('attribution').classList.remove('hide');
+
+		const a = document.createElement('a');
+		a.textContent = text;
+		a.title = title;
+		a.href = url;
+		a.target = '_blank';
+		a.rel = 'noreferrer';
+
+		document.getElementById('attributionLinks').appendChild(a);
+}
 function createSubTaskDiv(parent, id){
 	if(!parent){return null;}
 	const div = document.createElement('div');
@@ -647,36 +671,21 @@ function createSubTaskDiv(parent, id){
 }
 function createTask(parentDiv, taskID, index, parentTask){
 	dPush(`\t\tCreate Task: ${taskID}`);
-	const temp = tasks.filter(x => x.id === taskID);
-	if(temp.length === 0){return null;}
-	const t = temp[0];
+	const t = tasks.find(x => x.id === taskID);
+	if(!t){return null;}
 	dPush(`\t\t\t${t.text}`);
 	
 	const newTask = new task(taskID, Number(index)+1, t.text, t.time, t.audio, parentTask);
+	addTaskAttribution(taskID);
 	if(parentDiv) {
 		parentDiv.appendChild(newTask.btn);
 	}
 	
-	
 	if(t.icon){
 		const img = document.createElement("img");
 		img.classList.add('btnIcon');
-		//img.style.backgroundImage=`url(./icons/${icon})`;
 		img.src = `icons/${t.icon}`;
 		newTask.btn.insertBefore(img, newTask.btn.children[0]);
-	}
-	
-	if(t.iconAttribution){
-		document.getElementById('attribution').classList.remove('hide');
-		const p = document.getElementById('attributionLinks');
-		const li = document.createElement('li');
-		const a = document.createElement('a');
-		a.textContent = t.iconAttribution.text;
-		a.title = t.iconAttribution.title;
-		a.href = t.iconAttribution.url;
-		
-		//li.appendChild(a);
-		p.appendChild(a);
 	}
 	
 	return newTask;
@@ -689,29 +698,6 @@ function loadTasks(parentDiv, taskIDs, parentTask){
 		if(t.tasks && t.tasks.length > 0){
 			const d = createSubTaskDiv(parentDiv, newTask.btn.id);
 			loadTasks(d, t.tasks, newTask);
-		}
-	}
-}
-
-//used to generate dummy data.
-function createTaskLite(taskID, index, parentTask){
-	dPush(`\t\tCreate Task Lite: ${taskID}`);
-	const temp = tasks.filter(x => x.id === taskID);
-	if(temp.length === 0){return null;}
-	const t = temp[0];
-	dPush(`\t\t\t${t.text}`);
-	
-	const newTask = new task(taskID, Number(index)+1, t.text, t.time, t.audio, parentTask, true);
-	
-	return newTask;
-}
-function loadTasksLite(taskIDs, parentTask){
-	dPush('\tLoad Tasks Lite: ' + parentTask.text);
-	for(let index in taskIDs){
-		const t = taskIDs[index];
-		const newTask = createTaskLite(t.id, index, parentTask);
-		if(t.tasks && t.tasks.length > 0){
-			loadTasksLite(t.tasks, newTask);
 		}
 	}
 }
@@ -741,7 +727,7 @@ function getNextUncompletedTask(task){
 function routine(id, name, icon, audio, taskAudioPrefix, taskAudioSuffix, audioEncouragement, timeExpiredAudio, reminderLimit, theme, loopAudio, loopDelay, autoAdvanceTimer, autoAdvanceDone, enforceChildrenOrder, hideCompletedTasks, tasks){
 	this.id = id;
 	this.name = name;
-	if(icon){this.icon = `url('./icons/${icon}')`;}
+	if(icon){this.icon = `icons/${icon}`;}
 	if(audio){this.audio = new Audio(`.\\audio\\${audio}.mp3`);}
 	if(taskAudioPrefix){
 		this.taskAudioPrefix = new Audio(`.\\audio\\${taskAudioPrefix}.mp3`);
@@ -778,10 +764,10 @@ function routine(id, name, icon, audio, taskAudioPrefix, taskAudioSuffix, audioE
 	this.btn.id = `Routine_${id}`;
 	
 	if(icon){
-		const img = document.createElement("div");
+		const img = document.createElement("img");
 		img.classList.add('btnIcon');
-		img.style.backgroundImage=`url(./icons/${icon})`;
-		this.btn.appendChild(img);
+		img.src =`icons/${icon}`;
+		this.btn.insertBefore(img, this.btn.children[0]);
 	}
 	
 	if(name){
@@ -828,8 +814,16 @@ routine.prototype.select = function(){
 		enforceChildrenOrder = this.enforceChildrenOrder;
 		hideCompletedTasks = this.hideCompletedTasks;
 		
+		clearChildNodes('attributionLinks');
+		addRoutineAttribution(this.id);
+		document.getElementById('audioAttribution').classList.add('hide');
+		if(this.taskAudioPrefix || this.taskAudioSuffix || this.audioEncouragement || this.timeExpiredAudio){
+			document.getElementById('audioAttribution').classList.remove('hide');
+		}
+		
+		document.getElementById("routineImage").classList.toggle('hide', !this.icon);
 		if(this.icon){
-			document.getElementById("routineImage").style.backgroundImage = this.icon;
+			document.getElementById("routineImage").src = this.icon;
 		}
 		routineName.textContent = this.name;
 		document.getElementById("chkLoop").checked = loopAudio;
@@ -859,6 +853,9 @@ routine.prototype.select = function(){
 		
 		if(this.theme){
 			setTheme(this.theme);
+		}
+		else{
+			//TODO: default theme;
 		}
 		
 		if(autoAdvanceTimer){
@@ -957,11 +954,11 @@ function task(taskID, id, text, time, audio, parent, isLite=false) {
 	}
 	
 	if(audio) {
+		document.getElementById('audioAttribution').classList.remove('hide');
 		this.audio = new Audio(`.\\audio\\${audio}.mp3`);
 		this.audio.addEventListener('ended', () => audioEnded());
 		this.audio.addEventListener('error', () => audioError(this.id));
 	}
-	
 }
 task.prototype.playAudio = function(){
 	try{
@@ -1517,6 +1514,7 @@ function init(){
 		
 		for(let index in routines){
 			const r = routines[index];
+			addRoutineAttribution(r.id);
 			availableRoutines.push(new routine(r.id, r.name, r.icon,
 				r.audio, r.taskAudioPrefix, r.taskAudioSuffix, r.audioEncouragement, r.timeExpiredAudio, r.reminderLimit,
 			r.theme, r.loopAudio, r.loopDelay, r.autoAdvanceTimer, r.autoAdvanceDone, r.enforceChildrenOrder, r.hideCompletedTasks, r.tasks));
