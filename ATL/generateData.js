@@ -6,9 +6,9 @@ function createTaskLite(taskID, index, parentTask){
 	dPush(`\t\tCreate Task Lite: ${taskID}`);
 	const temp = tasks.find(x => x.id === taskID);
 	if(!temp){return null;}
-	dPush(`\t\t\t${t.text}`);
+	dPush(`\t\t\t${temp.text}`);
 	
-	const newTask = new task(taskID, Number(index)+1, temp.text, temp.time, temp.audio, parentTask, true);
+	const newTask = new task(taskID, Number(index)+1, temp.text, null, temp.time, temp.audio, parentTask, true);
 	
 	return newTask;
 }

@@ -568,7 +568,7 @@ function placeFloatButtons(){
 	}
 	else{
 		floatyButtons.style.position = "fixed";
-		floatyButtons.style.bottom = "10px";
+		floatyButtons.style.bottom = "50px";
 		floatyButtons.style.right = "10px";
 		floatyButtons.style.border = "solid 2px #000";
 		floatyButtons.style.padding = "10px";
@@ -675,17 +675,10 @@ function createTask(parentDiv, taskID, index, parentTask){
 	if(!t){return null;}
 	dPush(`\t\t\t${t.text}`);
 	
-	const newTask = new task(taskID, Number(index)+1, t.text, t.time, t.audio, parentTask);
+	const newTask = new task(taskID, Number(index)+1, t.text, t.icon, t.time, t.audio, parentTask);
 	addTaskAttribution(taskID);
 	if(parentDiv) {
 		parentDiv.appendChild(newTask.btn);
-	}
-	
-	if(t.icon){
-		const img = document.createElement("img");
-		img.classList.add('btnIcon');
-		img.src = `icons/${t.icon}`;
-		newTask.btn.insertBefore(img, newTask.btn.children[0]);
 	}
 	
 	return newTask;
@@ -918,7 +911,7 @@ routine.prototype.playTimeExpiredAudio = function(){
 	}
 }
 
-function task(taskID, id, text, time, audio, parent, isLite=false) {
+function task(taskID, id, text, icon, time, audio, parent, isLite=false) {
 	this.taskID = taskID;//used to look up task
 	this.id = id;//used to make the btn.id
 	this.parent = parent;
@@ -938,6 +931,15 @@ function task(taskID, id, text, time, audio, parent, isLite=false) {
 	this.btn.id = this.buildID();
 
 	if(isLite){return;}
+	
+	this.icon = null;
+	if(icon){
+		this.icon = `icons/${icon}`;
+		const img = document.createElement("img");
+		img.classList.add('btnIcon');
+		img.src = this.icon;
+		this.btn.appendChild(img);
+	}
 	
 	if(text){
 		const txt = document.createElement('div');
@@ -1026,6 +1028,9 @@ task.prototype.select = function(){
 			setTimeout(placeFloatButtons, 500);
 		}
 		currentReminds.textContent = this.reminders;
+		
+		document.getElementById('taskImg').classList.toggle('hide', !this.icon);
+		document.getElementById('currentTaskImg').src = this.icon;
 		
 		this.setCurrent();
 		currentTime = this.time;
