@@ -809,6 +809,7 @@ routine.prototype.select = function(){
 		
 		clearChildNodes('attributionLinks');
 		addRoutineAttribution(this.id);
+		
 		document.getElementById('audioAttribution').classList.add('hide');
 		if(this.taskAudioPrefix || this.taskAudioSuffix || this.audioEncouragement || this.timeExpiredAudio){
 			document.getElementById('audioAttribution').classList.remove('hide');

@@ -281,10 +281,6 @@ select {
 	cursor:pointer;
 }
 
-.hide{
-	display:none;
-}
-
 .notAllowed{
 	cursor:not-allowed;
 	background-color:#F22;
@@ -448,3 +444,8 @@ select {
 	display:inline-block;
 	padding:0 10px;
 }
+
+.hide{
+	display:none;
+}
+
