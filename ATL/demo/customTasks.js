@@ -145,8 +145,13 @@ var routines = [
 		name:'Enforce Order',
 		enforceChildrenOrder:true,
 		reminderLimit:2,
+		icon:'list.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/list',
+			title:'list icon attribution',
+			text:'List icon created by Freepik'
+		},
 		tasks:[
-			{id:25},
 			{id:25},
 			{id:26},
 			{id:27}
@@ -342,7 +347,7 @@ var tasks = [
 	{
 		id:1,
 		text:'Get Dressed',
-		time:15,
+		time:300,
 		audio:'dressed'
 	},
 	{
@@ -355,31 +360,31 @@ var tasks = [
 	{
 		id:3,
 		text:'Underwear On',
-		time:30,
+		time:45,
 		audio:'underwear'
 	},
 	{
 		id:4,
 		text:'Pants On',
-		time:30,
+		time:60,
 		audio:'trousers'
 	},
 	{
 		id:5,
 		text:'Shirt On',
-		time:30,
+		time:50,
 		audio:'shirt'
 	},
 	{
 		id:6,
 		text:'Long Sleeved Shirt On',
-		time:30,
+		time:50,
 		audio:'longShirt'
 	},
 	{
 		id:7,
 		text:'Socks On',
-		time:30,
+		time:45,
 		audio:'socks'
 	},
 	{
@@ -387,12 +392,6 @@ var tasks = [
 		text:'Drink Milk',
 		time:120,
 		audio:'milk'
-	},
-	{
-		id:9,
-		text:'Medicine',
-		time:30,
-		audio:'medicine'
 	},
 	{
 		id:10,
@@ -485,21 +484,33 @@ var tasks = [
 		id:25,
 		text:'Homework',
 		time:3600,
+		icon:'exam.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/homework',
+			title:'homework icon attribution',
+			text:'Homework icon created by Freepik'
+		}
 	},
 	{
 		id:26,
 		text:'Chores',
 		time:3600,
+		icon:'chores.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/cleaning',
+			title:'cleaning icon attribution',
+			text:'Cleaning icon created by photo3idea_studio'
+		}
 	},
 	{
 		id:27,
 		text:'Games/TV',
 		time:3600,
+		icon:'game.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/board-game',
+			title:'game icon attribution',
+			text:'Board game icons created by Freepik'
+		}
 	}
-	
-	
-	
-	
-	
-	
 ];				

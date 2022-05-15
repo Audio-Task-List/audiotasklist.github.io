@@ -179,8 +179,8 @@
 		</div>
 		<div id="topRow" class="topRow">
 			<div id="routineName" class="routineName"></div>
-			<div id="routineImage" class="routineIcon"></div>
 		</div>
+		<img id="routineImage" class="routineIcon hide"></img>
 		<div id="content" class="contentWrapper">
 			<div id="taskArea" class="taskArea">
 			</div>
@@ -205,6 +205,14 @@
 				<textarea id="txtDiagnostics" rows="20" cols="100"></textarea>
 			</div>
 		</div>
+		<div id="attribution" class="attribution hide">
+			Resources for this routine are from:
+			<div id="audioAttribution" class="audioAttribution attributionLinks hide"> 
+				<a href="https://freetts.com/" title="audio attribution">Audio generated from freetts.com</a>
+			</div>
+			<div id="attributionLinks" class="attributionLinks">
+			</div>
+		</div>
 		<div id="undoArea" class="undoArea hide">
 			<button id="undoButton" class="undoButton" onclick="undoLastComplete()">Undo Last Complete</button>
 		</div>
@@ -218,6 +226,9 @@
 			<div id="remindArea" class="remindArea">
 				<button id="btnRemind" class="btnRemind" onclick="remind()">Remind</button>
 				<div id="remindDisplay" class="remindDisplay">Reminds:<span id="currentReminds">70</span></div>
+			</div>
+			<div id="taskImg" class="taskImg hide">
+				<img id="currentTaskImg" class="currentTaskImg"></img>
 			</div>
 		</div>
 		<div class="themeArea">
