@@ -36,6 +36,14 @@ let completedData = [];
 let sortCol = 'taskNum';
 let sortAsc = true;
 
+const defaultTheme = {
+	contentWrapper:{bg:"#CCCCFF",c:"#000000"}, 
+	unstarted:{bg:"#F2B138",c:"#000000"}, 
+	current:{bg:"#00FF00",c:"#000000"}, 
+	completed:{bg:"#4B38F2",c:"#662222"}, 
+	notAllowed:{bg:"#FF2222",c:"#992222"}
+};
+
 const diagnostics = [];
 function dPush(input){
 	diagnostics.push(input);
@@ -125,8 +133,9 @@ function addTableRow(rowData){
 		const c = currentRoutine.reminderLimit?`Reminder Limit: ${currentRoutine.reminderLimit}`:'';
 		const b = a&&c?'\n':'';
 		newRow.title = `${a}${b}${c}`;
-		if((rowData.allocated && (rowData.completed - rowData.started) > (rowData.allocated+500)) || 
-			(currentRoutine.reminderLimit && rowData.reminders > currentRoutine.reminderLimit)){
+		const timeInfraction = (rowData.allocated !== 0) && (rowData.allocated && (rowData.completed - rowData.started) > (rowData.allocated+500));
+		const reminderInfraction = currentRoutine.reminderLimit && rowData.reminders > currentRoutine.reminderLimit;
+		if(timeInfraction|| reminderInfraction) {
 			newRow.style.color = "#F22";
 		}
 		
@@ -548,7 +557,8 @@ function placeFloatButtons(){
 	if(!currentTask || currentTask.children.length !== 0){return;}
 	const r = currentTask.btn.getBoundingClientRect();
 	const offset = window.scrollY;
-	console.log(offset);
+	
+	document.getElementById("timer").classList.toggle('hide', currentTask.time===0);
 	
 	const H = window.innerHeight;
 	const W = window.innerWidth;
@@ -640,7 +650,7 @@ function audioError(id) {
 	console.log("Audio not found:" + id);
 }
 
-function addRoutineAttribution(id){
+function addRoutineIconAttribution(id){
 	const routine = routines.find(x => x.id === id);
 	if(!routine || !routine.iconAttribution){return;}
 
@@ -648,7 +658,7 @@ function addRoutineAttribution(id){
 	const text = `${routine.name} icon created by ${routine.iconAttribution.creator}`;
 	addAttribution(text, title, routine.iconAttribution.url);
 }
-function addTaskAttribution(id){
+function addTaskIconAttribution(id){
 	const task = tasks.find(x => x.id === id);
 	if(!task || !task.iconAttribution){return;}
 
@@ -656,17 +666,35 @@ function addTaskAttribution(id){
 	const text = `${task.text} icon created by ${task.iconAttribution.creator}`;
 	addAttribution(text, title, task.iconAttribution.url);
 }
+function addRoutineAudioAttribution(id){
+	const routine = routines.find(x => x.id === id);
+	if(!routine || !routine.audioAttribution){return;}
+
+	const title = `${routine.name} audio attribution`;
+	const text = `${routine.name} audio created by ${routine.audioAttribution.creator}`;
+	addAttribution(text, title, routine.audioAttribution.url);
+}
+function addTaskAudioAttribution(id){
+	const task = tasks.find(x => x.id === id);
+	if(!task || !task.audioAttribution){return;}
+
+	const title = `${task.text} audio attribution`;
+	const text = `${task.text} audio created by ${task.audioAttribution.creator}`;
+	addAttribution(text, title, task.audioAttribution.url);
+}
+
 function addAttribution(text, title, url){
-		document.getElementById('attribution').classList.remove('hide');
+	document.getElementById('attribution').classList.remove('hide');
 
-		const a = document.createElement('a');
-		a.textContent = text;
-		a.title = title;
-		a.href = url;
-		a.target = '_blank';
-		a.rel = 'noreferrer';
-
-		document.getElementById('attributionLinks').appendChild(a);
+	const a = document.createElement('a');
+	a.textContent = text;
+	a.title = title;
+	a.href = url;
+	a.target = '_blank';
+	a.rel = 'noreferrer';
+	
+	const linksDiv = document.getElementById('attributionLinks');
+	linksDiv.appendChild(a);
 }
 function createSubTaskDiv(parent, id){
 	if(!parent){return null;}
@@ -684,7 +712,8 @@ function createTask(parentDiv, taskID, index, parentTask){
 	dPush(`\t\t\t${t.text}`);
 	
 	const newTask = new task(taskID, Number(index)+1, t.text, t.icon, t.time, t.audio, parentTask);
-	addTaskAttribution(taskID);
+	addTaskIconAttribution(taskID);
+	addTaskAudioAttribution(taskID);
 	if(parentDiv) {
 		parentDiv.appendChild(newTask.btn);
 	}
@@ -816,12 +845,8 @@ routine.prototype.select = function(){
 		hideCompletedTasks = this.hideCompletedTasks;
 		
 		clearChildNodes('attributionLinks');
-		addRoutineAttribution(this.id);
-		
-		document.getElementById('audioAttribution').classList.add('hide');
-		if(this.taskAudioPrefix || this.taskAudioSuffix || this.audioEncouragement || this.timeExpiredAudio){
-			document.getElementById('audioAttribution').classList.remove('hide');
-		}
+		addRoutineAudioAttribution(this.id);
+		addRoutineIconAttribution(this.id);
 		
 		document.getElementById("routineImage").classList.toggle('hide', !this.icon);
 		if(this.icon){
@@ -848,18 +873,21 @@ routine.prototype.select = function(){
 		
 		document.getElementById("settingsArea").classList.remove('hide');
 		floatyButtons.classList.add('hide');
-		document.getElementById('routineImage').classList.remove('hide');
+		if(this.image){
+			document.getElementById('routineImage').classList.remove('hide');
+		}
 
 		stopTimer();
 		currentTime = 0;
 		
 		completedData = [];
 		
+		console.log(this.theme, defaultTheme);
 		if(this.theme){
 			setTheme(this.theme);
 		}
 		else{
-			//TODO: default theme;
+			setTheme(defaultTheme);
 		}
 		
 		if(autoAdvanceTimer){
@@ -967,7 +995,6 @@ function task(taskID, id, text, icon, time, audio, parent, isLite=false) {
 	}
 	
 	if(audio) {
-		document.getElementById('audioAttribution').classList.remove('hide');
 		this.audio = new Audio(`.\\audio\\${audio}.mp3`);
 		this.audio.addEventListener('ended', () => audioEnded());
 		this.audio.addEventListener('error', () => audioError(this.id));
@@ -1531,7 +1558,7 @@ function init(){
 		
 		for(let index in routines){
 			const r = routines[index];
-			addRoutineAttribution(r.id);
+			addRoutineIconAttribution(r.id);
 			availableRoutines.push(new routine(r.id, r.name, r.icon,
 				r.audio, r.taskAudioPrefix, r.taskAudioSuffix, r.audioEncouragement, r.timeExpiredAudio, r.reminderLimit,
 			r.theme, r.loopAudio, r.loopDelay, r.autoAdvanceTimer, r.autoAdvanceDone, r.enforceChildrenOrder, r.hideCompletedTasks, r.tasks));

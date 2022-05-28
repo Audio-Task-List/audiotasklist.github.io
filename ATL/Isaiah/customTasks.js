@@ -5,6 +5,10 @@ const routines = [
 		id:0,
 		name:"Morning",
 		audio:"morning",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'sun.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/morning',
@@ -48,6 +52,10 @@ const routines = [
 		taskAudioPrefix:'Isaiah',
 		autoAdvanceDone:true,
 		audioEncouragement:'awesome',
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		timeExpiredAudio:'timer',
 		reminderLimit:2,
 		tasks:[
@@ -59,10 +67,18 @@ const routines = [
 		id:2,
 		name:"Evening",
 		audio:"evening",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'evening.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/night',
 			creator:'kmg design'
+		},
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
 		},
 		loopAudio:true,
 		loopDelay:10,
@@ -94,17 +110,25 @@ const tasks = [
 		text:"Travel time",
 		time:120,
 		audio:"eatingTime",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:"dining-table.png",
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/dining-room',
 			creator:'Freepik'
-		}
+		},
 	},
 	{
 		id:1,
 		text:"Eat up",
 		time:900,
 		audio:"breakfast",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:"oatmeal.png",
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/oatmeal',
@@ -116,6 +140,10 @@ const tasks = [
 		text:"Drink up",
 		time:420,
 		audio:"milk",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:"milk.png",
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/milk',
@@ -127,6 +155,10 @@ const tasks = [
 		text:"Medicine time",
 		time:30,
 		audio:"medicine",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:"medicine.png",
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/syringe',
@@ -144,6 +176,10 @@ const tasks = [
 		text:"Brush your teeth",
 		time:180,
 		audio:"teeth",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'brush-teeth.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/brush-teeth',
@@ -155,6 +191,10 @@ const tasks = [
 		text:"Pajamas off",
 		time:180,
 		audio:"unpajamas",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'pajamas.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/pajamas',
@@ -166,6 +206,10 @@ const tasks = [
 		text:"Clothes in hamper",
 		time:60,
 		audio:"hamper",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'hamper.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/hamper',
@@ -176,13 +220,21 @@ const tasks = [
 		id:8,
 		text:"Get ready to GO",
 		time:500,
-		audio:"readyToGo"
+		audio:"readyToGo",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 	},
 	{
 		id:9,
 		text:"Potty time",
 		time:300,
 		audio:"potty",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'toilet.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/toilet',
@@ -194,6 +246,10 @@ const tasks = [
 		text:"Shoes on",
 		time:180,
 		audio:"shoes",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'shoes.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/shoes',
@@ -205,6 +261,10 @@ const tasks = [
 		text:"Eat a snack",
 		time:600,
 		audio:"snack",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'snack.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/crisps',
@@ -217,6 +277,10 @@ const tasks = [
 		text:"Drink your water",
 		time:300,
 		audio:"water",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'drink-water.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/drink',
@@ -227,13 +291,21 @@ const tasks = [
 		id:13,
 		text:"Clean yourself",
 		time:900,
-		audio:"cleanliness"
+		audio:"cleanliness",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		}
 	},
 	{
 		id:14,
 		text:"Clothes off",
 		time:240,
 		audio:"undress",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'nude.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/body',
@@ -245,6 +317,10 @@ const tasks = [
 		text:"Wash time",
 		time:480,
 		audio:"bathe",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'bath.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/bath',
@@ -256,6 +332,10 @@ const tasks = [
 		text:"Dry yourself",
 		time:180,
 		audio:"dry",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'towel.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/towel',
@@ -267,6 +347,10 @@ const tasks = [
 		text:"Pajamas on",
 		time:240,
 		audio:"pjs",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'pajamas.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/pajamas',
@@ -278,6 +362,10 @@ const tasks = [
 		text:"Pick out clothes",
 		time:180,
 		audio:"pick",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'pick.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/clothes',
@@ -289,6 +377,10 @@ const tasks = [
 		text:"Bed time",
 		time:60,
 		audio:"sleep",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'sleep.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/sleep',
@@ -299,13 +391,21 @@ const tasks = [
 		id:20,
 		text:"Wake up",
 		time:60,
-		audio:"wake"
+		audio:"wake",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 	},
 	{
 		id:21,
 		text:"Clothes on",
 		time:300,
 		audio:"dress",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'clothes.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/clothes',
@@ -317,6 +417,10 @@ const tasks = [
 		text:"Make your bed",
 		time:120,
 		audio:"bed",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'bed.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/bed',
@@ -328,6 +432,10 @@ const tasks = [
 		text:"Go Upstairs",
 		time:60,
 		audio:"upstairs",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'upstairs.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/upstairs',
@@ -339,6 +447,10 @@ const tasks = [
 		text:"Throw away insert",
 		time:120,
 		audio:"throwAwayInsert",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'insert.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/sanitary-pad',
@@ -350,6 +462,10 @@ const tasks = [
 		text:"Go Downstairs",
 		time:60,
 		audio:"downstairs",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'downstairs.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/downstairs',
@@ -361,6 +477,10 @@ const tasks = [
 		text:"Collect reward",
 		time:30,
 		audio:"collect",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		icon:'token.png',
 		iconAttribution:{
 			url:'https://www.flaticon.com/free-icons/tokens',
