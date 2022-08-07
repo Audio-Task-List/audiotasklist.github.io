@@ -4,8 +4,16 @@ var routines = [
 	{
 		id:0,
 		name:'Default',
-		icon:'breakfast.png',
+		icon:'default.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/default',
+			creator:'inipagistudio'
+		},
 		audio:'default',
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		tasks:[
 			{
 				id:0,
@@ -38,48 +46,41 @@ var routines = [
 		id:1,
 		theme:
 		{
-			contentWrapper:{bg:"#CCCCFF",c:"#000000"}, 
+			contentWrapper:{bg:"#AAAAFF",c:"#000000"}, 
 			unstarted:{bg:"#999999",c:"#CCCCFF"}, 
 			current:{bg:"#CCFFCC",c:"#000000"}, 
 			completed:{bg:"#884444",c:"#662222"}, 
 			notAllowed:{bg:"#FFCCCC",c:"#992222"}
 		},
-		name:'Loop Audio',
+		name:'Loop Task Audio',
 		loopAudio:true,
-		loopDelay:10,
+		loopDelay:2,
+		icon:'repeat.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/music-and-multimedia',
+			creator:'orvipixel'
+		},
 		tasks:[
+			{id:28},
+			{id:29},
 			{
-				id:0,
+				id:30,
 				tasks:[
-					{
-						id:2,
-						tasks:[
-							{id:12},
-							{id:13}
-						]
-					},
-					{id:8}
+					{id:31},
+					{id:32}
 				]
-			},
-			{
-				id:1,
-				tasks:[
-					{id:3},
-					{id:4},
-					{id:5},
-					{id:6},
-					{id:7}
-				]
-			},
-			{id:10},
-			{id:11}
+			}
 		]
 	},
 	{
 		id:2,
-		theme:'dark',
 		name:'Timer Auto-Advance',
 		autoAdvanceTimer:true,
+		icon:'time.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/time',
+			creator:'Ilham Fitrotul Hayat'
+		},
 		tasks:[
 			{id:24},
 			{
@@ -108,9 +109,13 @@ var routines = [
 	},
 	{
 		id:3,
-		theme:'dark',
-		name:'Task Done Auto-Advance',
+		name:'Task Done Advance',
 		autoAdvanceDone:true,
+		icon:'todo.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/checklist',
+			creator:'Freepik'
+		},
 		tasks:[
 			{
 				id:0,
@@ -141,7 +146,6 @@ var routines = [
 	},
 	{
 		id:4,
-		theme:'dark',
 		name:'Enforce Order',
 		enforceChildrenOrder:true,
 		reminderLimit:2,
@@ -158,12 +162,17 @@ var routines = [
 	},
 	{
 		id:5,
-		theme:'dark',
 		name:'Hide Done',
 		audio:'hideCompleted',
-		icon:'breakfast.png',
-		loopAudio:false,
-		loopDelay:0,
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'completed.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/task',
+			creator:'prettycons'
+		},
 		hideCompletedTasks:true,
 		tasks:[
 			{
@@ -195,11 +204,17 @@ var routines = [
 	},
 	{
 		id:6,
-		theme:'dark',
 		name:'Task Audio Prefix',
-		loopAudio:false,
-		loopDelay:0,
 		taskAudioPrefix:'prefix',
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'prefix.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/playlist',
+			creator:'Freepik'
+		},
 		tasks:[
 			{
 				id:0,
@@ -230,11 +245,17 @@ var routines = [
 	},
 	{
 		id:7,
-		theme:'dark',
 		name:'Task Audio Suffix',
-		loopAudio:false,
-		loopDelay:0,
 		taskAudioSuffix:'suffix',
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'suffix.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/playlist',
+			creator:'Freepik'
+		},
 		tasks:[
 			{
 				id:0,
@@ -265,11 +286,17 @@ var routines = [
 	},
 	{
 		id:8,
-		theme:'dark',
 		name:'Task Done Audio',
-		loopAudio:false,
-		loopDelay:0,
 		audioEncouragement:'awesome',
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'doneAudio.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/playlist',
+			creator:'Royyan Wijaya'
+		},
 		tasks:[
 			{
 				id:0,
@@ -300,11 +327,17 @@ var routines = [
 	},
 	{
 		id:9,
-		theme:'dark',
 		name:'Time Expired Audio',
-		loopAudio:false,
-		loopDelay:0,
 		timeExpiredAudio:'timer',
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'clock.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/alarm-clock',
+			creator:'Iconjam'
+		},
 		tasks:[
 			{
 				id:0,
@@ -341,7 +374,6 @@ var tasks = [
 		text:'Breakfast Time',
 		time:3,
 		audio:'breakfast',
-		icon:'breakfast.png'
 	},
 	{
 		id:1,
@@ -508,5 +540,45 @@ var tasks = [
 			url:'https://www.flaticon.com/free-icons/board-game',
 			creator:'Freepik'
 		}
+	},
+	{
+		id:28,
+		text:'Technologic',
+		audio:"technologic",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		}
+	},
+	{
+		id:29,
+		text:'2 Legit 2 Quit',
+		audio:"2legit",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+	},
+	{
+		id:30,
+		text:'Da Da Da',
+	},
+	{
+		id:31,
+		text:'Da Da Da',
+		audio:"dadada1",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+	},
+	{
+		id:32,
+		text:"Ich lieb' dich nicht",
+		audio:"dadada2",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 	}
 ];				
