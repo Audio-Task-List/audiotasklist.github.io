@@ -3,53 +3,50 @@
 const routines = [
 	{
 		id:0,
-		theme:"dark",
 		name:"Morning",
 		audio:"morning",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'sun.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/morning',
+			creator:'Icon Place'
+		},
 		loopAudio:true,
 		loopDelay:10,
 		taskAudioPrefix:'Isaiah',
 		autoAdvanceDone:true,
 		audioEncouragement:'awesome',
 		timeExpiredAudio:'timer',
+		reminderLimit:2,
 		tasks:[
-			{id:20},
-			{
-				id:0,
-				tasks:[
-					{id:1},
-					{id:2},
-					{id:3}
-				]
-			},
-			{
-				id:4,
-				tasks:[
-					{id:5},
-					{id:6},
-					{id:21},
-					{id:7}
-				]
-			},
-			{
-				id:8,
-				tasks:[
-					{id:9},
-					{id:10}
-				]
-			}
+			{id:21},
+			{id:5},
+			{id:1},
+			{id:8}
 		]
 	},
 	{
 		id:1,
-		theme:"dark",
 		name:"Afternoon",
+		icon:'afternoon.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/sunset',
+			creator:'Freepik'
+		},
 		loopAudio:true,
 		loopDelay:10,
 		taskAudioPrefix:'Isaiah',
 		autoAdvanceDone:true,
 		audioEncouragement:'awesome',
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		timeExpiredAudio:'timer',
+		reminderLimit:2,
 		tasks:[
 			{id:11},
 			{id:12}
@@ -57,31 +54,41 @@ const routines = [
 	},
 	{
 		id:2,
-		theme:"dark",
 		name:"Evening",
 		audio:"evening",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'evening.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/night',
+			creator:'kmg design'
+		},
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 		loopAudio:true,
 		loopDelay:10,
 		autoAdvanceDone:true,
 		taskAudioPrefix:'Isaiah',
 		audioEncouragement:'awesome',
 		timeExpiredAudio:'timer',
+		reminderLimit:2,
 		tasks:[
 			{id:3},
 			{id:2},
-			{
-				id:13,
-				tasks:[
-					{id:14},
-					{id:15},
-					{id:16},
-					{id:17},
-					{id:5},
-					{id:7}
-				]
-			},
+			{id:23},
+			{id:14},
+			{id:15},
+			{id:16},
+			{id:17},
+			{id:5},
+			{id:7},
 			{id:18},
-			{id:19}
+			{id:19},
+			{id:26}
 		]
 	}
 ];
@@ -89,156 +96,384 @@ const routines = [
 const tasks = [
 	{
 		id:0,
-		text:"Breakfast Time",
-		time:2000,
-		audio:"downstairs",
-		image:""
+		text:"Travel time",
+		time:120,
+		audio:"eatingTime",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:"dining-table.png",
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/dining-room',
+			creator:'Freepik'
+		},
 	},
 	{
 		id:1,
-		text:"Eat Up!",
-		time:900,
-		audio:"breakfast",
-		image:""
+		text:"Eat up",
+		time:1200,
+		audio:"breakfast_milk",
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:"oatmeal.png",
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/oatmeal',
+			creator:'photo3idea_studio'
+		}
 	},
 	{
 		id:2,
-		text:"Drink Up!",
+		text:"Drink up",
 		time:420,
 		audio:"milk",
-		image:""
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:"milk.png",
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/milk',
+			creator:'Smashicons'
+		}
 	},
 	{
 		id:3,
-		text:"Medicine Time!",
+		text:"Medicine time",
 		time:30,
 		audio:"medicine",
-		image:""
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:"medicine.png",
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/syringe',
+			creator:'vitalia221'
+		}
 	},
 	{
 		id:4,
-		text:"Get ready for the Day!",
+		text:"Get ready for the day",
 		time:600,
-		audio:"ready",
-		image:""
+		audio:"ready"
 	},
 	{
 		id:5,
-		text:"Brush Your Teeth!",
+		text:"Brush your teeth",
 		time:300,
-		audio:"teeth",
-		image:""
+		audio:"teeth_potty",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'brush-teeth.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/brush-teeth',
+			creator:'iconixar'
+		}
 	},
 	{
 		id:6,
-		text:"Pajamas Off!",
-		time:120,
-		audio:"unpajamas",
-		image:""
+		text:"Pajamas off",
+		time:180,
+		audio:"unpajamas",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'pajamas.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/pajamas',
+			creator:'iconixar'
+		}
 	},
 	{
 		id:7,
-		text:"Clothes in hamper!",
+		text:"Clothes in hamper",
 		time:60,
-		audio:"hamper",
-		image:""
+		audio:"hamper",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'hamper.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/hamper',
+			creator:'Flowicon'
+		}
 	},
 	{
 		id:8,
-		text:"Get ready to GO!",
-		time:500,
+		text:"Get ready to GO",
+		time:600,
 		audio:"readyToGo",
-		image:""
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 	},
 	{
 		id:9,
-		text:"Potty Time",
+		text:"Potty time",
 		time:300,
 		audio:"potty",
-		image:""
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'toilet.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/toilet',
+			creator:'Eucalyp'
+		}
 	},
 	{
 		id:10,
-		text:"Shoes On!",
+		text:"Shoes on",
 		time:180,
-		audio:"shoes",
-		image:""
+		audio:"shoes",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'shoes.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/shoes',
+			creator:'Smashicons'
+		}
 	},
 	{
 		id:11,
 		text:"Eat a snack",
 		time:600,
-		audio:"snack",
-		image:""
+		audio:"snack",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'snack.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/crisps',
+			title:'Snack icon attribution',
+			creator:'Freepik'
+		}
 	},
 	{
 		id:12,
 		text:"Drink your water",
 		time:300,
-		audio:"water",
-		image:""
+		audio:"water",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'drink-water.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/drink',
+			creator:'GOWI'
+		}
 	},
 	{
 		id:13,
-		text:"Clean Yourself",
+		text:"Clean yourself",
 		time:900,
 		audio:"cleanliness",
-		image:""
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		}
 	},
 	{
 		id:14,
-		text:"Clothes Off!",
-		time:120,
-		audio:"undress",
-		image:""
+		text:"Clothes off",
+		time:240,
+		audio:"undress",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'nude.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/body',
+			creator:'Freepik'
+		}
 	},
 	{
 		id:15,
-		text:"Bath Time!",
+		text:"Wash time",
 		time:480,
-		audio:"bathe",
-		image:""
+		audio:"bathe",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'bath.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/bath',
+			creator:'Eucalyp'
+		}
 	},
 	{
 		id:16,
-		text:"Dry Yourself!",
+		text:"Dry yourself",
 		time:180,
-		audio:"dry",
-		image:""
+		audio:"dry",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'towel.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/towel',
+			creator:'Konkapp'
+		}
 	},
 	{
 		id:17,
-		text:"Pajamas On!",
-		time:180,
-		audio:"pjs",
-		image:""
+		text:"Pajamas on",
+		time:240,
+		audio:"pjs",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'pajamas.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/pajamas',
+			creator:'iconixar'
+		}
 	},
 	{
 		id:18,
-		text:"Pick out clothes!",
+		text:"Pick out clothes",
 		time:180,
-		audio:"pick",
-		image:""
+		audio:"pick",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'pick.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/clothes',
+			creator:'Freepik'
+		}
 	},
 	{
 		id:19,
-		text:"Bed Time",
+		text:"Bed time",
 		time:60,
-		audio:"sleep",
-		image:""
+		audio:"sleep",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'sleep.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/sleep',
+			creator:'Smashicons'
+		}
 	},
 	{
 		id:20,
 		text:"Wake up",
 		time:60,
 		audio:"wake",
-		image:""
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
 	},
 	{
 		id:21,
-		text:"Clothes On",
-		time:300,
-		audio:"dress",
-		image:""
+		text:"Get Dressed",
+		time:600,
+		audio:"dress_potty",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'clothes.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/clothes',
+			creator:'Freepik'
+		}
+	},
+	{
+		id:22,
+		text:"Make your bed",
+		time:120,
+		audio:"bed",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'bed.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/bed',
+			creator:'Freepik'
+		}
+	},
+	{
+		id:23,
+		text:"Go Upstairs",
+		time:60,
+		audio:"upstairs",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'upstairs.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/upstairs',
+			creator:'kerismaker'
+		}
+	},
+	{
+		id:24,
+		text:"Throw away insert",
+		time:120,
+		audio:"throwAwayInsert",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'insert.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/sanitary-pad',
+			creator:'Freepik'
+		}
+	},
+	{
+		id:25,
+		text:"Go Downstairs",
+		time:60,
+		audio:"downstairs",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'downstairs.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/downstairs',
+			creator:'Freepik'
+		}
+	},
+	{
+		id:26,
+		text:"Collect reward",
+		time:30,
+		audio:"collect",		
+		audioAttribution:{
+			url:'https://freetts.com/',
+			creator:'freetts.com'
+		},
+		icon:'token.png',
+		iconAttribution:{
+			url:'https://www.flaticon.com/free-icons/tokens',
+			creator:'Vitaly Gorbachev'
+		}
 	}
 ];				
