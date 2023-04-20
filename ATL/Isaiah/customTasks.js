@@ -22,21 +22,10 @@ const routines = [
 		timeExpiredAudio:'timer',
 		reminderLimit:2,
 		tasks:[
-			{id:0},
-			{id:1},
-			{id:2},
-			{id:3},			
-			{id:23},
-			{id:22},
-			{id:5},
-			{id:6},
 			{id:21},
-			{id:24},
-			{id:7},
-			{id:9},
-			{id:25},
-			{id:10},
-			{id:26}
+			{id:5},
+			{id:1},
+			{id:8}
 		]
 	},
 	{
@@ -123,8 +112,8 @@ const tasks = [
 	{
 		id:1,
 		text:"Eat up",
-		time:900,
-		audio:"breakfast",
+		time:1200,
+		audio:"breakfast_milk",
 		audioAttribution:{
 			url:'https://freetts.com/',
 			creator:'freetts.com'
@@ -174,8 +163,8 @@ const tasks = [
 	{
 		id:5,
 		text:"Brush your teeth",
-		time:180,
-		audio:"teeth",		
+		time:300,
+		audio:"teeth_potty",		
 		audioAttribution:{
 			url:'https://freetts.com/',
 			creator:'freetts.com'
@@ -219,12 +208,17 @@ const tasks = [
 	{
 		id:8,
 		text:"Get ready to GO",
-		time:500,
+		time:600,
 		audio:"readyToGo",
 		audioAttribution:{
 			url:'https://freetts.com/',
 			creator:'freetts.com'
 		},
+		icon:"shoes.png",
+		iconAttribution:{
+			url:"https://www.flaticon.com/free-icons/shoes",
+			creator:"smashicons"
+		}
 	},
 	{
 		id:9,
@@ -399,9 +393,9 @@ const tasks = [
 	},
 	{
 		id:21,
-		text:"Clothes on",
-		time:300,
-		audio:"dress",		
+		text:"Get Dressed",
+		time:600,
+		audio:"dress_potty",		
 		audioAttribution:{
 			url:'https://freetts.com/',
 			creator:'freetts.com'
