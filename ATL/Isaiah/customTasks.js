@@ -214,6 +214,11 @@ const tasks = [
 			url:'https://freetts.com/',
 			creator:'freetts.com'
 		},
+		icon:"shoes.png",
+		iconAttribution:{
+			url:"https://www.flaticon.com/free-icons/shoes",
+			creator:"smashicons"
+		}
 	},
 	{
 		id:9,
