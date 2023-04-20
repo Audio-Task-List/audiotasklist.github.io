@@ -105,6 +105,7 @@ var routines = [
 					{id:16}
 				]
 			},
+			{id:33},
 		]
 	},
 	{
@@ -580,5 +581,11 @@ var tasks = [
 			url:'https://freetts.com/',
 			creator:'freetts.com'
 		},
-	}
+	},
+	{
+		id:33,
+		text:'Cool Down',
+		time:60
+	},
+
 ];				

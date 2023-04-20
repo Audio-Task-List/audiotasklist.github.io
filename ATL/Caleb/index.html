@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>ATL - Demo</title>
+		<meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+		<link rel="icon" type="image/x-icon" href="../favicon.ico"/>
+		<link rel="stylesheet" type="text/css" href="../Base.css"/>
+		<script src="customTasks.js"></script>
+		<script src="../audiotasklist.js"></script>
+		<script src="../graph.js"></script>
+		<style>
+			.current{}
+			.completed{}
+			.unstarted{}
+			.notAllowed{}
+		</style>
+	</head>
+	<body onresize="resize()" onerror="windowError(message, source, lineno, colno, error)">
+		<div id="routineArea" class="routineArea routineAreaExpanded">
+			<button id="closeRoutines" class="closeRoutines" onclick="hideRoutines()">«</button>
+			<h1>Routines</h1>
+			<div id="inProgress" class="hide">
+				<button class="inProgress" onclick="restoreInProgress()">Restore Routine In Progress</button>
+				<hr/>
+			</div>
+		</div>
+		<div id="rightMenu" class="rightMenu">
+			<button id="closeRightMenu" class="closeMenu" onclick="hideRightMenu()">X</button>
+			<h4>Theme</h4>
+			<div class="colorLabel">Body</div>
+			<input id="cContentWrapper" type="color" value="#000000" onchange="changeColor(this, '.contentWrapper')">
+			on
+			<input id="bgContentWrapper" type="color" value="#FFFFFF" onchange="changeBackgroundColor(this, '.contentWrapper')">
+			<br/>
+			<div class="colorLabel">Unstarted Tasks</div>
+			<input id="cUnstarted" type="color" value="#000000" onchange="changeColor(this, '.unstarted')">
+			on
+			<input id="bgUnstarted" type="color" value="#F2B138" onchange="changeBackgroundColor(this, '.unstarted')">
+			<br/>
+			<div class="colorLabel">Current Tasks</div>
+			<input id="cCurrent" type="color" value="#000000" onchange="changeColor(this, '.current')">
+			on
+			<input id="bgCurrent" type="color" value="#00FF00" onchange="changeBackgroundColor(this, '.current')">
+			<br/>
+			<div class="colorLabel">Completed Tasks</div>
+			<input id="cCompleted" type="color" value="#000000" onchange="changeColor(this, '.completed')">
+			on
+			<input id="bgCompleted" type="color" value="#4B38F2" onchange="changeBackgroundColor(this, '.completed')">
+			<br/>
+			<div class="colorLabel">Disabled Tasks</div>
+			<input id="cNotAllowed" type="color" value="#992222" onchange="changeColor(this, '.notAllowed')">
+			on
+			<input id="bgNotAllowed" type="color" value="#FFCCCC" onchange="changeBackgroundColor(this, '.notAllowed')">
+			<hr/>
+			<div id="settingsArea" class="settings hide">
+				<hr/>
+				<h4>Routine Settings</h4>
+				<p>
+					<label for="chkLoop">Loop Audio</label>
+					<input id="chkLoop" type="checkbox" onchange="loopChange()" />
+					<br/>
+					<label for="numDelay">Loop Delay (s)</label>
+					<input id="numDelay" type="number" min="0" max="600" onchange="loopDelayChange()" />
+				</p>
+				<p>
+					<label for="chkAutoTimer">Start next task when the timer expires</label>
+					<input id="chkAutoTimer" type="checkbox" onchange="autoTimerAdvanceChange()" />
+				</p>
+				<p>
+					<label for="chkAutoDone">Start next task when task is completed</label>
+					<input id="chkAutoDone" type="checkbox" onchange="autoDoneAdvanceChange()" />
+				</p>
+				<p>
+					<label for="chkOrder">Enforce Task Order</label>
+					<input id="chkOrder" type="checkbox" onchange="enforceOrderChange()" />
+				</p>
+				<p>
+					<label for="chkHideComplete">Hide Completed Tasks</label>
+					<input id="chkHideComplete" type="checkbox" onchange="hideCompletedChange()" />
+				</p>
+			</div>
+			<hr/>
+			<h4>Data Management & Analysis</h4>
+			<p style="font-size:10pt;">
+				When all tasks in a routine are completed the times and reminders are saved in local storage.
+				The local storage can be exported to a text file as a backup in case the browser local storage is deleted.
+			</p>
+			<p>
+				<label for="btnGraph">Graph and Analyze data</label><br/>
+				<button id="btnGraph" onclick="showGraphModal()">Analysis Tools</button>
+			</p>
+			<p>
+				<label for="btnExport">Export Local Storage</label><br/>
+				<button id="btnExport" onclick="exportClick()">Download Data</button>
+			</p>
+			<p>
+				<label for="import">Import to Local Storage</label><br/>
+				<input id="import" type="file" accept=".txt" onchange="importFile(event);"/>
+			</p>
+			<p>
+				<label for="clearStorage">Clear Local Storage</label><br/>
+				<button id="clearStorage" onclick="clearStorage();">Clear Stored Data</button>
+			</p>
+			<p>
+				<label for="toggleDiagnostics">Toggle Diagnostics</label><br/>
+				<button id="toggleDiagnostics" onclick="displayDiagnostics();">Toggle Diagnostics</button>
+			</p>
+
+		</div>
+		<button id="toggleRoutines" class="toggleRoutines" onclick="showRoutines()">»</button>
+		<button id="rightMenuBtn" class="menuBtn" onclick="showRightMenu()">≡</button>
+		<div id="graphModalWrapper" class="graphModalWrapper hide">
+			<div id="graphModal" class="graphModal">
+				<button id="closeGraphModal" class="closeMenuButton" onclick="hideGraphModal()">X</button>
+				<button id="resetGraph" class="resetButton hide" onclick="resetGraphOptions()">Reset</button>
+				<div id="saveGraphButtons" class="saveGraphButtons hide">
+					<button id="dlGraph" onclick="saveGraphImage()">Save Graph</button>
+					<button id="dlTable" onclick="saveGraphTable()">Save Table</button>
+				</div>
+				<h3>Graphing & Analysis Tools</h3>
+				<div  class="modalContent">
+					<div id="modalContentWrapper" class="modalContentWrapper fullHeight">
+						<div id="modalSideArea" class="graphOptions">
+							<div id="graphOptionWrapper" class="graphOptionWrapper">
+								<label for="graphType" class="graphLabel">Graph Type</label>
+								<select id="graphType" class="graphOption" onchange="selectGraphType(this.value)">
+									<option selected disabled hidden>Select Graph Type</option>
+									<option value="flame">Flame Graph</option>
+									<option value="waterfall">Waterfall Chart</option>
+									<option value="pie">Pie Chart</option>
+									<option value="time">Completion Time</option>
+									<option value="reminders">Reminder Count</option>
+									<option value="stackedPercent">Stacked Bar % Time</option>
+									<option value="stackedTotal">Stacked Bar Total Time</option>
+									<option value="stackedReminders">Stacked Bar Reminders</option>
+								</select>
+								<div id="graphRoutine" class="graphOptionWrapper hide">
+									<label for="selectGraphRoutine" class="graphLabel">Routine</label>
+									<select id="selectGraphRoutine" class="graphOption" onchange="onSelectGraphRoutine(this.value)"></select>
+								</div>
+								<div id="graphInstance" class="graphOptionWrapper hide">
+									<label for="ddlYearMonth" class="graphLabel">Year-Month</label>
+									<select id="ddlYearMonth" onchange="getMonthInstances(this, event)"></select>
+									<div id="selectGraphInstance" class="graphOptionWrapper hide">
+										<label for="ddlGraphInstance" class="graphLabel">Instance</label>
+										<select id="ddlGraphInstance" class="graphOption" onchange="selectGraphRoutineInstance(this.value)"></select>
+									</div>
+								</div>
+								<div id="graphTotal" class="graphOptionWrapper hide">
+									<p>
+										<input id="dateFrom" type="date" />-
+										<input id="dateTo" type="date" />
+									</p>
+								</div>
+								<div id="generateGraph" class="hide">
+									<button class="graphButton" onclick="analyze()">Generate Graph</button>
+								</div>
+							</div>
+							<div id="sideGraphData" class="graphData hide">
+								<div id="dataWrapper">
+									<table id="graphDataTable" class="graphDataTable">
+										<thead id="tableHead" class="tableHead"></thead>
+										<tbody id="tableBody" class="tableBody"></tbody>
+										<tfoot id="tableFoot" class="tableFoot"></tfoot>
+									</table>
+								</div>
+							</div>
+						</div>
+						<div id="graphWrapper" class="graphWrapper">
+							<canvas id="Graph" class="graph" onmousemove="graphMouseMove(event)" onclick="graphClick(event)"><h1>Graph</h1></canvas>
+						</div>
+					</div>
+					<div id="bottomGraphData" class="bottomGraphData hide">
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="wrapper" class="wrapper">
+			<div id="topRow" class="topRow">
+				<div id="routineName" class="routineName"></div>
+			</div>
+			<img id="routineImage" class="routineIcon hide" alt="Routine Image" src="../b.png" />
+			<div id="content" class="content">
+				<div id="taskArea" class="taskArea">
+				</div>
+				<div id="completedArea" class="completedArea hide">
+					<h2>Completed Tasks:</h2>
+					<table class="completedTable">
+						<thead>
+							<tr>
+								<th class="completedColHeader" style="width:30px" onclick="sort('taskNum')">#</th>
+								<th class="completedColHeader" style="width:200px" onclick="sort('name')">Task</th>
+								<th class="completedColHeader" style="width:20px" onclick="sort('duration')">Duration</th>
+								<th class="completedColHeader" style="width:20px" onclick="sort('reminders')">Reminders</th>
+							</tr>
+						</thead>
+						<tbody id="completedTable" >
+						</tbody>
+					</table>
+				</div>
+				<div id="diagnosticsArea" class="diagnosticsArea hide">
+					<textarea id="txtDiagnostics" rows="20" cols="100"></textarea>
+				</div>
+			</div>
+			<div id="floatyButtons" class="floatyButtons hide">
+				<button id="btnDone" class="btnDone" onclick="clickDone()">✓</button>
+				<div id="timer" class="timer">
+					<div id="timerDisplay" class="timerDisplay" onclick="startStop()">00:00</div>
+					<button id="startStop" class="timerButton" onclick="startStop()">Start</button>
+					<button id="reset" class="timerButton" onclick="resetTimer()">Reset</button>
+				</div>
+				<div id="remindArea" class="remindArea">
+					<button id="btnRemind" class="btnRemind" onclick="remind()">Remind</button>
+					<div id="remindDisplay" class="remindDisplay">Reminds:<span id="currentReminds">70</span></div>
+				</div>
+				<div id="taskImg" class="taskImg hide">
+					<img id="currentTaskImg" class="currentTaskImg" alt="Current Task Image" src="../b.png" />
+				</div>
+			</div>
+		</div>
+		<div id="footer" class="footer">
+			<div id="attribution" class="attribution hide">
+				<div id="attributionLinks" class="attributionLinks"></div>
+			</div>
+			<div id="build" class="build"></div>
+		</div>
+		<div id="undoArea" class="undoArea hide">
+			<button id="undoButton" class="undoButton" onclick="undoLastComplete()">Undo Last Complete</button>
+		</div>
+		<script>init();</script>
+	</body>
+</html>
